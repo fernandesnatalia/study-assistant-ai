@@ -1,6 +1,32 @@
+### Criar matéria
 POST http://localhost:8080/api/subjects
 Content-Type: application/json
 
 {
   "name": "Matemática"
 }
+
+### Criar matéri — História
+POST http://localhost:8080/api/subjects
+Content-Type: application/json
+
+{
+  "name": "Matemática Aplicada"
+}
+
+### Listar matérias
+GET http://localhost:8080/api/subjects
+
+### Consultar matéria por ID
+GET http://localhost:8080/api/subjects/1
+
+### Atualizar matéria
+PUT http://localhost:8080/api/subjects/1
+Content-Type: application/json
+
+{
+  "name": "Matemática Avançada"
+}
+
+### Excluir matéria
+DELETE http://localhost:8080/api/subjects/1
