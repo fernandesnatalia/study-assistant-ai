@@ -151,3 +151,140 @@ GET http://localhost:8080/api/subjects/{{subjectId1}}
 
 ### Confirmar exclusão da matéria 2 (404)
 GET http://localhost:8080/api/subjects/{{subjectId2}}
+
+### Criar tópico para testes de conteúdo
+POST http://localhost:8080/api/topics
+Content-Type: application/json
+
+{
+  "name": "Equações do Segundo Grau"
+}
+
+> {%
+    client.global.set("contentTopicId", response.body.id);
+%}
+
+### Criar conteúdo
+POST http://localhost:8080/api/contents
+Content-Type: application/json
+
+{
+  "title": "Introdução às Equações do Segundo Grau",
+  "body": "Uma equação do segundo grau possui a forma ax² + bx + c = 0, com a diferente de zero.",
+  "topic": {
+    "id": {{contentTopicId}}
+  }
+}
+
+> {%
+    client.global.set("contentId", response.body.id);
+%}
+
+### Listar conteúdos
+GET http://localhost:8080/api/contents
+
+### Buscar conteúdo por ID
+GET http://localhost:8080/api/contents/{{contentId}}
+
+### Atualizar conteúdo
+PUT http://localhost:8080/api/contents/{{contentId}}
+Content-Type: application/json
+
+{
+  "title": "Equações do Segundo Grau — Fórmula de Bhaskara",
+  "body": "Para resolver ax² + bx + c = 0, calculamos o discriminante Δ = b² - 4ac e aplicamos x = (-b ± √Δ) / 2a."
+}
+
+### Buscar conteúdo excluído
+GET http://localhost:8080/api/contents/{{contentId}}
+
+### Teste — Atualização com título vazio (400)
+PUT http://localhost:8080/api/contents/{{contentId}}
+Content-Type: application/json
+
+{
+  "title": "",
+  "body": "Conteúdo sobre equações do segundo grau."
+}
+
+### Teste — Atualização com corpo vazio (400)
+PUT http://localhost:8080/api/contents/{{contentId}}
+Content-Type: application/json
+
+{
+  "title": "Equações do Segundo Grau",
+  "body": ""
+}
+
+### Teste — Atualização válida (200)
+PUT http://localhost:8080/api/contents/{{contentId}}
+Content-Type: application/json
+
+{
+  "title": "Equações do Segundo Grau — Fórmula de Bhaskara",
+  "body": "O discriminante é calculado por Δ = b² - 4ac."
+}
+
+### Excluir conteúdo
+DELETE http://localhost:8080/api/contents/{{contentId}}
+
+### Criar usuário
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+  "name": "Ada Lovelace",
+  "email": "ada@example.com"
+}
+
+> {%
+    client.global.set("userId", response.body.id);
+%}
+
+### Listar usuários
+GET http://localhost:8080/api/users
+
+### Buscar usuário por ID
+GET http://localhost:8080/api/users/1
+
+### Atualizar usuário
+PUT http://localhost:8080/api/users/1
+Content-Type: application/json
+
+{
+  "name": "Ada Byron Lovelace",
+  "email": "ada@example.com"
+}
+
+### Teste — Nome vazio (400)
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+  "name": "",
+  "email": "teste@example.com"
+}
+
+### Teste — E-mail inválido (400)
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+  "name": "Ada Lovelace",
+  "email": "email-invalido"
+}
+
+### Teste — E-mail duplicado (409)
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+  "name": "Augusta Ada King",
+  "email": "ada@example.com"
+}
+
+### Excluir usuário
+DELETE http://localhost:8080/api/users/1
+
+### Buscar usuário excluído (404)
+GET http://localhost:8080/api/users/1
