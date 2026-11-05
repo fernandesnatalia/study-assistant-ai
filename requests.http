@@ -68,3 +68,28 @@ Content-Type: application/json
 {
   "name": "Física"
 }
+
+### Criar tópicos dae matéria
+POST http://localhost:8080/api/topics
+Content-Type: application/json
+
+{
+  "name": "Álgebra Linear"
+}
+
+### Listar tópicos
+GET http://localhost:8080/api/topics
+
+### Consultar tópico
+GET http://localhost:8080/api/topics/1
+
+### Atualizar tópico
+PUT http://localhost:8080/api/topics/1
+Content-Type: application/json
+
+{
+  "name": "Álgebra Linear Aplicada"
+}
+
+### Excluir tópico
+DELETE http://localhost:8080/api/topics/1
