@@ -6,7 +6,11 @@ Content-Type: application/json
   "name": "Matemática"
 }
 
-### Criar matéri — História
+> {%
+    client.global.set("subjectId1", response.body.id);
+%}
+
+### Criar matéria
 POST http://localhost:8080/api/subjects
 Content-Type: application/json
 
@@ -14,22 +18,23 @@ Content-Type: application/json
   "name": "Matemática Aplicada"
 }
 
+> {%
+    client.global.set("subjectId2", response.body.id);
+%}
+
 ### Listar matérias
 GET http://localhost:8080/api/subjects
 
 ### Consultar matéria por ID
-GET http://localhost:8080/api/subjects/1
+GET http://localhost:8080/api/subjects/{{subjectId1}}
 
 ### Atualizar matéria
-PUT http://localhost:8080/api/subjects/1
+PUT http://localhost:8080/api/subjects/{{subjectId1}}
 Content-Type: application/json
 
 {
   "name": "Matemática Avançada"
 }
-
-### Excluir matéria
-DELETE http://localhost:8080/api/subjects/1
 
 ### Teste — Nome vazio (400)
 POST http://localhost:8080/api/subjects
@@ -54,7 +59,7 @@ Content-Type: application/json
 {}
 
 ### Teste — Atualização inválida (400)
-PUT http://localhost:8080/api/subjects/1
+PUT http://localhost:8080/api/subjects/{{subjectId1}}
 Content-Type: application/json
 
 {
@@ -69,7 +74,8 @@ Content-Type: application/json
   "name": "Física"
 }
 
-### Criar tópicos dae matéria
+
+### Criar tópico Álgebra Linear
 POST http://localhost:8080/api/topics
 Content-Type: application/json
 
@@ -77,19 +83,71 @@ Content-Type: application/json
   "name": "Álgebra Linear"
 }
 
+> {%
+    client.global.set("topicId", response.body.id);
+%}
+
 ### Listar tópicos
 GET http://localhost:8080/api/topics
 
-### Consultar tópico
-GET http://localhost:8080/api/topics/1
+### Consultar tópico por ID
+GET http://localhost:8080/api/topics/{{topicId}}
 
 ### Atualizar tópico
-PUT http://localhost:8080/api/topics/1
+PUT http://localhost:8080/api/topics/{{topicId}}
 Content-Type: application/json
 
 {
   "name": "Álgebra Linear Aplicada"
 }
 
-### Excluir tópico
-DELETE http://localhost:8080/api/topics/1
+### Associar tópico à matéria 1 (204)
+PUT http://localhost:8080/api/subjects/{{subjectId1}}/topics/{{topicId}}
+
+### Associar mesmo tópico à matéria 2 (204)
+PUT http://localhost:8080/api/subjects/{{subjectId2}}/topics/{{topicId}}
+
+### Consultar tópicos da matéria 1 (200)
+GET http://localhost:8080/api/subjects/{{subjectId1}}/topics
+
+### Consultar tópicos da matéria 2 (200)
+GET http://localhost:8080/api/subjects/{{subjectId2}}/topics
+
+### Remover associação da matéria 1 (204)
+DELETE http://localhost:8080/api/subjects/{{subjectId1}}/topics/{{topicId}}
+
+### Confirmar que a matéria 1 não possui o tópico (200)
+GET http://localhost:8080/api/subjects/{{subjectId1}}/topics
+
+### Confirmar que a matéria 2 mantém o tópico (200)
+GET http://localhost:8080/api/subjects/{{subjectId2}}/topics
+
+### Confirmar que o tópico continua existindo (200)
+GET http://localhost:8080/api/topics/{{topicId}}
+
+### Repetir remoção de associação inexistente (204)
+DELETE http://localhost:8080/api/subjects/{{subjectId1}}/topics/{{topicId}}
+
+### Excluir tópico associado (204)
+DELETE http://localhost:8080/api/topics/{{topicId}}
+
+### Confirmar que o tópico foi excluído (404)
+GET http://localhost:8080/api/topics/{{topicId}}
+
+### Confirmar que a matéria 2 continua existindo (200)
+GET http://localhost:8080/api/subjects/{{subjectId2}}
+
+### Confirmar que a matéria 2 não possui mais o tópico (200)
+GET http://localhost:8080/api/subjects/{{subjectId2}}/topics
+
+### Excluir matéria 1 (204)
+DELETE http://localhost:8080/api/subjects/{{subjectId1}}
+
+### Excluir matéria 2 (204)
+DELETE http://localhost:8080/api/subjects/{{subjectId2}}
+
+### Confirmar exclusão da matéria 1 (404)
+GET http://localhost:8080/api/subjects/{{subjectId1}}
+
+### Confirmar exclusão da matéria 2 (404)
+GET http://localhost:8080/api/subjects/{{subjectId2}}

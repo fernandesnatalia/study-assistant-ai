@@ -1,6 +1,7 @@
 package br.com.studyassistant.studyassistantai.controller;
 
 import br.com.studyassistant.studyassistantai.model.Subject;
+import br.com.studyassistant.studyassistantai.model.Topic;
 import br.com.studyassistant.studyassistantai.service.SubjectService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import jakarta.validation.Valid;
 import java.util.List;
+import org.springframework.web.bind.annotation.*;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/subjects")
@@ -27,7 +30,9 @@ public class SubjectController {
     }
 
     @PostMapping
-    public ResponseEntity<Subject> createSubject(@Valid @RequestBody Subject subject) {
+    public ResponseEntity<Subject> createSubject(
+            @Valid @RequestBody Subject subject
+    ) {
         Subject result = subjectService.createSubject(subject);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
@@ -54,5 +59,28 @@ public class SubjectController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteSubject(@PathVariable Long id) {
         subjectService.deleteSubject(id);
+    }
+
+    @PutMapping("/{subjectId}/topics/{topicId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void addTopicToSubject(
+            @PathVariable Long subjectId,
+            @PathVariable Long topicId
+    ) {
+        subjectService.addTopicToSubject(subjectId, topicId);
+    }
+
+    @GetMapping("/{subjectId}/topics")
+    public Set<Topic> getSubjectTopics(@PathVariable Long subjectId) {
+        return subjectService.getSubjectTopics(subjectId);
+    }
+
+    @DeleteMapping("/{subjectId}/topics/{topicId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeTopicFromSubject(
+            @PathVariable Long subjectId,
+            @PathVariable Long topicId
+    ) {
+        subjectService.removeTopicFromSubject(subjectId, topicId);
     }
 }

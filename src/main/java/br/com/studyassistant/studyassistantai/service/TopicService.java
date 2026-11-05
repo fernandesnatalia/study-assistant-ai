@@ -1,9 +1,11 @@
 package br.com.studyassistant.studyassistantai.service;
 
+import br.com.studyassistant.studyassistantai.model.Subject;
 import br.com.studyassistant.studyassistantai.model.Topic;
 import br.com.studyassistant.studyassistantai.repository.TopicRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
@@ -37,8 +39,14 @@ public class TopicService {
         return topicRepository.save(topic);
     }
 
+    @Transactional
     public void deleteTopic(Long id) {
         Topic topic = getTopicById(id);
+
+        for (Subject subject : topic.getSubjects()) {
+            subject.getTopics().remove(topic);
+        }
+
         topicRepository.delete(topic);
     }
 }
