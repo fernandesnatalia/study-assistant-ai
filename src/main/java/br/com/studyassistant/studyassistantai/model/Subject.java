@@ -1,6 +1,11 @@
 package br.com.studyassistant.studyassistantai.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Id;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.validation.constraints.NotBlank;
 
 @Entity
 public class Subject {
@@ -9,6 +14,7 @@ public class Subject {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Subject name is required")
     @Column(nullable = false)
     private String name;
 

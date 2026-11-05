@@ -4,7 +4,16 @@ import br.com.studyassistant.studyassistantai.model.Subject;
 import br.com.studyassistant.studyassistantai.service.SubjectService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -18,9 +27,10 @@ public class SubjectController {
     }
 
     @PostMapping
-    public ResponseEntity<Subject> createSubject(@RequestBody Subject subject) {
+    public ResponseEntity<Subject> createSubject(@Valid @RequestBody Subject subject) {
         Subject result = subjectService.createSubject(subject);
-        return ResponseEntity.status(HttpStatus.CREATED).body(result);    }
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
+    }
 
     @GetMapping
     public List<Subject> getAllSubjects() {
@@ -35,14 +45,14 @@ public class SubjectController {
     @PutMapping("/{id}")
     public Subject updateSubjectById(
             @PathVariable Long id,
-            @RequestBody Subject updatedSubject
+            @Valid @RequestBody Subject updatedSubject
     ) {
         return subjectService.updateSubject(id, updatedSubject);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteSubject(@PathVariable Long id){
+    public void deleteSubject(@PathVariable Long id) {
         subjectService.deleteSubject(id);
     }
 }

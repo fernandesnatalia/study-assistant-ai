@@ -30,3 +30,41 @@ Content-Type: application/json
 
 ### Excluir matéria
 DELETE http://localhost:8080/api/subjects/1
+
+### Teste — Nome vazio (400)
+POST http://localhost:8080/api/subjects
+Content-Type: application/json
+
+{
+  "name": ""
+}
+
+### Teste — Apenas espaços (400)
+POST http://localhost:8080/api/subjects
+Content-Type: application/json
+
+{
+  "name": "   "
+}
+
+### Teste — Nome ausente (400)
+POST http://localhost:8080/api/subjects
+Content-Type: application/json
+
+{}
+
+### Teste — Atualização inválida (400)
+PUT http://localhost:8080/api/subjects/1
+Content-Type: application/json
+
+{
+  "name": ""
+}
+
+### Teste — Cadastro válido (201)
+POST http://localhost:8080/api/subjects
+Content-Type: application/json
+
+{
+  "name": "Física"
+}
