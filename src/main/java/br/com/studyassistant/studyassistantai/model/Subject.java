@@ -7,7 +7,11 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.validation.constraints.NotBlank;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.FetchType;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -31,6 +35,11 @@ public class Subject {
     )
     private Set<Topic> topics = new HashSet<>();
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
+    private User user;
+
     public String getName() { return name; }
 
     public void setName(String name) { this.name = name; }
@@ -42,6 +51,10 @@ public class Subject {
     public Set<Topic> getTopics() { return topics; }
 
     public void setTopics(Set<Topic> topics) { this.topics = topics; }
+
+    public User getUser() { return user; }
+
+    public void setUser(User user) { this.user = user; }
 
     public Subject(){
     }

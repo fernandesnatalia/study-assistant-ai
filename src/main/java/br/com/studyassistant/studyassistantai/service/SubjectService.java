@@ -2,8 +2,10 @@ package br.com.studyassistant.studyassistantai.service;
 
 import br.com.studyassistant.studyassistantai.model.Subject;
 import br.com.studyassistant.studyassistantai.model.Topic;
+import br.com.studyassistant.studyassistantai.model.User;
 import br.com.studyassistant.studyassistantai.repository.SubjectRepository;
 import br.com.studyassistant.studyassistantai.repository.TopicRepository;
+import br.com.studyassistant.studyassistantai.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,16 +18,35 @@ public class SubjectService {
 
     private final SubjectRepository subjectRepository;
     private final TopicRepository topicRepository;
+    private final UserRepository userRepository;
 
     public SubjectService(
             SubjectRepository subjectRepository,
-            TopicRepository topicRepository
+            TopicRepository topicRepository, UserRepository userRepository
     ) {
         this.subjectRepository = subjectRepository;
         this.topicRepository = topicRepository;
+        this.userRepository = userRepository;
     }
 
     public Subject createSubject(Subject subject) {
+        if (subject.getUser() == null || subject.getUser().getId() == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "User ID is required"
+            );
+        }
+
+        Long userId = subject.getUser().getId();
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "User not found"
+                ));
+
+        subject.setUser(user);
+
         return subjectRepository.save(subject);
     }
 

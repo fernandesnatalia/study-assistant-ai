@@ -2,9 +2,10 @@ package br.com.studyassistant.studyassistantai.controller;
 
 import br.com.studyassistant.studyassistantai.model.Subject;
 import br.com.studyassistant.studyassistantai.model.Topic;
+import br.com.studyassistant.studyassistantai.model.User;
 import br.com.studyassistant.studyassistantai.service.SubjectService;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -29,11 +30,17 @@ public class SubjectController {
     }
 
     @PostMapping
-    public ResponseEntity<Subject> createSubject(
+    @ResponseStatus(HttpStatus.CREATED)
+    public Subject createSubject(
+            @RequestParam Long userId,
             @Valid @RequestBody Subject subject
     ) {
-        Subject result = subjectService.createSubject(subject);
-        return ResponseEntity.status(HttpStatus.CREATED).body(result);
+        User user = new User();
+        user.setId(userId);
+
+        subject.setUser(user);
+
+        return subjectService.createSubject(subject);
     }
 
     @GetMapping

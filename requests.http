@@ -1,5 +1,60 @@
-### Criar matéria
-POST http://localhost:8080/api/subjects
+### Criar usuário
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+  "name": "Ada Lovelace",
+  "email": "ada@example.com"
+}
+
+> {%
+    client.global.set("userId", response.body.id);
+%}
+
+### Listar usuários
+GET http://localhost:8080/api/users
+
+### Buscar usuário por ID
+GET http://localhost:8080/api/users/{{userId}}
+
+### Atualizar usuário
+PUT http://localhost:8080/api/users/{{userId}}
+Content-Type: application/json
+
+{
+  "name": "Ada Byron Lovelace",
+  "email": "ada@example.com"
+}
+
+### Teste — Nome vazio (400)
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+  "name": "",
+  "email": "teste@example.com"
+}
+
+### Teste — E-mail inválido (400)
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+  "name": "Ada Lovelace",
+  "email": "email-invalido"
+}
+
+### Teste — E-mail duplicado (409)
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+  "name": "Augusta Ada King",
+  "email": "ada@example.com"
+}
+
+### Criar matéria 1
+POST http://localhost:8080/api/subjects?userId={{userId}}
 Content-Type: application/json
 
 {
@@ -10,12 +65,12 @@ Content-Type: application/json
     client.global.set("subjectId1", response.body.id);
 %}
 
-### Criar matéria
-POST http://localhost:8080/api/subjects
+### Criar matéria 2
+POST http://localhost:8080/api/subjects?userId={{userId}}
 Content-Type: application/json
 
 {
-  "name": "Matemática Aplicada"
+  "name": "Física"
 }
 
 > {%
@@ -37,7 +92,7 @@ Content-Type: application/json
 }
 
 ### Teste — Nome vazio (400)
-POST http://localhost:8080/api/subjects
+POST http://localhost:8080/api/subjects?userId={{userId}}
 Content-Type: application/json
 
 {
@@ -45,7 +100,7 @@ Content-Type: application/json
 }
 
 ### Teste — Apenas espaços (400)
-POST http://localhost:8080/api/subjects
+POST http://localhost:8080/api/subjects?userId={{userId}}
 Content-Type: application/json
 
 {
@@ -53,7 +108,7 @@ Content-Type: application/json
 }
 
 ### Teste — Nome ausente (400)
-POST http://localhost:8080/api/subjects
+POST http://localhost:8080/api/subjects?userId={{userId}}
 Content-Type: application/json
 
 {}
@@ -67,13 +122,32 @@ Content-Type: application/json
 }
 
 ### Teste — Cadastro válido (201)
+POST http://localhost:8080/api/subjects?userId={{userId}}
+Content-Type: application/json
+
+{
+  "name": "Química"
+}
+
+> {%
+    client.global.set("subjectId3", response.body.id);
+%}
+
+### Teste — Cadastro com usuário inexistente (404)
+POST http://localhost:8080/api/subjects?userId=-1
+Content-Type: application/json
+
+{
+  "name": "Biologia"
+}
+
+### Teste — Cadastro sem usuário (400)
 POST http://localhost:8080/api/subjects
 Content-Type: application/json
 
 {
-  "name": "Física"
+  "name": "Biologia"
 }
-
 
 ### Criar tópico Álgebra Linear
 POST http://localhost:8080/api/topics
@@ -140,18 +214,6 @@ GET http://localhost:8080/api/subjects/{{subjectId2}}
 ### Confirmar que a matéria 2 não possui mais o tópico (200)
 GET http://localhost:8080/api/subjects/{{subjectId2}}/topics
 
-### Excluir matéria 1 (204)
-DELETE http://localhost:8080/api/subjects/{{subjectId1}}
-
-### Excluir matéria 2 (204)
-DELETE http://localhost:8080/api/subjects/{{subjectId2}}
-
-### Confirmar exclusão da matéria 1 (404)
-GET http://localhost:8080/api/subjects/{{subjectId1}}
-
-### Confirmar exclusão da matéria 2 (404)
-GET http://localhost:8080/api/subjects/{{subjectId2}}
-
 ### Criar tópico para testes de conteúdo
 POST http://localhost:8080/api/topics
 Content-Type: application/json
@@ -195,9 +257,6 @@ Content-Type: application/json
   "body": "Para resolver ax² + bx + c = 0, calculamos o discriminante Δ = b² - 4ac e aplicamos x = (-b ± √Δ) / 2a."
 }
 
-### Buscar conteúdo excluído
-GET http://localhost:8080/api/contents/{{contentId}}
-
 ### Teste — Atualização com título vazio (400)
 PUT http://localhost:8080/api/contents/{{contentId}}
 Content-Type: application/json
@@ -228,63 +287,32 @@ Content-Type: application/json
 ### Excluir conteúdo
 DELETE http://localhost:8080/api/contents/{{contentId}}
 
-### Criar usuário
-POST http://localhost:8080/api/users
-Content-Type: application/json
+### Buscar conteúdo excluído (404)
+GET http://localhost:8080/api/contents/{{contentId}}
 
-{
-  "name": "Ada Lovelace",
-  "email": "ada@example.com"
-}
+### Excluir tópico de conteúdo (204)
+DELETE http://localhost:8080/api/topics/{{contentTopicId}}
 
-> {%
-    client.global.set("userId", response.body.id);
-%}
+### Excluir matéria 1 (204)
+DELETE http://localhost:8080/api/subjects/{{subjectId1}}
 
-### Listar usuários
-GET http://localhost:8080/api/users
+### Excluir matéria 2 (204)
+DELETE http://localhost:8080/api/subjects/{{subjectId2}}
 
-### Buscar usuário por ID
-GET http://localhost:8080/api/users/1
+### Excluir matéria 3 (204)
+DELETE http://localhost:8080/api/subjects/{{subjectId3}}
 
-### Atualizar usuário
-PUT http://localhost:8080/api/users/1
-Content-Type: application/json
+### Confirmar exclusão da matéria 1 (404)
+GET http://localhost:8080/api/subjects/{{subjectId1}}
 
-{
-  "name": "Ada Byron Lovelace",
-  "email": "ada@example.com"
-}
+### Confirmar exclusão da matéria 2 (404)
+GET http://localhost:8080/api/subjects/{{subjectId2}}
 
-### Teste — Nome vazio (400)
-POST http://localhost:8080/api/users
-Content-Type: application/json
-
-{
-  "name": "",
-  "email": "teste@example.com"
-}
-
-### Teste — E-mail inválido (400)
-POST http://localhost:8080/api/users
-Content-Type: application/json
-
-{
-  "name": "Ada Lovelace",
-  "email": "email-invalido"
-}
-
-### Teste — E-mail duplicado (409)
-POST http://localhost:8080/api/users
-Content-Type: application/json
-
-{
-  "name": "Augusta Ada King",
-  "email": "ada@example.com"
-}
+### Confirmar exclusão da matéria 3 (404)
+GET http://localhost:8080/api/subjects/{{subjectId3}}
 
 ### Excluir usuário
-DELETE http://localhost:8080/api/users/1
+DELETE http://localhost:8080/api/users/{{userId}}
 
 ### Buscar usuário excluído (404)
-GET http://localhost:8080/api/users/1
+GET http://localhost:8080/api/users/{{userId}}

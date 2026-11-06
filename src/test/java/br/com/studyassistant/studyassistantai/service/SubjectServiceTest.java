@@ -2,8 +2,10 @@ package br.com.studyassistant.studyassistantai.service;
 
 import br.com.studyassistant.studyassistantai.model.Subject;
 import br.com.studyassistant.studyassistantai.model.Topic;
+import br.com.studyassistant.studyassistantai.model.User;
 import br.com.studyassistant.studyassistantai.repository.SubjectRepository;
 import br.com.studyassistant.studyassistantai.repository.TopicRepository;
+import br.com.studyassistant.studyassistantai.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,7 +17,6 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -27,6 +28,9 @@ class SubjectServiceTest {
 
     @Mock
     private TopicRepository topicRepository;
+
+    @Mock
+    private UserRepository userRepository;
 
     @InjectMocks
     private SubjectService subjectService;
@@ -42,11 +46,20 @@ class SubjectServiceTest {
 
     @Test
     void shouldCreateSubject() {
+        User user = new User();
+        user.setId(1L);
+
+        subject.setUser(user);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(subjectRepository.save(subject)).thenReturn(subject);
 
         Subject result = subjectService.createSubject(subject);
 
         assertEquals("Matemática", result.getName());
+        assertEquals(user, result.getUser());
+
+        verify(userRepository).findById(1L);
         verify(subjectRepository).save(subject);
     }
 
@@ -80,6 +93,35 @@ class SubjectServiceTest {
         );
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenUserIsMissing() {
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> subjectService.createSubject(subject)
+        );
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+        verifyNoInteractions(userRepository, subjectRepository);
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenUserDoesNotExist() {
+        User user = new User();
+        user.setId(99L);
+
+        subject.setUser(user);
+
+        when(userRepository.findById(99L)).thenReturn(Optional.empty());
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> subjectService.createSubject(subject)
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+        verify(subjectRepository, never()).save(any(Subject.class));
     }
 
     @Test
