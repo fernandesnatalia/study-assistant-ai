@@ -316,3 +316,86 @@ DELETE http://localhost:8080/api/users/{{userId}}
 
 ### Buscar usuário excluído (404)
 GET http://localhost:8080/api/users/{{userId}}
+
+
+### Flashcard — Criar sem resposta (201)
+POST http://localhost:8080/api/flashcards?contentId={{contentId}}
+Content-Type: application/json
+
+{
+  "question": "O que é uma equação do segundo grau?"
+}
+
+> {%
+    client.global.set("flashcardId", response.body.id);
+%}
+
+### Flashcard — Listar todos (200)
+GET http://localhost:8080/api/flashcards
+
+### Flashcard — Consultar por ID (200)
+GET http://localhost:8080/api/flashcards/{{flashcardId}}
+
+### Flashcard — Listar por conteúdo (200)
+GET http://localhost:8080/api/flashcards/content/{{contentId}}
+
+### Flashcard — Atualizar pergunta e resposta (200)
+PUT http://localhost:8080/api/flashcards/{{flashcardId}}
+Content-Type: application/json
+
+{
+  "question": "Qual é a forma geral de uma equação do segundo grau?",
+  "answer": "ax² + bx + c = 0, em que a, b e c são coeficientes reais e a é diferente de zero."
+}
+
+### Flashcard — Criar com resposta (201)
+POST http://localhost:8080/api/flashcards?contentId={{contentId}}
+Content-Type: application/json
+
+{
+  "question": "O que é o discriminante de uma equação do segundo grau?",
+  "answer": "É o valor Δ = b² - 4ac, utilizado para determinar a natureza das raízes reais."
+}
+
+> {%
+    client.global.set("flashcardId2", response.body.id);
+%}
+
+### Flashcard — Pergunta vazia (400)
+POST http://localhost:8080/api/flashcards?contentId={{contentId}}
+Content-Type: application/json
+
+{
+  "question": ""
+}
+
+### Flashcard — Conteúdo inexistente (404)
+POST http://localhost:8080/api/flashcards?contentId=-1
+Content-Type: application/json
+
+{
+  "question": "Pergunta de teste"
+}
+
+### Flashcard — Consultar inexistente (404)
+GET http://localhost:8080/api/flashcards/-1
+
+### Flashcard — Atualizar inexistente (404)
+PUT http://localhost:8080/api/flashcards/-1
+Content-Type: application/json
+
+{
+  "question": "Pergunta atualizada"
+}
+
+### Flashcard — Excluir inexistente (404)
+DELETE http://localhost:8080/api/flashcards/-1
+
+### Flashcard — Excluir primeiro flashcard (204)
+DELETE http://localhost:8080/api/flashcards/{{flashcardId}}
+
+### Flashcard — Excluir segundo flashcard (204)
+DELETE http://localhost:8080/api/flashcards/{{flashcardId2}}
+
+### Flashcard — Consultar após exclusão (404)
+GET http://localhost:8080/api/flashcards/{{flashcardId}}
