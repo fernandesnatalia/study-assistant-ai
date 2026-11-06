@@ -31,19 +31,13 @@ public class SubjectService {
 
     public Subject createSubject(Subject subject) {
         if (subject.getUser() == null || subject.getUser().getId() == null) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "User ID is required"
-            );
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID is required");
         }
 
         Long userId = subject.getUser().getId();
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "User not found"
-                ));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         subject.setUser(user);
 
@@ -56,9 +50,7 @@ public class SubjectService {
 
     public Subject getSubjectById(Long id) {
         return subjectRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Subject not found"
-                ));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Subject not found"));
     }
 
     public Subject updateSubject(Long id, Subject updatedSubject) {
@@ -78,9 +70,7 @@ public class SubjectService {
         Subject subject = getSubjectById(subjectId);
 
         Topic topic = topicRepository.findById(topicId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Topic not found"
-                ));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Topic not found"));
 
         subject.getTopics().add(topic);
     }
@@ -96,9 +86,7 @@ public class SubjectService {
         Subject subject = getSubjectById(subjectId);
 
         Topic topic = topicRepository.findById(topicId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Topic not found"
-                ));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Topic not found"));
 
         subject.getTopics().remove(topic);
     }

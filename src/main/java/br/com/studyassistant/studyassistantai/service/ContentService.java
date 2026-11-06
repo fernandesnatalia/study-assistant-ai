@@ -25,9 +25,7 @@ public class ContentService {
 
     public Content createContent(Content content) {
         if (content.getTopic().getId() == null) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, "Topic ID is required"
-            );
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Topic ID is required");
         }
 
         Topic topic = getExistingTopic(content.getTopic().getId());
@@ -55,10 +53,7 @@ public class ContentService {
                 updatedContent.getBody() == null ||
                 updatedContent.getBody().isBlank()) {
 
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Title and body are required"
-            );
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Title and body are required");
         }
 
         content.setTitle(updatedContent.getTitle());

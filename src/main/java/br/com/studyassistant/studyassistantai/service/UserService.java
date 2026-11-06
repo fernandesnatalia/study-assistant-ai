@@ -19,10 +19,7 @@ public class UserService {
 
     public User createUser(User user) {
         if (userRepository.existsByEmail(user.getEmail())) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "Email already registered"
-            );
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already registered");
         }
 
         return userRepository.save(user);
@@ -34,9 +31,7 @@ public class UserService {
 
     public User getUserById(Long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "User not found"
-                ));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
     }
 
     public User updateUser(Long id, User updatedUser) {
@@ -44,10 +39,7 @@ public class UserService {
 
         if (!user.getEmail().equals(updatedUser.getEmail())
                 && userRepository.existsByEmail(updatedUser.getEmail())) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "Email already registered"
-            );
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already registered");
         }
 
         user.setName(updatedUser.getName());

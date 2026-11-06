@@ -215,9 +215,7 @@ class SubjectServiceTest {
         when(subjectRepository.findById(1L)).thenReturn(Optional.of(subject));
         when(topicRepository.findById(10L)).thenReturn(Optional.of(topic));
 
-        assertDoesNotThrow(
-                () -> subjectService.removeTopicFromSubject(1L, 10L)
-        );
+        assertDoesNotThrow(() -> subjectService.removeTopicFromSubject(1L, 10L));
     }
 
     @Test

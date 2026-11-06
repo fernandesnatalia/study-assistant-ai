@@ -28,9 +28,7 @@ public class TopicService {
 
     public Topic getTopicById(Long id) {
         return topicRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Topic not found"
-                ));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Topic not found"));
     }
 
     public Topic updateTopic(Long id, Topic updatedTopic) {
