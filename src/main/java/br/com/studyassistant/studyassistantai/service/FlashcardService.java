@@ -14,13 +14,15 @@ public class FlashcardService {
 
     private final FlashcardRepository flashcardRepository;
     private final ContentRepository contentRepository;
+    private final GenerativeService generativeService;
 
     public FlashcardService(
             FlashcardRepository flashcardRepository,
-            ContentRepository contentRepository
+            ContentRepository contentRepository, GenerativeService generativeService
     ) {
         this.flashcardRepository = flashcardRepository;
         this.contentRepository = contentRepository;
+        this.generativeService = generativeService;
     }
 
     public Flashcard createFlashcard(
@@ -64,6 +66,19 @@ public class FlashcardService {
         flashcard.setQuestion(updatedFlashcard.getQuestion());
         flashcard.setAnswer(updatedFlashcard.getAnswer());
 
+        return flashcardRepository.save(flashcard);
+    }
+
+    public Flashcard generateFlashcardAnswer(Long id) {
+        Flashcard flashcard = getFlashcardById(id);
+
+        if (flashcard.getAnswer() != null && !flashcard.getAnswer().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Flashcard already has an answer");
+        }
+
+        Content content = flashcard.getContent();
+        String generatedAnswer = generativeService.generateAnswer(flashcard.getQuestion(), content.getBody());
+        flashcard.setAnswer(generatedAnswer);
         return flashcardRepository.save(flashcard);
     }
 

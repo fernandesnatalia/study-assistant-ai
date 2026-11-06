@@ -60,6 +60,11 @@ public class FlashcardController {
         return flashcardService.updateFlashcard(id, updatedFlashcard);
     }
 
+    @PostMapping("/{id}/generate-answer")
+    public Flashcard generateAnswer(@PathVariable Long id) {
+        return flashcardService.generateFlashcardAnswer(id);
+    }
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteFlashcard(@PathVariable Long id) {

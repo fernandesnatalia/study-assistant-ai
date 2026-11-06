@@ -1,5 +1,6 @@
 package br.com.studyassistant.studyassistantai.model;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -12,6 +13,7 @@ import jakarta.validation.constraints.NotBlank;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
+@JsonPropertyOrder({"id", "question", "answer"})
 public class Flashcard {
 
     @Id
@@ -22,7 +24,7 @@ public class Flashcard {
     @Column(nullable = false)
     private String question;
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String answer;
 
     @JsonIgnore

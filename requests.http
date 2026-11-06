@@ -399,3 +399,6 @@ DELETE http://localhost:8080/api/flashcards/{{flashcardId2}}
 
 ### Flashcard — Consultar após exclusão (404)
 GET http://localhost:8080/api/flashcards/{{flashcardId}}
+
+### Flashcard — Gerar resposta com IA (200)
+POST http://localhost:8080/api/flashcards/{{flashcardId}}/generate-answer
