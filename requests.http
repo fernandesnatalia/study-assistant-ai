@@ -1,4 +1,13 @@
-### Criar usuário
+# =============================================================================
+# STUDY ASSISTANT AI — FLUXOS DE TESTE
+# =============================================================================
+#
+# =============================================================================
+# FLUXO 1 — ADA LOVELACE
+# Cadastro, organização dos estudos, criação de conteúdo e revisão.
+# =============================================================================
+
+### Usuário - Criar primeiro usuário Ada Lovelace (201)
 POST http://localhost:8080/api/users
 Content-Type: application/json
 
@@ -7,18 +16,253 @@ Content-Type: application/json
   "email": "ada@example.com"
 }
 
-> {%
-    client.global.set("userId", response.body.id);
-%}
+### Usuário - Consultar Ada Lovelace (200)
+GET http://localhost:8080/api/users?userId=1
 
-### Listar usuários
-GET http://localhost:8080/api/users
+### Matéria - Criar Matemática para Ada Lovelace (201)
+POST http://localhost:8080/api/subjects?userId=1
+Content-Type: application/json
 
-### Buscar usuário por ID
-GET http://localhost:8080/api/users/{{userId}}
+{
+  "name": "Matemática"
+}
 
-### Atualizar usuário
-PUT http://localhost:8080/api/users/{{userId}}
+### Matéria - Criar Física para Ada Lovelace (201)
+POST http://localhost:8080/api/subjects?userId=1
+Content-Type: application/json
+
+{
+  "name": "Física"
+}
+
+### Matéria - Criar Química para Ada Lovelace (201)
+POST http://localhost:8080/api/subjects?userId=1
+Content-Type: application/json
+
+{
+  "name": "Química"
+}
+
+### Matéria - Consultar Matemática de Ada Lovelace (200)
+GET http://localhost:8080/api/subjects/1
+
+### Tópico - Criar Álgebra Linear (201)
+POST http://localhost:8080/api/topics
+Content-Type: application/json
+
+{
+  "name": "Álgebra Linear"
+}
+
+### Tópico - Associar Álgebra Linear à Matemática de Ada Lovelace (204)
+PUT http://localhost:8080/api/subjects/1/topics/1
+
+### Tópico - Associar Álgebra Linear à Física de Ada Lovelace (204)
+PUT http://localhost:8080/api/subjects/2/topics/1
+
+### Tópico - Consultar tópicos da Matemática de Ada Lovelace (200)
+GET http://localhost:8080/api/subjects/1/topics
+
+### Tópico - Consultar tópicos da Física de Ada Lovelace (200)
+GET http://localhost:8080/api/subjects/2/topics
+
+### Tópico - Criar Equações do Segundo Grau (201)
+POST http://localhost:8080/api/topics
+Content-Type: application/json
+
+{
+  "name": "Equações do Segundo Grau"
+}
+
+### Tópico - Criar Funções Quadráticas (201)
+POST http://localhost:8080/api/topics
+Content-Type: application/json
+
+{
+  "name": "Funções Quadráticas"
+}
+
+### Tópico - Associar Equações do Segundo Grau à Matemática de Ada Lovelace (204)
+PUT http://localhost:8080/api/subjects/1/topics/2
+
+### Tópico - Associar Funções Quadráticas à Matemática de Ada Lovelace (204)
+PUT http://localhost:8080/api/subjects/1/topics/3
+
+### Conteúdo - Criar conteúdo de Equações do Segundo Grau com dois tópicos (201)
+POST http://localhost:8080/api/contents?userId=1
+Content-Type: application/json
+
+{
+  "title": "Introdução às Equações do Segundo Grau",
+  "body": "Uma equação do segundo grau possui a forma ax² + bx + c = 0, com a diferente de zero.",
+  "topics": [
+    {
+      "id": 2
+    },
+    {
+      "id": 3
+    }
+  ]
+}
+
+### Conteúdo - Consultar conteúdo de Equações do Segundo Grau (200)
+GET http://localhost:8080/api/contents/1?userId=1
+
+### Conteúdo - Criar conteúdo de Álgebra Linear (201)
+POST http://localhost:8080/api/contents?userId=1
+Content-Type: application/json
+
+{
+  "title": "Introdução à Álgebra Linear",
+  "body": "A Álgebra Linear estuda vetores, matrizes, sistemas lineares e transformações lineares.",
+  "topics": [
+    {
+      "id": 1
+    }
+  ]
+}
+
+### Flashcard - Criar primeiro flashcard de Equações do Segundo Grau sem resposta (201)
+POST http://localhost:8080/api/flashcards?contentId=1
+Content-Type: application/json
+
+{
+  "question": "O que é uma equação do segundo grau?"
+}
+
+### Flashcard - Gerar resposta do primeiro flashcard com IA (200)
+POST http://localhost:8080/api/flashcards/1/generate-answer
+
+### Flashcard - Consultar primeiro flashcard após geração da resposta (200)
+GET http://localhost:8080/api/flashcards/1
+
+### Flashcard - Criar segundo flashcard com resposta (201)
+POST http://localhost:8080/api/flashcards?contentId=1
+Content-Type: application/json
+
+{
+  "question": "O que é o discriminante de uma equação do segundo grau?",
+  "answer": "É o valor Δ = b² - 4ac, utilizado para determinar a natureza das raízes reais."
+}
+
+### Flashcard - Criar terceiro flashcard de Álgebra Linear (201)
+POST http://localhost:8080/api/flashcards?contentId=2
+Content-Type: application/json
+
+{
+  "question": "O que é uma matriz?",
+  "answer": "É uma disposição retangular de elementos organizados em linhas e colunas."
+}
+
+### Flashcard - Listar flashcards do conteúdo de Equações do Segundo Grau (200)
+GET http://localhost:8080/api/flashcards/content/1
+
+### Tentativa de resposta - Registrar resposta correta de Ada ao primeiro flashcard (201)
+POST http://localhost:8080/api/answer-attempts
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "flashcardId": 1,
+  "correct": true
+}
+
+### Tentativa de resposta - Registrar resposta incorreta de Ada ao segundo flashcard (201)
+POST http://localhost:8080/api/answer-attempts
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "flashcardId": 2,
+  "correct": false
+}
+
+### Tentativa de resposta - Registrar nova resposta correta de Ada ao segundo flashcard (201)
+POST http://localhost:8080/api/answer-attempts
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "flashcardId": 2,
+  "correct": true
+}
+
+### Tentativa de resposta - Consultar histórico completo de Ada (200)
+GET http://localhost:8080/api/answer-attempts/users/1
+
+### Tentativa de resposta - Consultar histórico de Ada no segundo flashcard (200)
+GET http://localhost:8080/api/answer-attempts/users/1/flashcards/2
+
+# =============================================================================
+# FLUXO 2 — EMMY NOETHER
+# Segundo usuário, organização própria e revisão de flashcards existentes.
+# =============================================================================
+
+### Usuário - Criar segundo usuário Emmy Noether (201)
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+  "name": "Emmy Noether",
+  "email": "emmy@example.com"
+}
+
+### Usuário - Consultar Emmy Noether (200)
+GET http://localhost:8080/api/users/2
+
+### Matéria - Criar Matemática para Emmy Noether (201)
+POST http://localhost:8080/api/subjects?userId=2
+Content-Type: application/json
+
+{
+  "name": "Matemática"
+}
+
+### Tópico - Associar Equações do Segundo Grau à Matemática de Emmy Noether (204)
+PUT http://localhost:8080/api/subjects/4/topics/2
+
+### Tópico - Consultar tópicos da Matemática de Emmy Noether (200)
+GET http://localhost:8080/api/subjects/4/topics
+
+### Flashcard - Consultar primeiro flashcard para revisão de Emmy Noether (200)
+GET http://localhost:8080/api/flashcards/1
+
+### Tentativa de resposta - Registrar resposta incorreta de Emmy ao primeiro flashcard (201)
+POST http://localhost:8080/api/answer-attempts
+Content-Type: application/json
+
+{
+  "userId": 2,
+  "flashcardId": 1,
+  "correct": false
+}
+
+### Flashcard - Consultar segundo flashcard para revisão de Emmy Noether (200)
+GET http://localhost:8080/api/flashcards/2
+
+### Tentativa de resposta - Registrar resposta correta de Emmy ao segundo flashcard (201)
+POST http://localhost:8080/api/answer-attempts
+Content-Type: application/json
+
+{
+  "userId": 2,
+  "flashcardId": 2,
+  "correct": true
+}
+
+### Tentativa de resposta - Consultar histórico completo de Emmy (200)
+GET http://localhost:8080/api/answer-attempts/users/2
+
+### Tentativa de resposta - Consultar histórico de Emmy no primeiro flashcard (200)
+GET http://localhost:8080/api/answer-attempts/users/2/flashcards/1
+
+# =============================================================================
+# FLUXO 3 — MANUTENÇÃO DOS ESTUDOS
+# Atualização de dados existentes e confirmação das alterações.
+# =============================================================================
+
+### Usuário - Atualizar nome de Ada Lovelace para Ada Byron Lovelace (200)
+PUT http://localhost:8080/api/users/1
 Content-Type: application/json
 
 {
@@ -26,7 +270,76 @@ Content-Type: application/json
   "email": "ada@example.com"
 }
 
-### Teste — Nome vazio (400)
+### Usuário - Confirmar atualização do nome de Ada Byron Lovelace (200)
+GET http://localhost:8080/api/users/1
+
+### Matéria - Atualizar Matemática de Ada para Matemática Avançada (200)
+PUT http://localhost:8080/api/subjects/1
+Content-Type: application/json
+
+{
+  "name": "Matemática Avançada"
+}
+
+### Matéria - Confirmar atualização de Matemática Avançada (200)
+GET http://localhost:8080/api/subjects/1
+
+### Tópico - Atualizar Álgebra Linear para Álgebra Linear Aplicada (200)
+PUT http://localhost:8080/api/topics/1
+Content-Type: application/json
+
+{
+  "name": "Álgebra Linear Aplicada"
+}
+
+### Tópico - Confirmar atualização de Álgebra Linear Aplicada (200)
+GET http://localhost:8080/api/topics/1
+
+### Conteúdo - Atualizar título e corpo do conteúdo de Equações do Segundo Grau (200)
+PUT http://localhost:8080/api/contents/1?userId=1
+Content-Type: application/json
+
+{
+  "title": "Equações do Segundo Grau - Fórmula de Bhaskara",
+  "body": "Para resolver ax² + bx + c = 0, calculamos o discriminante Δ = b² - 4ac e aplicamos x = (-b ± √Δ) / 2a."
+}
+
+### Conteúdo - Confirmar atualização e preservação dos dois tópicos (200)
+GET http://localhost:8080/api/contents/1?userId=1
+
+### Flashcard - Atualizar pergunta e resposta do primeiro flashcard (200)
+PUT http://localhost:8080/api/flashcards/1
+Content-Type: application/json
+
+{
+  "question": "Qual é a forma geral de uma equação do segundo grau?",
+  "answer": "ax² + bx + c = 0, em que a, b e c são coeficientes reais e a é diferente de zero."
+}
+
+### Flashcard - Confirmar atualização do primeiro flashcard (200)
+GET http://localhost:8080/api/flashcards/1
+
+### Usuário - Listar usuários após atualizações (200)
+GET http://localhost:8080/api/users
+
+### Matéria - Listar matérias após atualizações (200)
+GET http://localhost:8080/api/subjects
+
+### Tópico - Listar tópicos após atualizações (200)
+GET http://localhost:8080/api/topics
+
+### Conteúdo - Listar conteúdos após atualizações (200)
+GET http://localhost:8080/api/contents?userId=1
+
+### Flashcard - Listar flashcards após atualizações (200)
+GET http://localhost:8080/api/flashcards
+
+# =============================================================================
+# FLUXO 4 — VALIDAÇÕES
+# Requisições inválidas sem exclusão dos dados válidos dos fluxos anteriores.
+# =============================================================================
+
+### Usuário - Rejeitar criação com nome vazio (400)
 POST http://localhost:8080/api/users
 Content-Type: application/json
 
@@ -35,7 +348,7 @@ Content-Type: application/json
   "email": "teste@example.com"
 }
 
-### Teste — E-mail inválido (400)
+### Usuário - Rejeitar criação com e-mail inválido (400)
 POST http://localhost:8080/api/users
 Content-Type: application/json
 
@@ -44,7 +357,7 @@ Content-Type: application/json
   "email": "email-invalido"
 }
 
-### Teste — E-mail duplicado (409)
+### Usuário - Rejeitar criação com e-mail duplicado de Ada (409)
 POST http://localhost:8080/api/users
 Content-Type: application/json
 
@@ -53,87 +366,37 @@ Content-Type: application/json
   "email": "ada@example.com"
 }
 
-### Criar matéria 1
-POST http://localhost:8080/api/subjects?userId={{userId}}
-Content-Type: application/json
-
-{
-  "name": "Matemática"
-}
-
-> {%
-    client.global.set("subjectId1", response.body.id);
-%}
-
-### Criar matéria 2
-POST http://localhost:8080/api/subjects?userId={{userId}}
-Content-Type: application/json
-
-{
-  "name": "Física"
-}
-
-> {%
-    client.global.set("subjectId2", response.body.id);
-%}
-
-### Listar matérias
-GET http://localhost:8080/api/subjects
-
-### Consultar matéria por ID
-GET http://localhost:8080/api/subjects/{{subjectId1}}
-
-### Atualizar matéria
-PUT http://localhost:8080/api/subjects/{{subjectId1}}
-Content-Type: application/json
-
-{
-  "name": "Matemática Avançada"
-}
-
-### Teste — Nome vazio (400)
-POST http://localhost:8080/api/subjects?userId={{userId}}
+### Matéria - Rejeitar criação com nome vazio para Ada (400)
+POST http://localhost:8080/api/subjects?userId=1
 Content-Type: application/json
 
 {
   "name": ""
 }
 
-### Teste — Apenas espaços (400)
-POST http://localhost:8080/api/subjects?userId={{userId}}
+### Matéria - Rejeitar criação com nome composto apenas por espaços para Ada (400)
+POST http://localhost:8080/api/subjects?userId=1
 Content-Type: application/json
 
 {
   "name": "   "
 }
 
-### Teste — Nome ausente (400)
-POST http://localhost:8080/api/subjects?userId={{userId}}
+### Matéria - Rejeitar criação sem nome para Ada (400)
+POST http://localhost:8080/api/subjects?userId=1
 Content-Type: application/json
 
 {}
 
-### Teste — Atualização inválida (400)
-PUT http://localhost:8080/api/subjects/{{subjectId1}}
+### Matéria - Rejeitar atualização com nome vazio de Matemática Avançada (400)
+PUT http://localhost:8080/api/subjects/1
 Content-Type: application/json
 
 {
   "name": ""
 }
 
-### Teste — Cadastro válido (201)
-POST http://localhost:8080/api/subjects?userId={{userId}}
-Content-Type: application/json
-
-{
-  "name": "Química"
-}
-
-> {%
-    client.global.set("subjectId3", response.body.id);
-%}
-
-### Teste — Cadastro com usuário inexistente (404)
+### Matéria - Rejeitar criação para usuário inexistente (404)
 POST http://localhost:8080/api/subjects?userId=-1
 Content-Type: application/json
 
@@ -141,7 +404,7 @@ Content-Type: application/json
   "name": "Biologia"
 }
 
-### Teste — Cadastro sem usuário (400)
+### Matéria - Rejeitar criação sem informar usuário (400)
 POST http://localhost:8080/api/subjects
 Content-Type: application/json
 
@@ -149,116 +412,8 @@ Content-Type: application/json
   "name": "Biologia"
 }
 
-### Criar tópico Álgebra Linear
-POST http://localhost:8080/api/topics
-Content-Type: application/json
-
-{
-  "name": "Álgebra Linear"
-}
-
-> {%
-    client.global.set("topicId", response.body.id);
-%}
-
-### Listar tópicos
-GET http://localhost:8080/api/topics
-
-### Consultar tópico por ID
-GET http://localhost:8080/api/topics/{{topicId}}
-
-### Atualizar tópico
-PUT http://localhost:8080/api/topics/{{topicId}}
-Content-Type: application/json
-
-{
-  "name": "Álgebra Linear Aplicada"
-}
-
-### Associar tópico à matéria 1 (204)
-PUT http://localhost:8080/api/subjects/{{subjectId1}}/topics/{{topicId}}
-
-### Associar mesmo tópico à matéria 2 (204)
-PUT http://localhost:8080/api/subjects/{{subjectId2}}/topics/{{topicId}}
-
-### Consultar tópicos da matéria 1 (200)
-GET http://localhost:8080/api/subjects/{{subjectId1}}/topics
-
-### Consultar tópicos da matéria 2 (200)
-GET http://localhost:8080/api/subjects/{{subjectId2}}/topics
-
-### Remover associação da matéria 1 (204)
-DELETE http://localhost:8080/api/subjects/{{subjectId1}}/topics/{{topicId}}
-
-### Confirmar que a matéria 1 não possui o tópico (200)
-GET http://localhost:8080/api/subjects/{{subjectId1}}/topics
-
-### Confirmar que a matéria 2 mantém o tópico (200)
-GET http://localhost:8080/api/subjects/{{subjectId2}}/topics
-
-### Confirmar que o tópico continua existindo (200)
-GET http://localhost:8080/api/topics/{{topicId}}
-
-### Repetir remoção de associação inexistente (204)
-DELETE http://localhost:8080/api/subjects/{{subjectId1}}/topics/{{topicId}}
-
-### Excluir tópico associado (204)
-DELETE http://localhost:8080/api/topics/{{topicId}}
-
-### Confirmar que o tópico foi excluído (404)
-GET http://localhost:8080/api/topics/{{topicId}}
-
-### Confirmar que a matéria 2 continua existindo (200)
-GET http://localhost:8080/api/subjects/{{subjectId2}}
-
-### Confirmar que a matéria 2 não possui mais o tópico (200)
-GET http://localhost:8080/api/subjects/{{subjectId2}}/topics
-
-### Criar tópico para testes de conteúdo
-POST http://localhost:8080/api/topics
-Content-Type: application/json
-
-{
-  "name": "Equações do Segundo Grau"
-}
-
-> {%
-    client.global.set("contentTopicId", response.body.id);
-%}
-
-### Criar conteúdo
-POST http://localhost:8080/api/contents
-Content-Type: application/json
-
-{
-  "title": "Introdução às Equações do Segundo Grau",
-  "body": "Uma equação do segundo grau possui a forma ax² + bx + c = 0, com a diferente de zero.",
-  "topic": {
-    "id": {{contentTopicId}}
-  }
-}
-
-> {%
-    client.global.set("contentId", response.body.id);
-%}
-
-### Listar conteúdos
-GET http://localhost:8080/api/contents
-
-### Buscar conteúdo por ID
-GET http://localhost:8080/api/contents/{{contentId}}
-
-### Atualizar conteúdo
-PUT http://localhost:8080/api/contents/{{contentId}}
-Content-Type: application/json
-
-{
-  "title": "Equações do Segundo Grau — Fórmula de Bhaskara",
-  "body": "Para resolver ax² + bx + c = 0, calculamos o discriminante Δ = b² - 4ac e aplicamos x = (-b ± √Δ) / 2a."
-}
-
-### Teste — Atualização com título vazio (400)
-PUT http://localhost:8080/api/contents/{{contentId}}
+### Conteúdo - Rejeitar atualização com título vazio (400)
+PUT http://localhost:8080/api/contents/1?userId=1
 Content-Type: application/json
 
 {
@@ -266,8 +421,8 @@ Content-Type: application/json
   "body": "Conteúdo sobre equações do segundo grau."
 }
 
-### Teste — Atualização com corpo vazio (400)
-PUT http://localhost:8080/api/contents/{{contentId}}
+### Conteúdo - Rejeitar atualização com corpo vazio (400)
+PUT http://localhost:8080/api/contents/1?userId=1
 Content-Type: application/json
 
 {
@@ -275,101 +430,21 @@ Content-Type: application/json
   "body": ""
 }
 
-### Teste — Atualização válida (200)
-PUT http://localhost:8080/api/contents/{{contentId}}
-Content-Type: application/json
+### Conteúdo - Ada consulta seu próprio conteúdo (200)
+GET http://localhost:8080/api/contents/1?userId=1
 
-{
-  "title": "Equações do Segundo Grau — Fórmula de Bhaskara",
-  "body": "O discriminante é calculado por Δ = b² - 4ac."
-}
+### Conteúdo - Emmy tenta consultar conteúdo de Ada (404)
+GET http://localhost:8080/api/contents/1?userId=2
 
-### Excluir conteúdo
-DELETE http://localhost:8080/api/contents/{{contentId}}
-
-### Buscar conteúdo excluído (404)
-GET http://localhost:8080/api/contents/{{contentId}}
-
-### Excluir tópico de conteúdo (204)
-DELETE http://localhost:8080/api/topics/{{contentTopicId}}
-
-### Excluir matéria 1 (204)
-DELETE http://localhost:8080/api/subjects/{{subjectId1}}
-
-### Excluir matéria 2 (204)
-DELETE http://localhost:8080/api/subjects/{{subjectId2}}
-
-### Excluir matéria 3 (204)
-DELETE http://localhost:8080/api/subjects/{{subjectId3}}
-
-### Confirmar exclusão da matéria 1 (404)
-GET http://localhost:8080/api/subjects/{{subjectId1}}
-
-### Confirmar exclusão da matéria 2 (404)
-GET http://localhost:8080/api/subjects/{{subjectId2}}
-
-### Confirmar exclusão da matéria 3 (404)
-GET http://localhost:8080/api/subjects/{{subjectId3}}
-
-### Excluir usuário
-DELETE http://localhost:8080/api/users/{{userId}}
-
-### Buscar usuário excluído (404)
-GET http://localhost:8080/api/users/{{userId}}
-
-
-### Flashcard — Criar sem resposta (201)
-POST http://localhost:8080/api/flashcards?contentId={{contentId}}
-Content-Type: application/json
-
-{
-  "question": "O que é uma equação do segundo grau?"
-}
-
-> {%
-    client.global.set("flashcardId", response.body.id);
-%}
-
-### Flashcard — Listar todos (200)
-GET http://localhost:8080/api/flashcards
-
-### Flashcard — Consultar por ID (200)
-GET http://localhost:8080/api/flashcards/{{flashcardId}}
-
-### Flashcard — Listar por conteúdo (200)
-GET http://localhost:8080/api/flashcards/content/{{contentId}}
-
-### Flashcard — Atualizar pergunta e resposta (200)
-PUT http://localhost:8080/api/flashcards/{{flashcardId}}
-Content-Type: application/json
-
-{
-  "question": "Qual é a forma geral de uma equação do segundo grau?",
-  "answer": "ax² + bx + c = 0, em que a, b e c são coeficientes reais e a é diferente de zero."
-}
-
-### Flashcard — Criar com resposta (201)
-POST http://localhost:8080/api/flashcards?contentId={{contentId}}
-Content-Type: application/json
-
-{
-  "question": "O que é o discriminante de uma equação do segundo grau?",
-  "answer": "É o valor Δ = b² - 4ac, utilizado para determinar a natureza das raízes reais."
-}
-
-> {%
-    client.global.set("flashcardId2", response.body.id);
-%}
-
-### Flashcard — Pergunta vazia (400)
-POST http://localhost:8080/api/flashcards?contentId={{contentId}}
+### Flashcard - Rejeitar criação com pergunta vazia (400)
+POST http://localhost:8080/api/flashcards?contentId=1
 Content-Type: application/json
 
 {
   "question": ""
 }
 
-### Flashcard — Conteúdo inexistente (404)
+### Flashcard - Rejeitar criação para conteúdo inexistente (404)
 POST http://localhost:8080/api/flashcards?contentId=-1
 Content-Type: application/json
 
@@ -377,10 +452,10 @@ Content-Type: application/json
   "question": "Pergunta de teste"
 }
 
-### Flashcard — Consultar inexistente (404)
+### Flashcard - Consultar flashcard inexistente (404)
 GET http://localhost:8080/api/flashcards/-1
 
-### Flashcard — Atualizar inexistente (404)
+### Flashcard - Rejeitar atualização de flashcard inexistente (404)
 PUT http://localhost:8080/api/flashcards/-1
 Content-Type: application/json
 
@@ -388,17 +463,118 @@ Content-Type: application/json
   "question": "Pergunta atualizada"
 }
 
-### Flashcard — Excluir inexistente (404)
+### Tentativa de resposta - Rejeitar registro para usuário inexistente (404)
+POST http://localhost:8080/api/answer-attempts
+Content-Type: application/json
+
+{
+  "userId": -1,
+  "flashcardId": 1,
+  "correct": true
+}
+
+### Tentativa de resposta - Rejeitar registro sem resultado (400)
+POST http://localhost:8080/api/answer-attempts
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "flashcardId": 1
+}
+
+###
+# =============================================================================
+# FLUXO 5 — EXCLUSÕES
+# Remoção de associações, registros e confirmação dos resultados.
+# Executar somente após concluir todos os fluxos anteriores.
+# =============================================================================
+
+### Tópico - Remover associação de Álgebra Linear com Matemática de Ada (204)
+DELETE http://localhost:8080/api/subjects/1/topics/1
+
+### Tópico - Confirmar ausência de Álgebra Linear na Matemática de Ada (200)
+GET http://localhost:8080/api/subjects/1/topics
+
+### Tópico - Confirmar permanência de Álgebra Linear na Física de Ada (200)
+GET http://localhost:8080/api/subjects/2/topics
+
+### Tópico - Repetir remoção da associação inexistente entre Álgebra Linear e Matemática de Ada (204)
+DELETE http://localhost:8080/api/subjects/1/topics/1
+
+### Flashcard - Excluir primeiro flashcard (204)
+DELETE http://localhost:8080/api/flashcards/1
+
+### Flashcard - Confirmar exclusão do primeiro flashcard (404)
+GET http://localhost:8080/api/flashcards/1
+
+### Flashcard - Excluir segundo flashcard (204)
+DELETE http://localhost:8080/api/flashcards/2
+
+### Flashcard - Excluir terceiro flashcard (204)
+DELETE http://localhost:8080/api/flashcards/3
+
+### Flashcard - Rejeitar exclusão de flashcard inexistente (404)
 DELETE http://localhost:8080/api/flashcards/-1
 
-### Flashcard — Excluir primeiro flashcard (204)
-DELETE http://localhost:8080/api/flashcards/{{flashcardId}}
+### Conteúdo - Excluir conteúdo de Equações do Segundo Grau (204)
+DELETE http://localhost:8080/api/contents/1?userId=1
 
-### Flashcard — Excluir segundo flashcard (204)
-DELETE http://localhost:8080/api/flashcards/{{flashcardId2}}
+### Conteúdo - Confirmar exclusão do conteúdo de Equações do Segundo Grau (404)
+GET http://localhost:8080/api/contents/1?userId=1
 
-### Flashcard — Consultar após exclusão (404)
-GET http://localhost:8080/api/flashcards/{{flashcardId}}
+### Conteúdo - Excluir conteúdo de Álgebra Linear (204)
+DELETE http://localhost:8080/api/contents/2?userId=1
 
-### Flashcard — Gerar resposta com IA (200)
-POST http://localhost:8080/api/flashcards/{{flashcardId}}/generate-answer
+### Tópico - Excluir Álgebra Linear Aplicada (204)
+DELETE http://localhost:8080/api/topics/1
+
+### Tópico - Confirmar exclusão de Álgebra Linear Aplicada (404)
+GET http://localhost:8080/api/topics/1
+
+### Tópico - Confirmar existência da Física após exclusão de Álgebra Linear Aplicada (200)
+GET http://localhost:8080/api/subjects/2
+
+### Tópico - Confirmar ausência de Álgebra Linear Aplicada na Física (200)
+GET http://localhost:8080/api/subjects/2/topics
+
+### Tópico - Excluir Equações do Segundo Grau (204)
+DELETE http://localhost:8080/api/topics/2
+
+### Tópico - Excluir Funções Quadráticas (204)
+DELETE http://localhost:8080/api/topics/3
+
+### Matéria - Excluir Matemática Avançada de Ada (204)
+DELETE http://localhost:8080/api/subjects/1
+
+### Matéria - Confirmar exclusão de Matemática Avançada de Ada (404)
+GET http://localhost:8080/api/subjects/1
+
+### Matéria - Excluir Física de Ada (204)
+DELETE http://localhost:8080/api/subjects/2
+
+### Matéria - Confirmar exclusão de Física de Ada (404)
+GET http://localhost:8080/api/subjects/2
+
+### Matéria - Excluir Química de Ada (204)
+DELETE http://localhost:8080/api/subjects/3
+
+### Matéria - Confirmar exclusão de Química de Ada (404)
+GET http://localhost:8080/api/subjects/3
+
+### Matéria - Excluir Matemática de Emmy (204)
+DELETE http://localhost:8080/api/subjects/4
+
+### Matéria - Confirmar exclusão de Matemática de Emmy (404)
+GET http://localhost:8080/api/subjects/4
+
+### Usuário - Excluir Ada Byron Lovelace (204)
+DELETE http://localhost:8080/api/users/1
+
+### Usuário - Confirmar exclusão de Ada Byron Lovelace (404)
+GET http://localhost:8080/api/users/1
+
+### Usuário - Excluir Emmy Noether (204)
+DELETE http://localhost:8080/api/users/2
+
+### Usuário - Confirmar exclusão de Emmy Noether (404)
+GET http://localhost:8080/api/users/2

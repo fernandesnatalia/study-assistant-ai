@@ -1,14 +1,19 @@
 package br.com.studyassistant.studyassistantai.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Column;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.FetchType;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 public class Content {
@@ -25,10 +30,18 @@ public class Content {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String body;
 
-    @NotNull
-    @ManyToOne
-    @JoinColumn(name = "topic_id", nullable = false)
-    private Topic topic;
+    @ManyToMany
+    @JoinTable(
+            name = "content_topics",
+            joinColumns = @JoinColumn(name = "content_id"),
+            inverseJoinColumns = @JoinColumn(name = "topic_id")
+    )
+    private Set<Topic> topics = new HashSet<>();
+
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     public Long getId() { return id; }
 
@@ -42,7 +55,11 @@ public class Content {
 
     public void setBody(String body) { this.body = body; }
 
-    public Topic getTopic() { return topic; }
+    public Set<Topic> getTopics() { return topics; }
 
-    public void setTopic(Topic topic) { this.topic = topic; }
+    public void setTopics(Set<Topic> topics) { this.topics = topics; }
+
+    public User getUser() { return user; }
+
+    public void setUser(User user) { this.user = user; }
 }
