@@ -30,9 +30,7 @@ public class AnswerAttemptController {
     ) {
         AnswerAttemptResponse response = answerAttemptService.create(request);
 
-        return ResponseEntity
-                .created(URI.create("/api/answer-attempts/" + response.id()))
-                .body(response);
+        return ResponseEntity.created(URI.create("/api/answer-attempts/" + response.id())).body(response);
     }
 
     @GetMapping("/users/{userId}")

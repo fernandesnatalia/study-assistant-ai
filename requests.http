@@ -1,204 +1,22 @@
 # =============================================================================
 # STUDY ASSISTANT AI — FLUXOS DE TESTE
 # =============================================================================
-#
+
 # =============================================================================
-# FLUXO 1 — ADA LOVELACE
-# Cadastro, organização dos estudos, criação de conteúdo e revisão.
+# FLUXO 1 — CADASTRO E ORGANIZAÇÃO DOS ESTUDOS
+# Ada Lovelace e Emmy Noether criam suas contas, matérias, tópicos e conteúdos.
 # =============================================================================
 
-### Usuário - Criar primeiro usuário Ada Lovelace (201)
+### Usuário - Criar Ada Lovelace (201)
 POST http://localhost:8080/api/users
 Content-Type: application/json
 
 {
-  "name": "Ada Lovelace",
+  "name": "Augusta Ada Byron King",
   "email": "ada@example.com"
 }
 
-### Usuário - Consultar Ada Lovelace (200)
-GET http://localhost:8080/api/users?userId=1
-
-### Matéria - Criar Matemática para Ada Lovelace (201)
-POST http://localhost:8080/api/subjects?userId=1
-Content-Type: application/json
-
-{
-  "name": "Matemática"
-}
-
-### Matéria - Criar Física para Ada Lovelace (201)
-POST http://localhost:8080/api/subjects?userId=1
-Content-Type: application/json
-
-{
-  "name": "Física"
-}
-
-### Matéria - Criar Química para Ada Lovelace (201)
-POST http://localhost:8080/api/subjects?userId=1
-Content-Type: application/json
-
-{
-  "name": "Química"
-}
-
-### Matéria - Consultar Matemática de Ada Lovelace (200)
-GET http://localhost:8080/api/subjects/1
-
-### Tópico - Criar Álgebra Linear (201)
-POST http://localhost:8080/api/topics
-Content-Type: application/json
-
-{
-  "name": "Álgebra Linear"
-}
-
-### Tópico - Associar Álgebra Linear à Matemática de Ada Lovelace (204)
-PUT http://localhost:8080/api/subjects/1/topics/1
-
-### Tópico - Associar Álgebra Linear à Física de Ada Lovelace (204)
-PUT http://localhost:8080/api/subjects/2/topics/1
-
-### Tópico - Consultar tópicos da Matemática de Ada Lovelace (200)
-GET http://localhost:8080/api/subjects/1/topics
-
-### Tópico - Consultar tópicos da Física de Ada Lovelace (200)
-GET http://localhost:8080/api/subjects/2/topics
-
-### Tópico - Criar Equações do Segundo Grau (201)
-POST http://localhost:8080/api/topics
-Content-Type: application/json
-
-{
-  "name": "Equações do Segundo Grau"
-}
-
-### Tópico - Criar Funções Quadráticas (201)
-POST http://localhost:8080/api/topics
-Content-Type: application/json
-
-{
-  "name": "Funções Quadráticas"
-}
-
-### Tópico - Associar Equações do Segundo Grau à Matemática de Ada Lovelace (204)
-PUT http://localhost:8080/api/subjects/1/topics/2
-
-### Tópico - Associar Funções Quadráticas à Matemática de Ada Lovelace (204)
-PUT http://localhost:8080/api/subjects/1/topics/3
-
-### Conteúdo - Criar conteúdo de Equações do Segundo Grau com dois tópicos (201)
-POST http://localhost:8080/api/contents?userId=1
-Content-Type: application/json
-
-{
-  "title": "Introdução às Equações do Segundo Grau",
-  "body": "Uma equação do segundo grau possui a forma ax² + bx + c = 0, com a diferente de zero.",
-  "topics": [
-    {
-      "id": 2
-    },
-    {
-      "id": 3
-    }
-  ]
-}
-
-### Conteúdo - Consultar conteúdo de Equações do Segundo Grau (200)
-GET http://localhost:8080/api/contents/1?userId=1
-
-### Conteúdo - Criar conteúdo de Álgebra Linear (201)
-POST http://localhost:8080/api/contents?userId=1
-Content-Type: application/json
-
-{
-  "title": "Introdução à Álgebra Linear",
-  "body": "A Álgebra Linear estuda vetores, matrizes, sistemas lineares e transformações lineares.",
-  "topics": [
-    {
-      "id": 1
-    }
-  ]
-}
-
-### Flashcard - Criar primeiro flashcard de Equações do Segundo Grau sem resposta (201)
-POST http://localhost:8080/api/flashcards?contentId=1
-Content-Type: application/json
-
-{
-  "question": "O que é uma equação do segundo grau?"
-}
-
-### Flashcard - Gerar resposta do primeiro flashcard com IA (200)
-POST http://localhost:8080/api/flashcards/1/generate-answer
-
-### Flashcard - Consultar primeiro flashcard após geração da resposta (200)
-GET http://localhost:8080/api/flashcards/1
-
-### Flashcard - Criar segundo flashcard com resposta (201)
-POST http://localhost:8080/api/flashcards?contentId=1
-Content-Type: application/json
-
-{
-  "question": "O que é o discriminante de uma equação do segundo grau?",
-  "answer": "É o valor Δ = b² - 4ac, utilizado para determinar a natureza das raízes reais."
-}
-
-### Flashcard - Criar terceiro flashcard de Álgebra Linear (201)
-POST http://localhost:8080/api/flashcards?contentId=2
-Content-Type: application/json
-
-{
-  "question": "O que é uma matriz?",
-  "answer": "É uma disposição retangular de elementos organizados em linhas e colunas."
-}
-
-### Flashcard - Listar flashcards do conteúdo de Equações do Segundo Grau (200)
-GET http://localhost:8080/api/flashcards/content/1
-
-### Tentativa de resposta - Registrar resposta correta de Ada ao primeiro flashcard (201)
-POST http://localhost:8080/api/answer-attempts
-Content-Type: application/json
-
-{
-  "userId": 1,
-  "flashcardId": 1,
-  "correct": true
-}
-
-### Tentativa de resposta - Registrar resposta incorreta de Ada ao segundo flashcard (201)
-POST http://localhost:8080/api/answer-attempts
-Content-Type: application/json
-
-{
-  "userId": 1,
-  "flashcardId": 2,
-  "correct": false
-}
-
-### Tentativa de resposta - Registrar nova resposta correta de Ada ao segundo flashcard (201)
-POST http://localhost:8080/api/answer-attempts
-Content-Type: application/json
-
-{
-  "userId": 1,
-  "flashcardId": 2,
-  "correct": true
-}
-
-### Tentativa de resposta - Consultar histórico completo de Ada (200)
-GET http://localhost:8080/api/answer-attempts/users/1
-
-### Tentativa de resposta - Consultar histórico de Ada no segundo flashcard (200)
-GET http://localhost:8080/api/answer-attempts/users/1/flashcards/2
-
-# =============================================================================
-# FLUXO 2 — EMMY NOETHER
-# Segundo usuário, organização própria e revisão de flashcards existentes.
-# =============================================================================
-
-### Usuário - Criar segundo usuário Emmy Noether (201)
+### Usuário - Criar Emmy Noether (201)
 POST http://localhost:8080/api/users
 Content-Type: application/json
 
@@ -207,117 +25,369 @@ Content-Type: application/json
   "email": "emmy@example.com"
 }
 
+### Usuário - Consultar Ada Lovelace (200)
+GET http://localhost:8080/api/users/1
+
 ### Usuário - Consultar Emmy Noether (200)
 GET http://localhost:8080/api/users/2
 
-### Matéria - Criar Matemática para Emmy Noether (201)
-POST http://localhost:8080/api/subjects?userId=2
+### Matéria - Ada cria Matemática (201)
+POST http://localhost:8080/api/subjects?userId=1
 Content-Type: application/json
 
 {
   "name": "Matemática"
 }
 
-### Tópico - Associar Equações do Segundo Grau à Matemática de Emmy Noether (204)
-PUT http://localhost:8080/api/subjects/4/topics/2
+### Matéria - Emmy cria Álgebra Abstrata (201)
+POST http://localhost:8080/api/subjects?userId=2
+Content-Type: application/json
 
-### Tópico - Consultar tópicos da Matemática de Emmy Noether (200)
+{
+  "name": "Álgebra Abstrata"
+}
+
+### Matéria - Ada cria Lógica (201)
+POST http://localhost:8080/api/subjects?userId=1
+Content-Type: application/json
+
+{
+  "name": "Lógica"
+}
+
+### Matéria - Ada cria Fundamentos da Computação (201)
+POST http://localhost:8080/api/subjects?userId=1
+Content-Type: application/json
+
+{
+  "name": "Fundamentos da Computação"
+}
+
+### Matéria - Consultar Matemática de Ada (200)
+GET http://localhost:8080/api/subjects/1
+
+### Matéria - Consultar Álgebra Abstrata de Emmy (200)
+GET http://localhost:8080/api/subjects/2
+
+### Tópico - Ada cria Algoritmos (201)
+POST http://localhost:8080/api/topics
+Content-Type: application/json
+
+{
+  "name": "Algoritmos"
+}
+
+### Tópico - Emmy cria Teoria dos Anéis (201)
+POST http://localhost:8080/api/topics
+Content-Type: application/json
+
+{
+  "name": "Teoria dos Anéis"
+}
+
+### Tópico - Ada cria Sequências Numéricas (201)
+POST http://localhost:8080/api/topics
+Content-Type: application/json
+
+{
+  "name": "Sequências Numéricas"
+}
+
+### Tópico - Ada cria Máquina Analítica (201)
+POST http://localhost:8080/api/topics
+Content-Type: application/json
+
+{
+  "name": "Máquina Analítica"
+}
+
+### Tópico - Associar Algoritmos à Matemática de Ada (204)
+PUT http://localhost:8080/api/subjects/1/topics/1
+
+### Tópico - Associar Teoria dos Anéis à Álgebra Abstrata de Emmy (204)
+PUT http://localhost:8080/api/subjects/2/topics/2
+
+### Tópico - Associar Algoritmos à Lógica de Ada (204)
+PUT http://localhost:8080/api/subjects/3/topics/1
+
+### Tópico - Associar Sequências Numéricas à Matemática de Ada (204)
+PUT http://localhost:8080/api/subjects/1/topics/3
+
+### Tópico - Associar Máquina Analítica à Fundamentos da Computação de Ada (204)
+PUT http://localhost:8080/api/subjects/4/topics/4
+
+### Tópico - Consultar tópicos da Matemática de Ada (200)
+GET http://localhost:8080/api/subjects/1/topics
+
+### Tópico - Consultar tópicos da Álgebra Abstrata de Emmy (200)
+GET http://localhost:8080/api/subjects/2/topics
+
+### Tópico - Consultar tópicos da Lógica de Ada (200)
+GET http://localhost:8080/api/subjects/3/topics
+
+### Tópico - Consultar tópicos de Fundamentos da Computação de Ada (200)
 GET http://localhost:8080/api/subjects/4/topics
 
-### Flashcard - Consultar primeiro flashcard para revisão de Emmy Noether (200)
-GET http://localhost:8080/api/flashcards/1
+### Conteúdo - Ada cria Algoritmos e Sequências Numéricas com dois tópicos (201)
+POST http://localhost:8080/api/contents?userId=1
+Content-Type: application/json
 
-### Tentativa de resposta - Registrar resposta incorreta de Emmy ao primeiro flashcard (201)
+{
+  "title": "Algoritmos e Sequências Numéricas",
+  "body": "Um algoritmo descreve uma sequência finita de instruções para resolver um problema. Sequências numéricas podem ser calculadas por procedimentos sistemáticos, como o algoritmo de Ada Lovelace para os números de Bernoulli.",
+  "topics": [
+    {
+      "id": 1
+    },
+    {
+      "id": 3
+    }
+  ]
+}
+
+### Conteúdo - Emmy cria Introdução à Teoria dos Anéis (201)
+POST http://localhost:8080/api/contents?userId=2
+Content-Type: application/json
+
+{
+  "title": "Introdução à Teoria dos Anéis",
+  "body": "Um anel é uma estrutura algébrica formada por um conjunto com duas operações, adição e multiplicação, que satisfazem propriedades específicas. A teoria dos anéis estuda essas estruturas e suas relações.",
+  "topics": [
+    {
+      "id": 2
+    }
+  ]
+}
+
+### Conteúdo - Ada cria Fundamentos da Máquina Analítica (201)
+POST http://localhost:8080/api/contents?userId=1
+Content-Type: application/json
+
+{
+  "title": "Fundamentos da Máquina Analítica",
+  "body": "A Máquina Analítica, concebida por Charles Babbage, foi projetada para executar operações matemáticas por meio de instruções e mecanismos de armazenamento e processamento.",
+  "topics": [
+    {
+      "id": 4
+    }
+  ]
+}
+
+### Conteúdo - Consultar Algoritmos e Sequências Numéricas de Ada (200)
+GET http://localhost:8080/api/contents/1?userId=1
+
+### Conteúdo - Consultar Introdução à Teoria dos Anéis de Emmy (200)
+GET http://localhost:8080/api/contents/2?userId=2
+
+### Conteúdo - Consultar Fundamentos da Máquina Analítica de Ada (200)
+GET http://localhost:8080/api/contents/3?userId=1
+
+# =============================================================================
+# FLUXO 2 — CRIAÇÃO ALTERNADA DE FLASHCARDS E REVISÕES
+# Ada e Emmy criam flashcards intercalados e registram suas respostas.
+# =============================================================================
+
+### Flashcard - Ada cria primeiro flashcard sobre algoritmos sem resposta (201)
+POST http://localhost:8080/api/flashcards?userId=1&contentId=1
+Content-Type: application/json
+
+{
+  "question": "O que é um algoritmo?"
+}
+
+### Flashcard - Emmy cria primeiro flashcard sobre anéis (201)
+POST http://localhost:8080/api/flashcards?userId=2&contentId=2
+Content-Type: application/json
+
+{
+  "question": "O que é um anel na Álgebra Abstrata?",
+  "answer": "É um conjunto com duas operações, adição e multiplicação, cuja adição forma um grupo abeliano e cuja multiplicação é associativa e distributiva em relação à adição."
+}
+
+### Flashcard - Ada gera resposta do primeiro flashcard com IA (200)
+POST http://localhost:8080/api/flashcards/1/generate-answer?userId=1
+
+### Flashcard - Ada consulta primeiro flashcard após geração da resposta (200)
+GET http://localhost:8080/api/flashcards/1?userId=1
+
+### Flashcard - Ada cria segundo flashcard sobre sequências numéricas (201)
+POST http://localhost:8080/api/flashcards?userId=1&contentId=1
+Content-Type: application/json
+
+{
+  "question": "O que caracteriza uma sequência numérica?",
+  "answer": "É uma lista ordenada de números cujos termos são determinados por uma regra de formação."
+}
+
+### Flashcard - Emmy cria segundo flashcard sobre ideais (201)
+POST http://localhost:8080/api/flashcards?userId=2&contentId=2
+Content-Type: application/json
+
+{
+  "question": "O que é um ideal de um anel?",
+  "answer": "É um subgrupo aditivo fechado sob multiplicação por elementos do anel, nas condições correspondentes a um ideal à esquerda, à direita ou bilateral."
+}
+
+### Flashcard - Ada cria terceiro flashcard sobre a Máquina Analítica (201)
+POST http://localhost:8080/api/flashcards?userId=1&contentId=3
+Content-Type: application/json
+
+{
+  "question": "Qual era a finalidade da Máquina Analítica?",
+  "answer": "Executar cálculos matemáticos programáveis por meio de instruções, utilizando mecanismos de processamento e armazenamento."
+}
+
+### Flashcard - Ada consulta seus flashcards (200)
+GET http://localhost:8080/api/flashcards?userId=1
+
+### Flashcard - Emmy consulta seus flashcards (200)
+GET http://localhost:8080/api/flashcards?userId=2
+
+### Flashcard - Ada consulta flashcards do conteúdo de Algoritmos e Sequências Numéricas (200)
+GET http://localhost:8080/api/flashcards/content/1?userId=1
+
+### Flashcard - Emmy consulta flashcards do conteúdo de Teoria dos Anéis (200)
+GET http://localhost:8080/api/flashcards/content/2?userId=2
+
+### Flashcard - Ada consulta seu primeiro flashcard (200)
+GET http://localhost:8080/api/flashcards/1?userId=1
+
+### Flashcard - Emmy consulta seu primeiro flashcard (200)
+GET http://localhost:8080/api/flashcards/2?userId=2
+
+### Flashcard - Ada consulta seu segundo flashcard (200)
+GET http://localhost:8080/api/flashcards/3?userId=1
+
+### Flashcard - Emmy consulta seu segundo flashcard (200)
+GET http://localhost:8080/api/flashcards/4?userId=2
+
+### Flashcard - Ada consulta seu terceiro flashcard (200)
+GET http://localhost:8080/api/flashcards/5?userId=1
+
+### Tentativa de resposta - Ada registra resposta correta ao primeiro flashcard (201)
 POST http://localhost:8080/api/answer-attempts
 Content-Type: application/json
 
 {
-  "userId": 2,
+  "userId": 1,
   "flashcardId": 1,
-  "correct": false
+  "correct": true
 }
 
-### Flashcard - Consultar segundo flashcard para revisão de Emmy Noether (200)
-GET http://localhost:8080/api/flashcards/2
-
-### Tentativa de resposta - Registrar resposta correta de Emmy ao segundo flashcard (201)
+### Tentativa de resposta - Emmy registra resposta incorreta ao primeiro flashcard (201)
 POST http://localhost:8080/api/answer-attempts
 Content-Type: application/json
 
 {
   "userId": 2,
   "flashcardId": 2,
+  "correct": false
+}
+
+### Tentativa de resposta - Ada registra resposta incorreta ao segundo flashcard (201)
+POST http://localhost:8080/api/answer-attempts
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "flashcardId": 3,
+  "correct": false
+}
+
+### Tentativa de resposta - Emmy registra resposta correta ao segundo flashcard (201)
+POST http://localhost:8080/api/answer-attempts
+Content-Type: application/json
+
+{
+  "userId": 2,
+  "flashcardId": 4,
   "correct": true
 }
+
+### Tentativa de resposta - Ada registra nova resposta correta ao segundo flashcard (201)
+POST http://localhost:8080/api/answer-attempts
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "flashcardId": 3,
+  "correct": true
+}
+
+### Tentativa de resposta - Consultar histórico completo de Ada (200)
+GET http://localhost:8080/api/answer-attempts/users/1
 
 ### Tentativa de resposta - Consultar histórico completo de Emmy (200)
 GET http://localhost:8080/api/answer-attempts/users/2
 
+### Tentativa de resposta - Consultar histórico de Ada no segundo flashcard (200)
+GET http://localhost:8080/api/answer-attempts/users/1/flashcards/3
+
 ### Tentativa de resposta - Consultar histórico de Emmy no primeiro flashcard (200)
-GET http://localhost:8080/api/answer-attempts/users/2/flashcards/1
+GET http://localhost:8080/api/answer-attempts/users/2/flashcards/2
 
 # =============================================================================
 # FLUXO 3 — MANUTENÇÃO DOS ESTUDOS
 # Atualização de dados existentes e confirmação das alterações.
 # =============================================================================
 
-### Usuário - Atualizar nome de Ada Lovelace para Ada Byron Lovelace (200)
+### Usuário - Atualizar nome de Ada Lovelace (200)
 PUT http://localhost:8080/api/users/1
 Content-Type: application/json
 
 {
-  "name": "Ada Byron Lovelace",
+  "name": "Ada Lovelace",
   "email": "ada@example.com"
 }
 
 ### Usuário - Confirmar atualização do nome de Ada Byron Lovelace (200)
 GET http://localhost:8080/api/users/1
 
-### Matéria - Atualizar Matemática de Ada para Matemática Avançada (200)
+### Matéria - Atualizar Matemática de Ada para Matemática Aplicada (200)
 PUT http://localhost:8080/api/subjects/1
 Content-Type: application/json
 
 {
-  "name": "Matemática Avançada"
+  "name": "Matemática Aplicada"
 }
 
-### Matéria - Confirmar atualização de Matemática Avançada (200)
+### Matéria - Confirmar atualização de Matemática Aplicada (200)
 GET http://localhost:8080/api/subjects/1
 
-### Tópico - Atualizar Álgebra Linear para Álgebra Linear Aplicada (200)
+### Tópico - Atualizar Algoritmos para Algoritmos Matemáticos (200)
 PUT http://localhost:8080/api/topics/1
 Content-Type: application/json
 
 {
-  "name": "Álgebra Linear Aplicada"
+  "name": "Algoritmos Matemáticos"
 }
 
-### Tópico - Confirmar atualização de Álgebra Linear Aplicada (200)
+### Tópico - Confirmar atualização de Algoritmos Matemáticos (200)
 GET http://localhost:8080/api/topics/1
 
-### Conteúdo - Atualizar título e corpo do conteúdo de Equações do Segundo Grau (200)
+### Conteúdo - Atualizar título e corpo de Algoritmos e Sequências Numéricas (200)
 PUT http://localhost:8080/api/contents/1?userId=1
 Content-Type: application/json
 
 {
-  "title": "Equações do Segundo Grau - Fórmula de Bhaskara",
-  "body": "Para resolver ax² + bx + c = 0, calculamos o discriminante Δ = b² - 4ac e aplicamos x = (-b ± √Δ) / 2a."
+  "title": "Algoritmos Matemáticos e Números de Bernoulli",
+  "body": "Os números de Bernoulli formam uma sequência de números racionais que aparece em diversas fórmulas matemáticas. Ada Lovelace descreveu um procedimento para calculá-los utilizando a Máquina Analítica."
 }
 
 ### Conteúdo - Confirmar atualização e preservação dos dois tópicos (200)
 GET http://localhost:8080/api/contents/1?userId=1
 
-### Flashcard - Atualizar pergunta e resposta do primeiro flashcard (200)
-PUT http://localhost:8080/api/flashcards/1
+### Flashcard - Atualizar pergunta e resposta do primeiro flashcard de Ada (200)
+PUT http://localhost:8080/api/flashcards/1?userId=1
 Content-Type: application/json
 
 {
-  "question": "Qual é a forma geral de uma equação do segundo grau?",
-  "answer": "ax² + bx + c = 0, em que a, b e c são coeficientes reais e a é diferente de zero."
+  "question": "Qual é a relação entre algoritmos e a Máquina Analítica?",
+  "answer": "A Máquina Analítica foi concebida para executar sequências de operações definidas por instruções, permitindo representar procedimentos matemáticos de forma programável."
 }
 
-### Flashcard - Confirmar atualização do primeiro flashcard (200)
-GET http://localhost:8080/api/flashcards/1
+### Flashcard - Confirmar atualização do primeiro flashcard de Ada (200)
+GET http://localhost:8080/api/flashcards/1?userId=1
 
 ### Usuário - Listar usuários após atualizações (200)
 GET http://localhost:8080/api/users
@@ -328,16 +398,31 @@ GET http://localhost:8080/api/subjects
 ### Tópico - Listar tópicos após atualizações (200)
 GET http://localhost:8080/api/topics
 
-### Conteúdo - Listar conteúdos após atualizações (200)
+### Conteúdo - Listar conteúdos de Ada após atualizações (200)
 GET http://localhost:8080/api/contents?userId=1
 
-### Flashcard - Listar flashcards após atualizações (200)
-GET http://localhost:8080/api/flashcards
+### Conteúdo - Listar conteúdos de Emmy após atualizações (200)
+GET http://localhost:8080/api/contents?userId=2
+
+### Flashcard - Listar flashcards de Ada após atualizações (200)
+GET http://localhost:8080/api/flashcards?userId=1
+
+### Flashcard - Listar flashcards de Emmy após atualizações (200)
+GET http://localhost:8080/api/flashcards?userId=2
 
 # =============================================================================
 # FLUXO 4 — VALIDAÇÕES
-# Requisições inválidas sem exclusão dos dados válidos dos fluxos anteriores.
+# Validação de dados, permissões e preservação dos registros.
 # =============================================================================
+
+### Flashcard - Permitir atualização pelo proprietário (200)
+PUT http://localhost:8080/api/flashcards/1?userId=1
+Content-Type: application/json
+
+{
+  "question": "Qual é a relação entre algoritmos e a Máquina Analítica?",
+  "answer": "A Máquina Analítica foi concebida para executar sequências de operações definidas por instruções, permitindo representar procedimentos matemáticos de forma programável."
+}
 
 ### Usuário - Rejeitar criação com nome vazio (400)
 POST http://localhost:8080/api/users
@@ -362,7 +447,7 @@ POST http://localhost:8080/api/users
 Content-Type: application/json
 
 {
-  "name": "Augusta Ada King",
+  "name": "Augusta Ada Byron King",
   "email": "ada@example.com"
 }
 
@@ -388,7 +473,7 @@ Content-Type: application/json
 
 {}
 
-### Matéria - Rejeitar atualização com nome vazio de Matemática Avançada (400)
+### Matéria - Rejeitar atualização com nome vazio de Matemática Aplicada (400)
 PUT http://localhost:8080/api/subjects/1
 Content-Type: application/json
 
@@ -401,7 +486,7 @@ POST http://localhost:8080/api/subjects?userId=-1
 Content-Type: application/json
 
 {
-  "name": "Biologia"
+  "name": "Teoria dos Grupos"
 }
 
 ### Matéria - Rejeitar criação sem informar usuário (400)
@@ -409,7 +494,7 @@ POST http://localhost:8080/api/subjects
 Content-Type: application/json
 
 {
-  "name": "Biologia"
+  "name": "Teoria dos Grupos"
 }
 
 ### Conteúdo - Rejeitar atualização com título vazio (400)
@@ -418,7 +503,7 @@ Content-Type: application/json
 
 {
   "title": "",
-  "body": "Conteúdo sobre equações do segundo grau."
+  "body": "Conteúdo sobre algoritmos matemáticos e números de Bernoulli."
 }
 
 ### Conteúdo - Rejeitar atualização com corpo vazio (400)
@@ -426,7 +511,7 @@ PUT http://localhost:8080/api/contents/1?userId=1
 Content-Type: application/json
 
 {
-  "title": "Equações do Segundo Grau",
+  "title": "Algoritmos Matemáticos",
   "body": ""
 }
 
@@ -436,8 +521,128 @@ GET http://localhost:8080/api/contents/1?userId=1
 ### Conteúdo - Emmy tenta consultar conteúdo de Ada (404)
 GET http://localhost:8080/api/contents/1?userId=2
 
+### Conteúdo - Emmy consulta seu próprio conteúdo (200)
+GET http://localhost:8080/api/contents/2?userId=2
+
+### Conteúdo - Ada tenta consultar conteúdo de Emmy (404)
+GET http://localhost:8080/api/contents/2?userId=1
+
+### Flashcard - Listar flashcards de Ada (200)
+GET http://localhost:8080/api/flashcards?userId=1
+
+### Flashcard - Listar flashcards de Emmy (200)
+GET http://localhost:8080/api/flashcards?userId=2
+
+### Flashcard - Ada consulta seu próprio flashcard (200)
+GET http://localhost:8080/api/flashcards/1?userId=1
+
+### Flashcard - Emmy tenta consultar flashcard de Ada (404)
+GET http://localhost:8080/api/flashcards/1?userId=2
+
+### Flashcard - Emmy consulta seu próprio flashcard (200)
+GET http://localhost:8080/api/flashcards/2?userId=2
+
+### Flashcard - Ada tenta consultar flashcard de Emmy (404)
+GET http://localhost:8080/api/flashcards/2?userId=1
+
+### Flashcard - Ada lista flashcards de conteúdo próprio (200)
+GET http://localhost:8080/api/flashcards/content/1?userId=1
+
+### Flashcard - Emmy tenta listar flashcards de conteúdo de Ada (404)
+GET http://localhost:8080/api/flashcards/content/1?userId=2
+
+### Flashcard - Emmy lista flashcards de conteúdo próprio (200)
+GET http://localhost:8080/api/flashcards/content/2?userId=2
+
+### Flashcard - Ada tenta listar flashcards de conteúdo de Emmy (404)
+GET http://localhost:8080/api/flashcards/content/2?userId=1
+
+### Flashcard - Bloquear criação de Emmy em conteúdo de Ada (404)
+POST http://localhost:8080/api/flashcards?userId=2&contentId=1
+Content-Type: application/json
+
+{
+  "question": "Como a Máquina Analítica executaria um algoritmo?",
+  "answer": "Por meio de uma sequência programada de operações matemáticas."
+}
+
+### Flashcard - Bloquear criação de Ada em conteúdo de Emmy (404)
+POST http://localhost:8080/api/flashcards?userId=1&contentId=2
+Content-Type: application/json
+
+{
+  "question": "O que é um anel comutativo?",
+  "answer": "É um anel cuja multiplicação é comutativa."
+}
+
+### Flashcard - Bloquear exclusão de flashcard de Ada por Emmy (404)
+DELETE http://localhost:8080/api/flashcards/1?userId=2
+
+### Flashcard - Bloquear exclusão de flashcard de Emmy por Ada (404)
+DELETE http://localhost:8080/api/flashcards/2?userId=1
+
+### Flashcard - Bloquear atualização de flashcard de Ada por Emmy (404)
+PUT http://localhost:8080/api/flashcards/1?userId=2
+Content-Type: application/json
+
+{
+  "question": "Qual é a definição de um algoritmo matemático?",
+  "answer": "É uma sequência finita de instruções para resolver um problema matemático."
+}
+
+### Flashcard - Bloquear atualização de flashcard de Emmy por Ada (404)
+PUT http://localhost:8080/api/flashcards/2?userId=1
+Content-Type: application/json
+
+{
+  "question": "O que caracteriza um anel comutativo?",
+  "answer": "A multiplicação entre seus elementos é comutativa."
+}
+
+### Flashcard - Bloquear geração de resposta em flashcard de Ada por Emmy (404)
+POST http://localhost:8080/api/flashcards/1/generate-answer?userId=2
+
+### Flashcard - Bloquear geração de resposta em flashcard de Emmy por Ada (404)
+POST http://localhost:8080/api/flashcards/2/generate-answer?userId=1
+
+### Flashcard - Confirmar preservação do flashcard de Ada após tentativas de acesso (200)
+GET http://localhost:8080/api/flashcards/1?userId=1
+
+### Flashcard - Confirmar preservação do flashcard de Emmy após tentativas de acesso (200)
+GET http://localhost:8080/api/flashcards/2?userId=2
+
+### Flashcard - Ada cria flashcard temporário sobre números de Bernoulli (201)
+POST http://localhost:8080/api/flashcards?userId=1&contentId=1
+Content-Type: application/json
+
+{
+  "question": "O que são os números de Bernoulli?",
+  "answer": "São números racionais definidos por uma sequência matemática, utilizados em fórmulas de somatórios, séries e outras aplicações."
+}
+
+### Flashcard - Ada consulta flashcard temporário (200)
+GET http://localhost:8080/api/flashcards/6?userId=1
+
+### Flashcard - Ada atualiza flashcard temporário (200)
+PUT http://localhost:8080/api/flashcards/6?userId=1
+Content-Type: application/json
+
+{
+  "question": "Em quais aplicações matemáticas aparecem os números de Bernoulli?",
+  "answer": "Aparecem em fórmulas para somas de potências de números inteiros, séries e expansões matemáticas."
+}
+
+### Flashcard - Confirmar atualização do flashcard temporário de Ada (200)
+GET http://localhost:8080/api/flashcards/6?userId=1
+
+### Flashcard - Ada exclui flashcard temporário (204)
+DELETE http://localhost:8080/api/flashcards/6?userId=1
+
+### Flashcard - Confirmar exclusão do flashcard temporário (404)
+GET http://localhost:8080/api/flashcards/6?userId=1
+
 ### Flashcard - Rejeitar criação com pergunta vazia (400)
-POST http://localhost:8080/api/flashcards?contentId=1
+POST http://localhost:8080/api/flashcards?userId=1&contentId=1
 Content-Type: application/json
 
 {
@@ -445,22 +650,22 @@ Content-Type: application/json
 }
 
 ### Flashcard - Rejeitar criação para conteúdo inexistente (404)
-POST http://localhost:8080/api/flashcards?contentId=-1
+POST http://localhost:8080/api/flashcards?userId=1&contentId=-1
 Content-Type: application/json
 
 {
-  "question": "Pergunta de teste"
+  "question": "Qual é a função de um algoritmo na computação?"
 }
 
 ### Flashcard - Consultar flashcard inexistente (404)
-GET http://localhost:8080/api/flashcards/-1
+GET http://localhost:8080/api/flashcards/-1?userId=1
 
 ### Flashcard - Rejeitar atualização de flashcard inexistente (404)
-PUT http://localhost:8080/api/flashcards/-1
+PUT http://localhost:8080/api/flashcards/-1?userId=1
 Content-Type: application/json
 
 {
-  "question": "Pergunta atualizada"
+  "question": "Como os algoritmos representam procedimentos matemáticos?"
 }
 
 ### Tentativa de resposta - Rejeitar registro para usuário inexistente (404)
@@ -482,95 +687,167 @@ Content-Type: application/json
   "flashcardId": 1
 }
 
-###
+### Tentativa de resposta - Bloquear registro de Emmy em flashcard de Ada (404)
+POST http://localhost:8080/api/answer-attempts
+Content-Type: application/json
+
+{
+  "userId": 2,
+  "flashcardId": 1,
+  "correct": true
+}
+
+### Tentativa de resposta - Bloquear registro de Ada em flashcard de Emmy (404)
+POST http://localhost:8080/api/answer-attempts
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "flashcardId": 2,
+  "correct": true
+}
+
+### Tentativa de resposta - Bloquear consulta de Emmy ao histórico de flashcard de Ada (404)
+GET http://localhost:8080/api/answer-attempts/users/2/flashcards/1
+
+### Tentativa de resposta - Bloquear consulta de Ada ao histórico de flashcard de Emmy (404)
+GET http://localhost:8080/api/answer-attempts/users/1/flashcards/2
+
+### Tentativa de resposta - Permitir registro de Ada em flashcard próprio (201)
+POST http://localhost:8080/api/answer-attempts
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "flashcardId": 1,
+  "correct": true
+}
+
+### Tentativa de resposta - Permitir registro de Emmy em flashcard próprio (201)
+POST http://localhost:8080/api/answer-attempts
+Content-Type: application/json
+
+{
+  "userId": 2,
+  "flashcardId": 2,
+  "correct": true
+}
+
+### Tentativa de resposta - Consultar histórico de Ada no primeiro flashcard (200)
+GET http://localhost:8080/api/answer-attempts/users/1/flashcards/1
+
+### Tentativa de resposta - Consultar histórico de Emmy no primeiro flashcard (200)
+GET http://localhost:8080/api/answer-attempts/users/2/flashcards/2
+
+### Tentativa de resposta - Consultar histórico completo de Ada (200)
+GET http://localhost:8080/api/answer-attempts/users/1
+
+### Tentativa de resposta - Consultar histórico completo de Emmy (200)
+GET http://localhost:8080/api/answer-attempts/users/2
+
 # =============================================================================
 # FLUXO 5 — EXCLUSÕES
 # Remoção de associações, registros e confirmação dos resultados.
 # Executar somente após concluir todos os fluxos anteriores.
 # =============================================================================
 
-### Tópico - Remover associação de Álgebra Linear com Matemática de Ada (204)
+### Tópico - Remover associação de Algoritmos Matemáticos com Matemática Aplicada de Ada (204)
 DELETE http://localhost:8080/api/subjects/1/topics/1
 
-### Tópico - Confirmar ausência de Álgebra Linear na Matemática de Ada (200)
+### Tópico - Confirmar ausência de Algoritmos Matemáticos na Matemática Aplicada de Ada (200)
 GET http://localhost:8080/api/subjects/1/topics
 
-### Tópico - Confirmar permanência de Álgebra Linear na Física de Ada (200)
-GET http://localhost:8080/api/subjects/2/topics
+### Tópico - Confirmar permanência de Algoritmos Matemáticos na Lógica de Ada (200)
+GET http://localhost:8080/api/subjects/3/topics
 
-### Tópico - Repetir remoção da associação inexistente entre Álgebra Linear e Matemática de Ada (204)
+### Tópico - Repetir remoção da associação inexistente entre Algoritmos Matemáticos e Matemática Aplicada de Ada (204)
 DELETE http://localhost:8080/api/subjects/1/topics/1
 
-### Flashcard - Excluir primeiro flashcard (204)
-DELETE http://localhost:8080/api/flashcards/1
+### Flashcard - Excluir primeiro flashcard de Ada (204)
+DELETE http://localhost:8080/api/flashcards/1?userId=1
 
-### Flashcard - Confirmar exclusão do primeiro flashcard (404)
-GET http://localhost:8080/api/flashcards/1
+### Flashcard - Confirmar exclusão do primeiro flashcard de Ada (404)
+GET http://localhost:8080/api/flashcards/1?userId=1
 
-### Flashcard - Excluir segundo flashcard (204)
-DELETE http://localhost:8080/api/flashcards/2
+### Flashcard - Excluir primeiro flashcard de Emmy (204)
+DELETE http://localhost:8080/api/flashcards/2?userId=2
 
-### Flashcard - Excluir terceiro flashcard (204)
-DELETE http://localhost:8080/api/flashcards/3
+### Flashcard - Excluir segundo flashcard de Ada (204)
+DELETE http://localhost:8080/api/flashcards/3?userId=1
+
+### Flashcard - Excluir segundo flashcard de Emmy (204)
+DELETE http://localhost:8080/api/flashcards/4?userId=2
+
+### Flashcard - Excluir terceiro flashcard de Ada (204)
+DELETE http://localhost:8080/api/flashcards/5?userId=1
 
 ### Flashcard - Rejeitar exclusão de flashcard inexistente (404)
-DELETE http://localhost:8080/api/flashcards/-1
+DELETE http://localhost:8080/api/flashcards/-1?userId=1
 
-### Conteúdo - Excluir conteúdo de Equações do Segundo Grau (204)
+### Conteúdo - Excluir Algoritmos Matemáticos e Números de Bernoulli de Ada (204)
 DELETE http://localhost:8080/api/contents/1?userId=1
 
-### Conteúdo - Confirmar exclusão do conteúdo de Equações do Segundo Grau (404)
+### Conteúdo - Confirmar exclusão de Algoritmos Matemáticos e Números de Bernoulli (404)
 GET http://localhost:8080/api/contents/1?userId=1
 
-### Conteúdo - Excluir conteúdo de Álgebra Linear (204)
-DELETE http://localhost:8080/api/contents/2?userId=1
+### Conteúdo - Excluir Introdução à Teoria dos Anéis de Emmy (204)
+DELETE http://localhost:8080/api/contents/2?userId=2
 
-### Tópico - Excluir Álgebra Linear Aplicada (204)
+### Conteúdo - Confirmar exclusão de Introdução à Teoria dos Anéis (404)
+GET http://localhost:8080/api/contents/2?userId=2
+
+### Conteúdo - Excluir Fundamentos da Máquina Analítica de Ada (204)
+DELETE http://localhost:8080/api/contents/3?userId=1
+
+### Tópico - Excluir Algoritmos Matemáticos (204)
 DELETE http://localhost:8080/api/topics/1
 
-### Tópico - Confirmar exclusão de Álgebra Linear Aplicada (404)
+### Tópico - Confirmar exclusão de Algoritmos Matemáticos (404)
 GET http://localhost:8080/api/topics/1
 
-### Tópico - Confirmar existência da Física após exclusão de Álgebra Linear Aplicada (200)
-GET http://localhost:8080/api/subjects/2
-
-### Tópico - Confirmar ausência de Álgebra Linear Aplicada na Física (200)
-GET http://localhost:8080/api/subjects/2/topics
-
-### Tópico - Excluir Equações do Segundo Grau (204)
-DELETE http://localhost:8080/api/topics/2
-
-### Tópico - Excluir Funções Quadráticas (204)
-DELETE http://localhost:8080/api/topics/3
-
-### Matéria - Excluir Matemática Avançada de Ada (204)
-DELETE http://localhost:8080/api/subjects/1
-
-### Matéria - Confirmar exclusão de Matemática Avançada de Ada (404)
-GET http://localhost:8080/api/subjects/1
-
-### Matéria - Excluir Física de Ada (204)
-DELETE http://localhost:8080/api/subjects/2
-
-### Matéria - Confirmar exclusão de Física de Ada (404)
-GET http://localhost:8080/api/subjects/2
-
-### Matéria - Excluir Química de Ada (204)
-DELETE http://localhost:8080/api/subjects/3
-
-### Matéria - Confirmar exclusão de Química de Ada (404)
+### Tópico - Confirmar existência da Lógica após exclusão de Algoritmos Matemáticos (200)
 GET http://localhost:8080/api/subjects/3
 
-### Matéria - Excluir Matemática de Emmy (204)
+### Tópico - Confirmar ausência de Algoritmos Matemáticos na Lógica (200)
+GET http://localhost:8080/api/subjects/3/topics
+
+### Tópico - Excluir Teoria dos Anéis (204)
+DELETE http://localhost:8080/api/topics/2
+
+### Tópico - Excluir Sequências Numéricas (204)
+DELETE http://localhost:8080/api/topics/3
+
+### Tópico - Excluir Máquina Analítica (204)
+DELETE http://localhost:8080/api/topics/4
+
+### Matéria - Excluir Matemática Aplicada de Ada (204)
+DELETE http://localhost:8080/api/subjects/1
+
+### Matéria - Confirmar exclusão de Matemática Aplicada de Ada (404)
+GET http://localhost:8080/api/subjects/1
+
+### Matéria - Excluir Álgebra Abstrata de Emmy (204)
+DELETE http://localhost:8080/api/subjects/2
+
+### Matéria - Confirmar exclusão de Álgebra Abstrata de Emmy (404)
+GET http://localhost:8080/api/subjects/2
+
+### Matéria - Excluir Lógica de Ada (204)
+DELETE http://localhost:8080/api/subjects/3
+
+### Matéria - Confirmar exclusão de Lógica de Ada (404)
+GET http://localhost:8080/api/subjects/3
+
+### Matéria - Excluir Fundamentos da Computação de Ada (204)
 DELETE http://localhost:8080/api/subjects/4
 
-### Matéria - Confirmar exclusão de Matemática de Emmy (404)
+### Matéria - Confirmar exclusão de Fundamentos da Computação de Ada (404)
 GET http://localhost:8080/api/subjects/4
 
-### Usuário - Excluir Ada Byron Lovelace (204)
+### Usuário - Excluir Ada Lovelace (204)
 DELETE http://localhost:8080/api/users/1
 
-### Usuário - Confirmar exclusão de Ada Byron Lovelace (404)
+### Usuário - Confirmar exclusão de Ada Lovelace (404)
 GET http://localhost:8080/api/users/1
 
 ### Usuário - Excluir Emmy Noether (204)

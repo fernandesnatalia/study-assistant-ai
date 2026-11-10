@@ -44,7 +44,7 @@ class ContentServiceTest {
     private Topic createTopic() {
         Topic topic = new Topic();
         topic.setId(1L);
-        topic.setName("Equações do Segundo Grau");
+        topic.setName("Teoria dos Anéis");
         return topic;
     }
 
@@ -57,8 +57,11 @@ class ContentServiceTest {
     private Content createContent(Topic topic) {
         Content content = new Content();
         content.setId(1L);
-        content.setTitle("Introdução às Equações do Segundo Grau");
-        content.setBody("Uma equação do segundo grau possui a forma ax² + bx + c = 0.");
+        content.setTitle("Introdução à Teoria dos Anéis");
+        content.setBody("Um anel é uma estrutura algébrica formada por um conjunto com duas operações, " +
+                "adição e multiplicação, que satisfazem propriedades específicas. A teoria dos anéis " +
+                "estuda essas estruturas e suas relações."
+        );
         content.setTopics(Set.of(topic));
         return content;
     }
@@ -91,8 +94,7 @@ class ContentServiceTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(createUser()));
 
         ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
-                () -> contentService.createContent(1L, content)
+                ResponseStatusException.class, () -> contentService.createContent(1L, content)
         );
 
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
@@ -107,8 +109,7 @@ class ContentServiceTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(createUser()));
 
         ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
-                () -> contentService.createContent(1L, content)
+                ResponseStatusException.class, () -> contentService.createContent(1L, content)
         );
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
@@ -147,8 +148,7 @@ class ContentServiceTest {
         when(contentRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.empty());
 
         ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
-                () -> contentService.getContentById(1L, 1L)
+                ResponseStatusException.class, () -> contentService.getContentById(1L, 1L)
         );
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
@@ -159,16 +159,19 @@ class ContentServiceTest {
         Content existingContent = createContent(createTopic());
 
         Content updatedContent = new Content();
-        updatedContent.setTitle("Fórmula de Bhaskara");
-        updatedContent.setBody("O discriminante é Δ = b² - 4ac.");
+        updatedContent.setTitle("Qual era a finalidade da Máquina Analítica?");
+        updatedContent.setBody("Executar cálculos matemáticos programáveis por meio de instruções, utilizando " +
+                "mecanismos de processamento e armazenamento.");
 
         when(contentRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(existingContent));
         when(contentRepository.save(existingContent)).thenReturn(existingContent);
 
         Content result = contentService.updateContent(1L, 1L, updatedContent);;
 
-        assertEquals("Fórmula de Bhaskara", result.getTitle());
-        assertEquals("O discriminante é Δ = b² - 4ac.", result.getBody());
+        assertEquals("Qual era a finalidade da Máquina Analítica?", result.getTitle());
+        assertEquals("Executar cálculos matemáticos programáveis por meio de instruções, utilizando " +
+                "mecanismos de processamento e armazenamento.", result.getBody()
+        );
 
         assertTrue(result.getTopics().stream().anyMatch(topic -> topic.getId().equals(1L)));
 
@@ -186,8 +189,7 @@ class ContentServiceTest {
         when(contentRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(existingContent));
 
         ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
-                () -> contentService.updateContent(1L, 1L, updatedContent)
+                ResponseStatusException.class, () -> contentService.updateContent(1L, 1L, updatedContent)
         );
 
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
@@ -199,14 +201,13 @@ class ContentServiceTest {
         Content existingContent = createContent(createTopic());
 
         Content updatedContent = new Content();
-        updatedContent.setTitle("Equações do Segundo Grau");
+        updatedContent.setTitle("Teoria dos Anéis");
         updatedContent.setBody("");
 
         when(contentRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(existingContent));
 
         ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
-                () -> contentService.updateContent(1L, 1L, updatedContent)
+                ResponseStatusException.class, () -> contentService.updateContent(1L, 1L, updatedContent)
         );
 
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
@@ -220,8 +221,7 @@ class ContentServiceTest {
         when(contentRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.empty());
 
         ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
-                () -> contentService.updateContent(1L, 1L, updatedContent)
+                ResponseStatusException.class, () -> contentService.updateContent(1L, 1L, updatedContent)
         );
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
@@ -244,8 +244,7 @@ class ContentServiceTest {
         when(contentRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.empty());
 
         ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
-                () -> contentService.deleteContent(1L, 1L)
+                ResponseStatusException.class, () -> contentService.deleteContent(1L, 1L)
         );
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
@@ -258,7 +257,7 @@ class ContentServiceTest {
         Topic secondTopic = new Topic();
 
         secondTopic.setId(2L);
-        secondTopic.setName("Funções Quadráticas");
+        secondTopic.setName("Álgebra Abstrata");
 
         Content content = createContent(firstTopic);
 
@@ -288,8 +287,7 @@ class ContentServiceTest {
         when(contentRepository.findByIdAndUserId(1L, 2L)).thenReturn(Optional.empty());
 
         ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
-                () -> contentService.getContentById(1L, 2L)
+                ResponseStatusException.class, () -> contentService.getContentById(1L, 2L)
         );
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
@@ -302,8 +300,7 @@ class ContentServiceTest {
         when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
         ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
-                () -> contentService.createContent(99L, content)
+                ResponseStatusException.class, () -> contentService.createContent(99L, content)
         );
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());

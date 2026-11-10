@@ -36,7 +36,7 @@ public class AnswerAttemptService {
         User user = userRepository.findById(request.userId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        Flashcard flashcard = flashcardRepository.findById(request.flashcardId())
+        Flashcard flashcard = flashcardRepository.findByIdAndContentUserId(request.flashcardId(), request.userId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Flashcard not found"));
 
         AnswerAttempt attempt = new AnswerAttempt(user, flashcard, request.correct());
@@ -62,7 +62,8 @@ public class AnswerAttemptService {
             Long flashcardId
     ) {
         validateUserExists(userId);
-        validateFlashcardExists(flashcardId);
+        flashcardRepository.findByIdAndContentUserId(flashcardId, userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Flashcard not found"));
 
         return answerAttemptRepository
                 .findByUserIdAndFlashcardIdOrderByAnsweredAtDescIdDesc(
@@ -77,12 +78,6 @@ public class AnswerAttemptService {
     private void validateUserExists(Long userId) {
         if (!userRepository.existsById(userId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
-        }
-    }
-
-    private void validateFlashcardExists(Long flashcardId) {
-        if (!flashcardRepository.existsById(flashcardId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Flashcard not found");
         }
     }
 

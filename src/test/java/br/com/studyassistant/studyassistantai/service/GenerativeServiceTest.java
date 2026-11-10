@@ -39,9 +39,10 @@ class GenerativeServiceTest {
 
     @Test
     void shouldGenerateAnswerUsingQuestionAndReferenceContent() {
-        String question = "O que é uma equação do segundo grau?";
-        String content = "Uma equação do segundo grau possui a forma ax² + bx + c = 0.";
-        String expectedAnswer = "É uma equação polinomial de grau dois.";
+        String question = "O que é um anel comutativo?";
+        String content = "Um algoritmo descreve uma sequência finita de instruções para resolver um problema. Sequências " +
+                "numéricas podem ser calculadas por procedimentos sistemáticos, como o algoritmo de Ada Lovelace para os números de Bernoulli.";
+        String expectedAnswer = "É um anel cuja multiplicação é comutativa.";
 
         when(chatClient.prompt()).thenReturn(requestSpec);
         when(requestSpec.system(anyString())).thenReturn(requestSpec);

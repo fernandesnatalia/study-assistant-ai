@@ -17,8 +17,15 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class SubjectServiceTest {
@@ -65,19 +72,21 @@ class SubjectServiceTest {
 
     @Test
     void shouldGetAllSubjects() {
-        when(subjectRepository.findAll()).thenReturn(List.of(subject));
+        when(subjectRepository.findByUserId(1L)).thenReturn(List.of(subject));
 
-        List<Subject> result = subjectService.getAllSubjects();
+        List<Subject> result = subjectService.getAllSubjects(1L);
 
         assertEquals(1, result.size());
         assertEquals("Matemática", result.getFirst().getName());
+
+        verify(subjectRepository).findByUserId(1L);
     }
 
     @Test
     void shouldGetSubjectById() {
-        when(subjectRepository.findById(1L)).thenReturn(Optional.of(subject));
+        when(subjectRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(subject));
 
-        Subject result = subjectService.getSubjectById(1L);
+        Subject result = subjectService.getSubjectById(1L, 1L);
 
         assertEquals(1L, result.getId());
         assertEquals("Matemática", result.getName());
@@ -85,11 +94,10 @@ class SubjectServiceTest {
 
     @Test
     void shouldReturnNotFoundWhenSubjectDoesNotExist() {
-        when(subjectRepository.findById(99L)).thenReturn(Optional.empty());
+        when(subjectRepository.findByIdAndUserId(99L, 1L)).thenReturn(Optional.empty());
 
         ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
-                () -> subjectService.getSubjectById(99L)
+                ResponseStatusException.class, () -> subjectService.getSubjectById(99L, 1L)
         );
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
@@ -98,8 +106,7 @@ class SubjectServiceTest {
     @Test
     void shouldReturnBadRequestWhenUserIsMissing() {
         ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
-                () -> subjectService.createSubject(subject)
+                ResponseStatusException.class, () -> subjectService.createSubject(subject)
         );
 
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
@@ -116,8 +123,7 @@ class SubjectServiceTest {
         when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
         ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
-                () -> subjectService.createSubject(subject)
+                ResponseStatusException.class, () -> subjectService.createSubject(subject)
         );
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
@@ -129,32 +135,32 @@ class SubjectServiceTest {
         Subject updatedSubject = new Subject();
         updatedSubject.setName("Matemática Aplicada");
 
-        when(subjectRepository.findById(1L)).thenReturn(Optional.of(subject));
+        when(subjectRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(subject));
         when(subjectRepository.save(subject)).thenReturn(subject);
 
-        Subject result = subjectService.updateSubject(1L, updatedSubject);
+        Subject result = subjectService.updateSubject(1L, 1L, updatedSubject);
 
         assertEquals("Matemática Aplicada", result.getName());
         assertEquals(1L, result.getId());
+
         verify(subjectRepository).save(subject);
     }
 
     @Test
     void shouldDeleteSubject() {
-        when(subjectRepository.findById(1L)).thenReturn(Optional.of(subject));
+        when(subjectRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(subject));
 
-        subjectService.deleteSubject(1L);
+        subjectService.deleteSubject(1L, 1L);
 
         verify(subjectRepository).delete(subject);
     }
 
     @Test
     void shouldReturnNotFoundWhenDeletingNonexistentSubject() {
-        when(subjectRepository.findById(99L)).thenReturn(Optional.empty());
+        when(subjectRepository.findByIdAndUserId(99L, 1L)).thenReturn(Optional.empty());
 
         ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
-                () -> subjectService.deleteSubject(99L)
+                ResponseStatusException.class, () -> subjectService.deleteSubject(99L, 1L)
         );
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
@@ -165,12 +171,12 @@ class SubjectServiceTest {
     void shouldAddTopicToSubject() {
         Topic topic = new Topic();
         topic.setId(10L);
-        topic.setName("Álgebra Linear");
+        topic.setName("Algoritmos");
 
-        when(subjectRepository.findById(1L)).thenReturn(Optional.of(subject));
+        when(subjectRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(subject));
         when(topicRepository.findById(10L)).thenReturn(Optional.of(topic));
 
-        subjectService.addTopicToSubject(1L, 10L);
+        subjectService.addTopicToSubject(1L, 10L, 1L);
 
         assertTrue(subject.getTopics().contains(topic));
     }
@@ -179,13 +185,13 @@ class SubjectServiceTest {
     void shouldGetTopicsFromSubject() {
         Topic topic = new Topic();
         topic.setId(10L);
-        topic.setName("Álgebra Linear");
+        topic.setName("Algoritmos");
 
         subject.getTopics().add(topic);
 
-        when(subjectRepository.findById(1L)).thenReturn(Optional.of(subject));
+        when(subjectRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(subject));
 
-        Set<Topic> result = subjectService.getSubjectTopics(1L);
+        Set<Topic> result = subjectService.getSubjectTopics(1L, 1L);
 
         assertEquals(1, result.size());
         assertTrue(result.contains(topic));
@@ -195,14 +201,14 @@ class SubjectServiceTest {
     void shouldRemoveTopicFromSubject() {
         Topic topic = new Topic();
         topic.setId(10L);
-        topic.setName("Álgebra Linear");
+        topic.setName("Algoritmos");
 
         subject.getTopics().add(topic);
 
-        when(subjectRepository.findById(1L)).thenReturn(Optional.of(subject));
+        when(subjectRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(subject));
         when(topicRepository.findById(10L)).thenReturn(Optional.of(topic));
 
-        subjectService.removeTopicFromSubject(1L, 10L);
+        subjectService.removeTopicFromSubject(1L, 10L, 1L);
 
         assertTrue(subject.getTopics().isEmpty());
     }
@@ -212,22 +218,95 @@ class SubjectServiceTest {
         Topic topic = new Topic();
         topic.setId(10L);
 
-        when(subjectRepository.findById(1L)).thenReturn(Optional.of(subject));
+        when(subjectRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(subject));
         when(topicRepository.findById(10L)).thenReturn(Optional.of(topic));
 
-        assertDoesNotThrow(() -> subjectService.removeTopicFromSubject(1L, 10L));
+        assertDoesNotThrow(() -> subjectService.removeTopicFromSubject(1L, 10L, 1L));
     }
 
     @Test
     void shouldThrowNotFoundWhenAddingNonExistingTopic() {
-        when(subjectRepository.findById(1L)).thenReturn(Optional.of(subject));
+        when(subjectRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(subject));
         when(topicRepository.findById(10L)).thenReturn(Optional.empty());
 
         ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
-                () -> subjectService.addTopicToSubject(1L, 10L)
+                ResponseStatusException.class, () -> subjectService.addTopicToSubject(1L, 10L, 1L)
         );
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+    }
+
+    @Test
+    void shouldNotGetAnotherUsersSubject() {
+        when(subjectRepository.findByIdAndUserId(1L, 2L)).thenReturn(Optional.empty());
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class, () -> subjectService.getSubjectById(1L, 2L)
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+    }
+
+    @Test
+    void shouldNotUpdateAnotherUsersSubject() {
+        Subject updatedSubject = new Subject();
+        updatedSubject.setName("Álgebra Abstrata");
+
+        when(subjectRepository.findByIdAndUserId(1L, 2L)).thenReturn(Optional.empty());
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class, () -> subjectService.updateSubject(1L, 2L, updatedSubject)
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+        verify(subjectRepository, never()).save(any(Subject.class));
+    }
+
+    @Test
+    void shouldNotDeleteAnotherUsersSubject() {
+        when(subjectRepository.findByIdAndUserId(1L, 2L)).thenReturn(Optional.empty());
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class, () -> subjectService.deleteSubject(1L, 2L)
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+        verify(subjectRepository, never()).delete(any(Subject.class));
+    }
+
+    @Test
+    void shouldNotAddTopicToAnotherUsersSubject() {
+        when(subjectRepository.findByIdAndUserId(1L, 2L)).thenReturn(Optional.empty());
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class, () -> subjectService.addTopicToSubject(1L, 10L, 2L)
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+        verifyNoInteractions(topicRepository);
+    }
+
+    @Test
+    void shouldNotGetTopicsFromAnotherUsersSubject() {
+        when(subjectRepository.findByIdAndUserId(1L, 2L)).thenReturn(Optional.empty());
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class, () -> subjectService.getSubjectTopics(1L, 2L)
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+        verifyNoInteractions(topicRepository);
+    }
+
+    @Test
+    void shouldNotRemoveTopicFromAnotherUsersSubject() {
+        when(subjectRepository.findByIdAndUserId(1L, 2L)).thenReturn(Optional.empty());
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class, () -> subjectService.removeTopicFromSubject(1L, 10L, 2L)
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+        verifyNoInteractions(topicRepository);
     }
 }

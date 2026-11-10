@@ -29,45 +29,57 @@ public class FlashcardController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Flashcard createFlashcard(
+            @RequestParam Long userId,
             @RequestParam Long contentId,
             @Valid @RequestBody Flashcard flashcard
     ) {
-        return flashcardService.createFlashcard(contentId, flashcard);
+        return flashcardService.createFlashcard(userId, contentId, flashcard);
     }
 
     @GetMapping
-    public List<Flashcard> getAllFlashcards() {
-        return flashcardService.getAllFlashcards();
+    public List<Flashcard> getAllFlashcards(@RequestParam Long userId) {
+        return flashcardService.getAllFlashcards(userId);
     }
 
     @GetMapping("/{id}")
-    public Flashcard getFlashcardById(@PathVariable Long id) {
-        return flashcardService.getFlashcardById(id);
+    public Flashcard getFlashcardById(
+            @PathVariable Long id,
+            @RequestParam Long userId
+    ) {
+        return flashcardService.getFlashcardById(id, userId);
     }
 
     @GetMapping("/content/{contentId}")
     public List<Flashcard> getFlashcardsByContentId(
-            @PathVariable Long contentId
+            @PathVariable Long contentId,
+            @RequestParam Long userId
     ) {
-        return flashcardService.getFlashcardsByContentId(contentId);
+        return flashcardService.getFlashcardsByContentId(contentId, userId);
     }
 
     @PutMapping("/{id}")
     public Flashcard updateFlashcard(
             @PathVariable Long id,
+            @RequestParam Long userId,
             @Valid @RequestBody Flashcard updatedFlashcard
     ) {
-        return flashcardService.updateFlashcard(id, updatedFlashcard);
+        return flashcardService.updateFlashcard(id, userId, updatedFlashcard);
     }
 
     @PostMapping("/{id}/generate-answer")
-    public Flashcard generateAnswer(@PathVariable Long id) {
-        return flashcardService.generateFlashcardAnswer(id);
+    public Flashcard generateAnswer(
+            @PathVariable Long id,
+            @RequestParam Long userId
+    ) {
+        return flashcardService.generateFlashcardAnswer(id, userId);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteFlashcard(@PathVariable Long id) {
-        flashcardService.deleteFlashcard(id);
+    public void deleteFlashcard(
+            @PathVariable Long id,
+            @RequestParam Long userId
+    ) {
+        flashcardService.deleteFlashcard(id, userId);
     }
 }

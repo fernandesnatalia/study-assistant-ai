@@ -35,7 +35,6 @@ public class SubjectService {
         }
 
         Long userId = subject.getUser().getId();
-
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
@@ -44,30 +43,30 @@ public class SubjectService {
         return subjectRepository.save(subject);
     }
 
-    public List<Subject> getAllSubjects() {
-        return subjectRepository.findAll();
+    public List<Subject> getAllSubjects(Long userId) {
+        return subjectRepository.findByUserId(userId);
     }
 
-    public Subject getSubjectById(Long id) {
-        return subjectRepository.findById(id)
+    public Subject getSubjectById(Long id, Long userId) {
+        return subjectRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Subject not found"));
     }
 
-    public Subject updateSubject(Long id, Subject updatedSubject) {
-        Subject subject = getSubjectById(id);
+    public Subject updateSubject(Long id, Long userId, Subject updatedSubject) {
+        Subject subject = getSubjectById(id, userId);
         subject.setName(updatedSubject.getName());
         return subjectRepository.save(subject);
     }
 
     @Transactional
-    public void deleteSubject(Long id) {
-        Subject subject = getSubjectById(id);
+    public void deleteSubject(Long id, Long userId) {
+        Subject subject = getSubjectById(id, userId);
         subjectRepository.delete(subject);
     }
 
     @Transactional
-    public void addTopicToSubject(Long subjectId, Long topicId) {
-        Subject subject = getSubjectById(subjectId);
+    public void addTopicToSubject(Long subjectId, Long topicId, Long userId) {
+        Subject subject = getSubjectById(subjectId, userId);
 
         Topic topic = topicRepository.findById(topicId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Topic not found"));
@@ -76,14 +75,14 @@ public class SubjectService {
     }
 
     @Transactional(readOnly = true)
-    public Set<Topic> getSubjectTopics(Long subjectId) {
-        Subject subject = getSubjectById(subjectId);
+    public Set<Topic> getSubjectTopics(Long subjectId, Long userId) {
+        Subject subject = getSubjectById(subjectId, userId);
         return Set.copyOf(subject.getTopics());
     }
 
     @Transactional
-    public void removeTopicFromSubject(Long subjectId, Long topicId) {
-        Subject subject = getSubjectById(subjectId);
+    public void removeTopicFromSubject(Long subjectId, Long topicId, Long userId) {
+        Subject subject = getSubjectById(subjectId, userId);
 
         Topic topic = topicRepository.findById(topicId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Topic not found"));

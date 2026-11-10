@@ -26,10 +26,11 @@ public class FlashcardService {
     }
 
     public Flashcard createFlashcard(
+            Long userId,
             Long contentId,
             Flashcard flashcard
     ) {
-        Content content = contentRepository.findById(contentId)
+        Content content = contentRepository.findByIdAndUserId(contentId, userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Content not found"));
 
         flashcard.setId(null);
@@ -38,30 +39,30 @@ public class FlashcardService {
         return flashcardRepository.save(flashcard);
     }
 
-    public List<Flashcard> getAllFlashcards() {
-        return flashcardRepository.findAll();
+    public List<Flashcard> getAllFlashcards(Long userId) {
+        return flashcardRepository.findByContentUserId(userId);
     }
 
-    public Flashcard getFlashcardById(Long id) {
-        return flashcardRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Flashcard not found"
+    public Flashcard getFlashcardById(Long id, Long userId) {
+        return flashcardRepository.findByIdAndContentUserId(id, userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Flashcard not found"
                 ));
     }
 
-    public List<Flashcard> getFlashcardsByContentId(Long contentId) {
-        if (!contentRepository.existsById(contentId)) {
+    public List<Flashcard> getFlashcardsByContentId(Long contentId, Long userId) {
+        if (contentRepository.findByIdAndUserId(contentId, userId).isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Content not found");
         }
 
-        return flashcardRepository.findByContentId(contentId);
+        return flashcardRepository.findByContentIdAndContentUserId(contentId, userId);
     }
 
     public Flashcard updateFlashcard(
             Long id,
+            Long userId,
             Flashcard updatedFlashcard
     ) {
-        Flashcard flashcard = getFlashcardById(id);
+        Flashcard flashcard = getFlashcardById(id, userId);
 
         flashcard.setQuestion(updatedFlashcard.getQuestion());
         flashcard.setAnswer(updatedFlashcard.getAnswer());
@@ -69,8 +70,8 @@ public class FlashcardService {
         return flashcardRepository.save(flashcard);
     }
 
-    public Flashcard generateFlashcardAnswer(Long id) {
-        Flashcard flashcard = getFlashcardById(id);
+    public Flashcard generateFlashcardAnswer(Long id, Long userId) {
+        Flashcard flashcard = getFlashcardById(id, userId);
 
         if (flashcard.getAnswer() != null && !flashcard.getAnswer().isBlank()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Flashcard already has an answer");
@@ -82,8 +83,8 @@ public class FlashcardService {
         return flashcardRepository.save(flashcard);
     }
 
-    public void deleteFlashcard(Long id) {
-        Flashcard flashcard = getFlashcardById(id);
+    public void deleteFlashcard(Long id, Long userId) {
+        Flashcard flashcard = getFlashcardById(id, userId);
         flashcardRepository.delete(flashcard);
     }
 }

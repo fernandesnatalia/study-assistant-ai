@@ -14,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Optional;
@@ -57,13 +58,10 @@ class AnswerAttemptServiceTest {
         AnswerAttemptRequest request = new AnswerAttemptRequest(1L, 10L, true);
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(flashcardRepository.findById(10L)).thenReturn(Optional.of(flashcard));
-
+        when(flashcardRepository.findByIdAndContentUserId(10L, 1L)).thenReturn(Optional.of(flashcard));
         when(user.getId()).thenReturn(1L);
         when(flashcard.getId()).thenReturn(10L);
-
-        when(answerAttemptRepository.save(any(AnswerAttempt.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(answerAttemptRepository.save(any(AnswerAttempt.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         AnswerAttemptResponse response = service.create(request);
 
@@ -91,10 +89,25 @@ class AnswerAttemptServiceTest {
         AnswerAttemptRequest request = new AnswerAttemptRequest(1L, 99L, false);
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(flashcardRepository.findById(99L)).thenReturn(Optional.empty());
+        when(flashcardRepository.findByIdAndContentUserId(99L, 1L)).thenReturn(Optional.empty());
 
         assertThrows(ResponseStatusException.class, () -> service.create(request));
 
+        verify(answerAttemptRepository, never()).save(any(AnswerAttempt.class));
+    }
+
+    @Test
+    void shouldRejectAttemptForAnotherUsersFlashcard() {
+        AnswerAttemptRequest request = new AnswerAttemptRequest(2L, 10L, true);
+
+        when(userRepository.findById(2L)).thenReturn(Optional.of(user));
+        when(flashcardRepository.findByIdAndContentUserId(10L, 2L)).thenReturn(Optional.empty());
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class, () -> service.create(request)
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
         verify(answerAttemptRepository, never()).save(any(AnswerAttempt.class));
     }
 
@@ -107,13 +120,27 @@ class AnswerAttemptServiceTest {
         when(user.getId()).thenReturn(1L);
         when(flashcard.getId()).thenReturn(10L);
 
-        when(answerAttemptRepository.findByUserIdOrderByAnsweredAtDescIdDesc(1L))
-                .thenReturn(List.of(second, first));
+        when(answerAttemptRepository.findByUserIdOrderByAnsweredAtDescIdDesc(1L)).thenReturn(List.of(second, first));
 
         List<AnswerAttemptResponse> history = service.findByUser(1L);
 
         assertEquals(2, history.size());
         assertTrue(history.get(0).correct());
         assertFalse(history.get(1).correct());
+    }
+
+    @Test
+    void shouldRejectHistoryAccessForAnotherUsersFlashcard() {
+        when(userRepository.existsById(2L)).thenReturn(true);
+        when(flashcardRepository.findByIdAndContentUserId(10L, 2L)).thenReturn(Optional.empty());
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class, () -> service.findByUserAndFlashcard(2L, 10L)
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+
+        verify(answerAttemptRepository, never())
+                .findByUserIdAndFlashcardIdOrderByAnsweredAtDescIdDesc(2L, 10L);
     }
 }

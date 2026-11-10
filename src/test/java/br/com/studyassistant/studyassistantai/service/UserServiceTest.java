@@ -23,6 +23,14 @@ class UserServiceTest {
     @InjectMocks
     private UserService userService;
 
+    private User createUser() {
+        User user = new User();
+        user.setId(1L);
+        user.setName("Augusta Ada Byron King");
+        user.setEmail("ada@example.com");
+        return user;
+    }
+
     @Test
     void shouldCreateUser() {
         User user = createUser();
@@ -43,8 +51,7 @@ class UserServiceTest {
         when(userRepository.existsByEmail(user.getEmail())).thenReturn(true);
 
         ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
-                () -> userService.createUser(user)
+                ResponseStatusException.class, () -> userService.createUser(user)
         );
 
         assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
@@ -77,8 +84,7 @@ class UserServiceTest {
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
         ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
-                () -> userService.getUserById(1L)
+                ResponseStatusException.class, () -> userService.getUserById(1L)
         );
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
@@ -88,14 +94,14 @@ class UserServiceTest {
     void shouldUpdateUser() {
         User user = createUser();
         User updated = createUser();
-        updated.setName("Ada Byron Lovelace");
+        updated.setName("Ada Lovelace");
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(userRepository.save(user)).thenReturn(user);
 
         User result = userService.updateUser(1L, updated);
 
-        assertEquals("Ada Byron Lovelace", result.getName());
+        assertEquals("Ada Lovelace", result.getName());
         assertEquals("ada@example.com", result.getEmail());
         verify(userRepository).save(user);
     }
@@ -110,8 +116,7 @@ class UserServiceTest {
         when(userRepository.existsByEmail("other@example.com")).thenReturn(true);
 
         ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
-                () -> userService.updateUser(1L, updated)
+                ResponseStatusException.class, () -> userService.updateUser(1L, updated)
         );
 
         assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
@@ -134,19 +139,10 @@ class UserServiceTest {
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
         ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
-                () -> userService.deleteUser(1L)
+                ResponseStatusException.class, () -> userService.deleteUser(1L)
         );
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
         verify(userRepository, never()).delete(any());
-    }
-
-    private User createUser() {
-        User user = new User();
-        user.setId(1L);
-        user.setName("Ada Lovelace");
-        user.setEmail("ada@example.com");
-        return user;
     }
 }
