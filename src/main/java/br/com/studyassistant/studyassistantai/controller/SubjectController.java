@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,6 +26,15 @@ public class SubjectController {
 
     public SubjectController(SubjectService subjectService) {
         this.subjectService = subjectService;
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public Subject createSubject(
+            @Valid @RequestBody Subject subject,
+            @RequestParam Long userId
+    ) {
+        return subjectService.createSubject(subject, userId);
     }
 
     @GetMapping
@@ -58,31 +68,11 @@ public class SubjectController {
         subjectService.deleteSubject(id, userId);
     }
 
-    @PutMapping("/{subjectId}/topics/{topicId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void addTopicToSubject(
-            @PathVariable Long subjectId,
-            @PathVariable Long topicId,
-            @RequestParam Long userId
-    ) {
-        subjectService.addTopicToSubject(subjectId, topicId, userId);
-    }
-
     @GetMapping("/{subjectId}/topics")
     public Set<Topic> getSubjectTopics(
             @PathVariable Long subjectId,
             @RequestParam Long userId
     ) {
         return subjectService.getSubjectTopics(subjectId, userId);
-    }
-
-    @DeleteMapping("/{subjectId}/topics/{topicId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removeTopicFromSubject(
-            @PathVariable Long subjectId,
-            @PathVariable Long topicId,
-            @RequestParam Long userId
-    ) {
-        subjectService.removeTopicFromSubject(subjectId, topicId, userId);
     }
 }

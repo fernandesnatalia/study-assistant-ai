@@ -30,9 +30,10 @@ public class TopicController {
     @PostMapping
     public ResponseEntity<Topic> createTopic(
             @Valid @RequestBody Topic topic,
-            @RequestParam Long userId
+            @RequestParam Long userId,
+            @RequestParam Long subjectId
     ) {
-        Topic result = topicService.createTopic(topic, userId);
+        Topic result = topicService.createTopic(topic, userId, subjectId);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 

@@ -7,12 +7,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Column;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.ManyToMany;
 import jakarta.validation.constraints.NotBlank;
-import java.util.HashSet;
-import java.util.Set;
+import jakarta.validation.constraints.Size;
 
 @Entity
 public class Topic {
@@ -21,18 +18,19 @@ public class Topic {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Topic name is required")
-    @Column(nullable = false)
+    @NotBlank
+    @Size(max = 100)
     private String name;
-
-    @JsonIgnore
-    @ManyToMany(mappedBy = "topics")
-    private Set<Subject> subjects = new HashSet<>();
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     @JsonIgnore
     private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "subject_id", nullable = false)
+    @JsonIgnore
+    private Subject subject;
 
     public Long getId() { return id; }
 
@@ -42,9 +40,9 @@ public class Topic {
 
     public void setName(String name) { this.name = name; }
 
-    public Set<Subject> getSubjects() { return subjects; }
+    public Subject getSubject() { return subject; }
 
-    public void setSubjects(Set<Subject> subjects) { this.subjects = subjects; }
+    public void setSubject(Subject subject) { this.subject = subject; }
 
     public User getUser() { return user; }
 

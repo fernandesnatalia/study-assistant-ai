@@ -5,6 +5,7 @@ import br.com.studyassistant.studyassistantai.model.Topic;
 import br.com.studyassistant.studyassistantai.model.User;
 import br.com.studyassistant.studyassistantai.repository.TopicRepository;
 import br.com.studyassistant.studyassistantai.repository.UserRepository;
+import br.com.studyassistant.studyassistantai.repository.SubjectRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,7 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -28,10 +28,14 @@ class TopicServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private SubjectRepository subjectRepository;
+
     @InjectMocks
     private TopicService topicService;
 
     private Topic topic;
+    private Subject subject;
     private User ada;
     private User emmy;
 
@@ -49,19 +53,28 @@ class TopicServiceTest {
         topic.setId(1L);
         topic.setName("Sequências numéricas");
         topic.setUser(ada);
+
+        subject = new Subject();
+        subject.setId(1L);
+        subject.setName("Matemática");
+        subject.setUser(ada);
+        topic.setSubject(subject);
     }
 
     @Test
     void shouldCreateTopic() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(ada));
+        when(subjectRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(subject));
         when(topicRepository.save(topic)).thenReturn(topic);
 
-        Topic result = topicService.createTopic(topic, 1L);
+        Topic result = topicService.createTopic(topic, 1L, 1L);
 
         assertEquals("Sequências numéricas", result.getName());
         assertEquals(ada, result.getUser());
+        assertEquals(subject, result.getSubject());
 
         verify(userRepository).findById(1L);
+        verify(subjectRepository).findByIdAndUserId(1L, 1L);
         verify(topicRepository).save(topic);
     }
 
@@ -70,10 +83,24 @@ class TopicServiceTest {
         when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
         ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class, () -> topicService.createTopic(topic, 99L)
+                ResponseStatusException.class, () -> topicService.createTopic(topic, 99L, 1L)
         );
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+        verify(topicRepository, never()).save(any(Topic.class));
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenSubjectDoesNotExist() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(ada));
+        when(subjectRepository.findByIdAndUserId(99L, 1L)).thenReturn(Optional.empty());
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class, () -> topicService.createTopic(topic, 1L, 99L)
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+
         verify(topicRepository, never()).save(any(Topic.class));
     }
 
@@ -91,10 +118,16 @@ class TopicServiceTest {
 
     @Test
     void shouldReturnOnlyTopicsFromRequestedUser() {
+        Subject emmySubject = new Subject();
+        emmySubject.setId(2L);
+        emmySubject.setName("Álgebra");
+        emmySubject.setUser(emmy);
+
         Topic emmyTopic = new Topic();
         emmyTopic.setId(2L);
         emmyTopic.setName("Anéis comutativos");
         emmyTopic.setUser(emmy);
+        emmyTopic.setSubject(emmySubject);
 
         when(topicRepository.findByUserId(2L)).thenReturn(List.of(emmyTopic));
 
@@ -178,23 +211,6 @@ class TopicServiceTest {
 
         topicService.deleteTopic(1L, 1L);
 
-        verify(topicRepository).delete(topic);
-    }
-
-    @Test
-    void shouldRemoveTopicFromSubjectsBeforeDeleting() {
-        Subject subject = new Subject();
-        subject.setId(1L);
-        subject.setName("Matemática");
-        subject.setTopics(new java.util.HashSet<>(Set.of(topic)));
-
-        topic.getSubjects().add(subject);
-
-        when(topicRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(topic));
-
-        topicService.deleteTopic(1L, 1L);
-
-        assertFalse(subject.getTopics().contains(topic));
         verify(topicRepository).delete(topic);
     }
 
