@@ -66,10 +66,7 @@ public class AnswerAttemptService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Flashcard not found"));
 
         return answerAttemptRepository
-                .findByUserIdAndFlashcardIdOrderByAnsweredAtDescIdDesc(
-                        userId,
-                        flashcardId
-                )
+                .findByUserIdAndFlashcardIdOrderByAnsweredAtDescIdDesc(userId, flashcardId)
                 .stream()
                 .map(this::toResponse)
                 .toList();

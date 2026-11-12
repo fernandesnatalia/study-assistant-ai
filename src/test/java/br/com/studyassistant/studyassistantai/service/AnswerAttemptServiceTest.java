@@ -61,7 +61,8 @@ class AnswerAttemptServiceTest {
         when(flashcardRepository.findByIdAndContentUserId(10L, 1L)).thenReturn(Optional.of(flashcard));
         when(user.getId()).thenReturn(1L);
         when(flashcard.getId()).thenReturn(10L);
-        when(answerAttemptRepository.save(any(AnswerAttempt.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(answerAttemptRepository.save(any(AnswerAttempt.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         AnswerAttemptResponse response = service.create(request);
 
@@ -119,7 +120,6 @@ class AnswerAttemptServiceTest {
         when(userRepository.existsById(1L)).thenReturn(true);
         when(user.getId()).thenReturn(1L);
         when(flashcard.getId()).thenReturn(10L);
-
         when(answerAttemptRepository.findByUserIdOrderByAnsweredAtDescIdDesc(1L)).thenReturn(List.of(second, first));
 
         List<AnswerAttemptResponse> history = service.findByUser(1L);
@@ -142,5 +142,50 @@ class AnswerAttemptServiceTest {
 
         verify(answerAttemptRepository, never())
                 .findByUserIdAndFlashcardIdOrderByAnsweredAtDescIdDesc(2L, 10L);
+    }
+
+    @Test
+    void shouldReturnUserAttemptHistoryForFlashcard() {
+        AnswerAttempt first = new AnswerAttempt(user, flashcard, false);
+        AnswerAttempt second = new AnswerAttempt(user, flashcard, true);
+
+        when(userRepository.existsById(1L)).thenReturn(true);
+        when(flashcardRepository.findByIdAndContentUserId(10L, 1L)).thenReturn(Optional.of(flashcard));
+        when(user.getId()).thenReturn(1L);
+        when(flashcard.getId()).thenReturn(10L);
+        when(answerAttemptRepository.
+                findByUserIdAndFlashcardIdOrderByAnsweredAtDescIdDesc(1L, 10L)).thenReturn(List.of(second, first)
+        );
+
+        List<AnswerAttemptResponse> history = service.findByUserAndFlashcard(1L, 10L);
+
+        assertEquals(2, history.size());
+        assertTrue(history.get(0).correct());
+        assertFalse(history.get(1).correct());
+
+        verify(answerAttemptRepository).findByUserIdAndFlashcardIdOrderByAnsweredAtDescIdDesc(1L, 10L);
+    }
+
+    @Test
+    void shouldRejectHistoryAccessWhenUserDoesNotExist() {
+        when(userRepository.existsById(99L)).thenReturn(false);
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class, () -> service.findByUser(99L)
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+        verify(answerAttemptRepository, never()).findByUserIdOrderByAnsweredAtDescIdDesc(99L);
+    }
+
+    @Test
+    void shouldReturnEmptyHistoryWhenUserHasNoAttempts() {
+        when(userRepository.existsById(1L)).thenReturn(true);
+        when(answerAttemptRepository.findByUserIdOrderByAnsweredAtDescIdDesc(1L)).thenReturn(List.of());
+
+        List<AnswerAttemptResponse> history = service.findByUser(1L);
+
+        assertTrue(history.isEmpty());
+        verify(answerAttemptRepository).findByUserIdOrderByAnsweredAtDescIdDesc(1L);
     }
 }

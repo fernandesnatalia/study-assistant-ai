@@ -45,8 +45,7 @@ public class FlashcardService {
 
     public Flashcard getFlashcardById(Long id, Long userId) {
         return flashcardRepository.findByIdAndContentUserId(id, userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Flashcard not found"
-                ));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Flashcard not found"));
     }
 
     public List<Flashcard> getFlashcardsByContentId(Long contentId, Long userId) {

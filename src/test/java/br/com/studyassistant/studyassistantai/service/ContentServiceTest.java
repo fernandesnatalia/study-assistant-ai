@@ -73,7 +73,7 @@ class ContentServiceTest {
 
         User user = createUser();
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(topicRepository.findById(1L)).thenReturn(Optional.of(topic));
+        when(topicRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(topic));
         when(contentRepository.save(content)).thenReturn(content);
 
         Content result = contentService.createContent(1L, content);
@@ -82,7 +82,7 @@ class ContentServiceTest {
         assertSame(user, result.getUser());
         assertEquals(Set.of(topic), result.getTopics());
 
-        verify(topicRepository).findById(1L);
+        verify(topicRepository).findByIdAndUserId(1L, 1L);
         verify(contentRepository).save(content);
     }
 
@@ -105,7 +105,7 @@ class ContentServiceTest {
     void shouldThrowNotFoundWhenCreatingContentWithNonexistentTopic() {
         Content content = createContent(createTopic());
 
-        when(topicRepository.findById(1L)).thenReturn(Optional.empty());
+        when(topicRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.empty());
         when(userRepository.findById(1L)).thenReturn(Optional.of(createUser()));
 
         ResponseStatusException exception = assertThrows(
@@ -266,8 +266,8 @@ class ContentServiceTest {
         User user = createUser();
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(topicRepository.findById(1L)).thenReturn(Optional.of(firstTopic));
-        when(topicRepository.findById(2L)).thenReturn(Optional.of(secondTopic));
+        when(topicRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(firstTopic));
+        when(topicRepository.findByIdAndUserId(2L, 1L)).thenReturn(Optional.of(secondTopic));
         when(contentRepository.save(content)).thenReturn(content);
 
         Content result = contentService.createContent(1L, content);
@@ -277,8 +277,8 @@ class ContentServiceTest {
         assertTrue(result.getTopics().contains(firstTopic));
         assertTrue(result.getTopics().contains(secondTopic));
 
-        verify(topicRepository).findById(1L);
-        verify(topicRepository).findById(2L);
+        verify(topicRepository).findByIdAndUserId(1L, 1L);
+        verify(topicRepository).findByIdAndUserId(2L, 1L);
         verify(contentRepository).save(content);
     }
 
@@ -306,5 +306,20 @@ class ContentServiceTest {
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
 
         verifyNoInteractions(contentRepository, topicRepository);
+    }
+
+    @Test
+    void shouldNotCreateContentWithAnotherUsersTopic() {
+        Content content = createContent(createTopic());
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(createUser()));
+        when(topicRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.empty());
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class, () -> contentService.createContent(1L, content)
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+        verify(contentRepository, never()).save(any());
     }
 }

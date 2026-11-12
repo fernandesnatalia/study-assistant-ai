@@ -68,7 +68,7 @@ public class SubjectService {
     public void addTopicToSubject(Long subjectId, Long topicId, Long userId) {
         Subject subject = getSubjectById(subjectId, userId);
 
-        Topic topic = topicRepository.findById(topicId)
+        Topic topic = topicRepository.findByIdAndUserId(topicId, subject.getUser().getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Topic not found"));
 
         subject.getTopics().add(topic);
@@ -84,7 +84,7 @@ public class SubjectService {
     public void removeTopicFromSubject(Long subjectId, Long topicId, Long userId) {
         Subject subject = getSubjectById(subjectId, userId);
 
-        Topic topic = topicRepository.findById(topicId)
+        Topic topic = topicRepository.findByIdAndUserId(topicId, subject.getUser().getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Topic not found"));
 
         subject.getTopics().remove(topic);

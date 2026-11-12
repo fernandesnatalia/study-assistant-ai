@@ -36,9 +36,7 @@ public class ContentService {
         }
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "User not found"
-                ));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         if (content.getTopics() == null || content.getTopics().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At least one topic is required");
@@ -51,7 +49,7 @@ public class ContentService {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Topic ID is required");
             }
 
-            topics.add(getExistingTopic(topic.getId()));
+            topics.add(getExistingTopic(topic.getId(), userId));
         }
 
         content.setId(null);
@@ -94,10 +92,8 @@ public class ContentService {
         contentRepository.delete(content);
     }
 
-    private Topic getExistingTopic(Long topicId) {
-        return topicRepository.findById(topicId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Topic not found"
-                ));
+    private Topic getExistingTopic(Long topicId, Long userId) {
+        return topicRepository.findByIdAndUserId(topicId, userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Topic not found"));
     }
 }

@@ -44,11 +44,16 @@ class SubjectServiceTest {
 
     private Subject subject;
 
+    private User user;
+
     @BeforeEach
     void setUp() {
         subject = new Subject();
         subject.setId(1L);
         subject.setName("Matemática");
+
+        user = new User();
+        user.setId(1L);
     }
 
     @Test
@@ -173,8 +178,10 @@ class SubjectServiceTest {
         topic.setId(10L);
         topic.setName("Algoritmos");
 
+        subject.setUser(user);
+
         when(subjectRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(subject));
-        when(topicRepository.findById(10L)).thenReturn(Optional.of(topic));
+        when(topicRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(topic));
 
         subjectService.addTopicToSubject(1L, 10L, 1L);
 
@@ -203,10 +210,12 @@ class SubjectServiceTest {
         topic.setId(10L);
         topic.setName("Algoritmos");
 
+        subject.setUser(user);
+
         subject.getTopics().add(topic);
 
         when(subjectRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(subject));
-        when(topicRepository.findById(10L)).thenReturn(Optional.of(topic));
+        when(topicRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(topic));
 
         subjectService.removeTopicFromSubject(1L, 10L, 1L);
 
@@ -218,16 +227,20 @@ class SubjectServiceTest {
         Topic topic = new Topic();
         topic.setId(10L);
 
+        subject.setUser(user);
+
         when(subjectRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(subject));
-        when(topicRepository.findById(10L)).thenReturn(Optional.of(topic));
+        when(topicRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(topic));
 
         assertDoesNotThrow(() -> subjectService.removeTopicFromSubject(1L, 10L, 1L));
     }
 
     @Test
     void shouldThrowNotFoundWhenAddingNonExistingTopic() {
+        subject.setUser(user);
+
         when(subjectRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(subject));
-        when(topicRepository.findById(10L)).thenReturn(Optional.empty());
+        when(topicRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.empty());
 
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class, () -> subjectService.addTopicToSubject(1L, 10L, 1L)
@@ -308,5 +321,20 @@ class SubjectServiceTest {
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
         verifyNoInteractions(topicRepository);
+    }
+
+    @Test
+    void shouldNotAddAnotherUsersTopicToSubject() {
+        subject.setUser(user);
+
+        when(subjectRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(subject));
+        when(topicRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.empty());
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class, () -> subjectService.addTopicToSubject(1L, 10L, 1L)
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+        assertTrue(subject.getTopics().isEmpty());
     }
 }

@@ -64,13 +64,13 @@ Content-Type: application/json
 }
 
 ### Matéria - Consultar Matemática de Ada (200)
-GET http://localhost:8080/api/subjects/1
+GET http://localhost:8080/api/subjects/1?userId=1
 
 ### Matéria - Consultar Álgebra Abstrata de Emmy (200)
-GET http://localhost:8080/api/subjects/2
+GET http://localhost:8080/api/subjects/2?userId=2
 
 ### Tópico - Ada cria Algoritmos (201)
-POST http://localhost:8080/api/topics
+POST http://localhost:8080/api/topics?userId=1
 Content-Type: application/json
 
 {
@@ -78,7 +78,7 @@ Content-Type: application/json
 }
 
 ### Tópico - Emmy cria Teoria dos Anéis (201)
-POST http://localhost:8080/api/topics
+POST http://localhost:8080/api/topics?userId=2
 Content-Type: application/json
 
 {
@@ -86,7 +86,7 @@ Content-Type: application/json
 }
 
 ### Tópico - Ada cria Sequências Numéricas (201)
-POST http://localhost:8080/api/topics
+POST http://localhost:8080/api/topics?userId=1
 Content-Type: application/json
 
 {
@@ -94,7 +94,7 @@ Content-Type: application/json
 }
 
 ### Tópico - Ada cria Máquina Analítica (201)
-POST http://localhost:8080/api/topics
+POST http://localhost:8080/api/topics?userId=1
 Content-Type: application/json
 
 {
@@ -102,31 +102,31 @@ Content-Type: application/json
 }
 
 ### Tópico - Associar Algoritmos à Matemática de Ada (204)
-PUT http://localhost:8080/api/subjects/1/topics/1
+PUT http://localhost:8080/api/subjects/1/topics/1?userId=1
 
 ### Tópico - Associar Teoria dos Anéis à Álgebra Abstrata de Emmy (204)
-PUT http://localhost:8080/api/subjects/2/topics/2
+PUT http://localhost:8080/api/subjects/2/topics/2?userId=2
 
 ### Tópico - Associar Algoritmos à Lógica de Ada (204)
-PUT http://localhost:8080/api/subjects/3/topics/1
+PUT http://localhost:8080/api/subjects/3/topics/1?userId=1
 
 ### Tópico - Associar Sequências Numéricas à Matemática de Ada (204)
-PUT http://localhost:8080/api/subjects/1/topics/3
+PUT http://localhost:8080/api/subjects/1/topics/3?userId=1
 
 ### Tópico - Associar Máquina Analítica à Fundamentos da Computação de Ada (204)
-PUT http://localhost:8080/api/subjects/4/topics/4
+PUT http://localhost:8080/api/subjects/4/topics/4?userId=1
 
 ### Tópico - Consultar tópicos da Matemática de Ada (200)
-GET http://localhost:8080/api/subjects/1/topics
+GET http://localhost:8080/api/subjects/1/topics?userId=1
 
 ### Tópico - Consultar tópicos da Álgebra Abstrata de Emmy (200)
-GET http://localhost:8080/api/subjects/2/topics
+GET http://localhost:8080/api/subjects/2/topics?userId=2
 
 ### Tópico - Consultar tópicos da Lógica de Ada (200)
-GET http://localhost:8080/api/subjects/3/topics
+GET http://localhost:8080/api/subjects/3/topics?userId=1
 
 ### Tópico - Consultar tópicos de Fundamentos da Computação de Ada (200)
-GET http://localhost:8080/api/subjects/4/topics
+GET http://localhost:8080/api/subjects/4/topics?userId=1
 
 ### Conteúdo - Ada cria Algoritmos e Sequências Numéricas com dois tópicos (201)
 POST http://localhost:8080/api/contents?userId=1
@@ -344,7 +344,7 @@ Content-Type: application/json
 GET http://localhost:8080/api/users/1
 
 ### Matéria - Atualizar Matemática de Ada para Matemática Aplicada (200)
-PUT http://localhost:8080/api/subjects/1
+PUT http://localhost:8080/api/subjects/1?userId=1
 Content-Type: application/json
 
 {
@@ -352,10 +352,10 @@ Content-Type: application/json
 }
 
 ### Matéria - Confirmar atualização de Matemática Aplicada (200)
-GET http://localhost:8080/api/subjects/1
+GET http://localhost:8080/api/subjects/1?userId=1
 
 ### Tópico - Atualizar Algoritmos para Algoritmos Matemáticos (200)
-PUT http://localhost:8080/api/topics/1
+PUT http://localhost:8080/api/topics/1?userId=1
 Content-Type: application/json
 
 {
@@ -363,7 +363,7 @@ Content-Type: application/json
 }
 
 ### Tópico - Confirmar atualização de Algoritmos Matemáticos (200)
-GET http://localhost:8080/api/topics/1
+GET http://localhost:8080/api/topics/1?userId=1
 
 ### Conteúdo - Atualizar título e corpo de Algoritmos e Sequências Numéricas (200)
 PUT http://localhost:8080/api/contents/1?userId=1
@@ -392,11 +392,17 @@ GET http://localhost:8080/api/flashcards/1?userId=1
 ### Usuário - Listar usuários após atualizações (200)
 GET http://localhost:8080/api/users
 
-### Matéria - Listar matérias após atualizações (200)
-GET http://localhost:8080/api/subjects
+### Matéria - Listar matérias de Ada após atualizações (200)
+GET http://localhost:8080/api/subjects?userId=1
 
-### Tópico - Listar tópicos após atualizações (200)
-GET http://localhost:8080/api/topics
+### Matéria - Listar matérias de Emmy após atualizações (200)
+GET http://localhost:8080/api/subjects?userId=2
+
+### Tópico - Listar tópicos de Ada após atualizações (200)
+GET http://localhost:8080/api/topics?userId=1
+
+### Tópico - Listar tópicos de Emmy após atualizações (200)
+GET http://localhost:8080/api/topics?userId=2
 
 ### Conteúdo - Listar conteúdos de Ada após atualizações (200)
 GET http://localhost:8080/api/contents?userId=1
@@ -474,7 +480,7 @@ Content-Type: application/json
 {}
 
 ### Matéria - Rejeitar atualização com nome vazio de Matemática Aplicada (400)
-PUT http://localhost:8080/api/subjects/1
+PUT http://localhost:8080/api/subjects/1?userId=1
 Content-Type: application/json
 
 {
@@ -496,6 +502,64 @@ Content-Type: application/json
 {
   "name": "Teoria dos Grupos"
 }
+
+### Matéria - Ada consulta sua própria matéria (200)
+GET http://localhost:8080/api/subjects/1?userId=1
+
+### Matéria - Emmy tenta consultar matéria de Ada (404)
+GET http://localhost:8080/api/subjects/1?userId=2
+
+### Matéria - Ada tenta consultar matéria de Emmy (404)
+GET http://localhost:8080/api/subjects/2?userId=1
+
+### Matéria - Bloquear atualização de matéria de Ada por Emmy (404)
+PUT http://localhost:8080/api/subjects/1?userId=2
+Content-Type: application/json
+
+{
+  "name": "Álgebra Abstrata"
+}
+
+### Matéria - Bloquear exclusão de matéria de Ada por Emmy (404)
+DELETE http://localhost:8080/api/subjects/1?userId=2
+
+### Matéria - Confirmar preservação da matéria de Ada (200)
+GET http://localhost:8080/api/subjects/1?userId=1
+
+### Tópico - Ada consulta seu próprio tópico (200)
+GET http://localhost:8080/api/topics/1?userId=1
+
+### Tópico - Emmy tenta consultar tópico de Ada (404)
+GET http://localhost:8080/api/topics/1?userId=2
+
+### Tópico - Ada tenta consultar tópico de Emmy (404)
+GET http://localhost:8080/api/topics/2?userId=1
+
+### Tópico - Bloquear atualização de tópico de Ada por Emmy (404)
+PUT http://localhost:8080/api/topics/1?userId=2
+Content-Type: application/json
+
+{
+  "name": "Teoria dos Anéis"
+}
+
+### Tópico - Bloquear exclusão de tópico de Ada por Emmy (404)
+DELETE http://localhost:8080/api/topics/1?userId=2
+
+### Tópico - Confirmar preservação do tópico de Ada (200)
+GET http://localhost:8080/api/topics/1?userId=1
+
+### Tópico - Bloquear associação de tópico de Emmy à matéria de Ada (404)
+PUT http://localhost:8080/api/subjects/1/topics/2?userId=1
+
+### Tópico - Bloquear associação de tópico de Ada à matéria de Emmy (404)
+PUT http://localhost:8080/api/subjects/2/topics/1?userId=2
+
+### Tópico - Bloquear remoção de associação por usuário diferente (404)
+DELETE http://localhost:8080/api/subjects/2/topics/2?userId=1
+
+### Tópico - Confirmar preservação dos tópicos da matéria de Emmy (200)
+GET http://localhost:8080/api/subjects/2/topics?userId=2
 
 ### Conteúdo - Rejeitar atualização com título vazio (400)
 PUT http://localhost:8080/api/contents/1?userId=1
@@ -526,6 +590,37 @@ GET http://localhost:8080/api/contents/2?userId=2
 
 ### Conteúdo - Ada tenta consultar conteúdo de Emmy (404)
 GET http://localhost:8080/api/contents/2?userId=1
+
+### Conteúdo - Bloquear criação de Ada com tópico de Emmy (404)
+POST http://localhost:8080/api/contents?userId=1
+Content-Type: application/json
+
+{
+  "title": "Introdução à Teoria dos Anéis",
+  "body": "Estudo das propriedades algébricas dos anéis.",
+  "topics": [
+    {
+      "id": 2
+    }
+  ]
+}
+
+### Conteúdo - Bloquear criação com tópicos de usuários diferentes (404)
+POST http://localhost:8080/api/contents?userId=1
+Content-Type: application/json
+
+{
+  "title": "Algoritmos e Teoria dos Anéis",
+  "body": "Estudo de algoritmos matemáticos e estruturas algébricas.",
+  "topics": [
+    {
+      "id": 1
+    },
+    {
+      "id": 2
+    }
+  ]
+}
 
 ### Flashcard - Listar flashcards de Ada (200)
 GET http://localhost:8080/api/flashcards?userId=1
@@ -752,16 +847,16 @@ GET http://localhost:8080/api/answer-attempts/users/2
 # =============================================================================
 
 ### Tópico - Remover associação de Algoritmos Matemáticos com Matemática Aplicada de Ada (204)
-DELETE http://localhost:8080/api/subjects/1/topics/1
+DELETE http://localhost:8080/api/subjects/1/topics/1?userId=1
 
 ### Tópico - Confirmar ausência de Algoritmos Matemáticos na Matemática Aplicada de Ada (200)
-GET http://localhost:8080/api/subjects/1/topics
+GET http://localhost:8080/api/subjects/1/topics?userId=1
 
 ### Tópico - Confirmar permanência de Algoritmos Matemáticos na Lógica de Ada (200)
-GET http://localhost:8080/api/subjects/3/topics
+GET http://localhost:8080/api/subjects/3/topics?userId=1
 
 ### Tópico - Repetir remoção da associação inexistente entre Algoritmos Matemáticos e Matemática Aplicada de Ada (204)
-DELETE http://localhost:8080/api/subjects/1/topics/1
+DELETE http://localhost:8080/api/subjects/1/topics/1?userId=1
 
 ### Flashcard - Excluir primeiro flashcard de Ada (204)
 DELETE http://localhost:8080/api/flashcards/1?userId=1
@@ -800,49 +895,49 @@ GET http://localhost:8080/api/contents/2?userId=2
 DELETE http://localhost:8080/api/contents/3?userId=1
 
 ### Tópico - Excluir Algoritmos Matemáticos (204)
-DELETE http://localhost:8080/api/topics/1
+DELETE http://localhost:8080/api/topics/1?userId=1
 
 ### Tópico - Confirmar exclusão de Algoritmos Matemáticos (404)
-GET http://localhost:8080/api/topics/1
+GET http://localhost:8080/api/topics/1?userId=1
 
 ### Tópico - Confirmar existência da Lógica após exclusão de Algoritmos Matemáticos (200)
-GET http://localhost:8080/api/subjects/3
+GET http://localhost:8080/api/subjects/3?userId=1
 
 ### Tópico - Confirmar ausência de Algoritmos Matemáticos na Lógica (200)
-GET http://localhost:8080/api/subjects/3/topics
+GET http://localhost:8080/api/subjects/3/topics?userId=1
 
 ### Tópico - Excluir Teoria dos Anéis (204)
-DELETE http://localhost:8080/api/topics/2
+DELETE http://localhost:8080/api/topics/2?userId=2
 
 ### Tópico - Excluir Sequências Numéricas (204)
-DELETE http://localhost:8080/api/topics/3
+DELETE http://localhost:8080/api/topics/3?userId=1
 
 ### Tópico - Excluir Máquina Analítica (204)
-DELETE http://localhost:8080/api/topics/4
+DELETE http://localhost:8080/api/topics/4?userId=1
 
 ### Matéria - Excluir Matemática Aplicada de Ada (204)
-DELETE http://localhost:8080/api/subjects/1
+DELETE http://localhost:8080/api/subjects/1?userId=1
 
 ### Matéria - Confirmar exclusão de Matemática Aplicada de Ada (404)
-GET http://localhost:8080/api/subjects/1
+GET http://localhost:8080/api/subjects/1?userId=1
 
 ### Matéria - Excluir Álgebra Abstrata de Emmy (204)
-DELETE http://localhost:8080/api/subjects/2
+DELETE http://localhost:8080/api/subjects/2?userId=2
 
 ### Matéria - Confirmar exclusão de Álgebra Abstrata de Emmy (404)
-GET http://localhost:8080/api/subjects/2
+GET http://localhost:8080/api/subjects/2?userId=2
 
 ### Matéria - Excluir Lógica de Ada (204)
-DELETE http://localhost:8080/api/subjects/3
+DELETE http://localhost:8080/api/subjects/3?userId=1
 
 ### Matéria - Confirmar exclusão de Lógica de Ada (404)
-GET http://localhost:8080/api/subjects/3
+GET http://localhost:8080/api/subjects/3?userId=1
 
 ### Matéria - Excluir Fundamentos da Computação de Ada (204)
-DELETE http://localhost:8080/api/subjects/4
+DELETE http://localhost:8080/api/subjects/4?userId=1
 
 ### Matéria - Confirmar exclusão de Fundamentos da Computação de Ada (404)
-GET http://localhost:8080/api/subjects/4
+GET http://localhost:8080/api/subjects/4?userId=1
 
 ### Usuário - Excluir Ada Lovelace (204)
 DELETE http://localhost:8080/api/users/1
