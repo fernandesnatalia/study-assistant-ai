@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.List;
 import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
@@ -51,11 +52,15 @@ class UserServiceTest {
     @InjectMocks
     private UserService userService;
 
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
     private User createUser() {
         User user = new User();
         user.setId(1L);
         user.setName("Augusta Ada Byron King");
         user.setEmail("ada@example.com");
+        user.setPassword("ada123");
         return user;
     }
 
@@ -64,11 +69,14 @@ class UserServiceTest {
         User user = createUser();
 
         when(userRepository.existsByEmail(user.getEmail())).thenReturn(false);
+        when(passwordEncoder.encode("ada123")).thenReturn("encoded-password");
         when(userRepository.save(user)).thenReturn(user);
 
         User result = userService.createUser(user);
 
         assertSame(user, result);
+        assertEquals("encoded-password", result.getPassword());
+        verify(passwordEncoder).encode("ada123");
         verify(userRepository).save(user);
     }
 

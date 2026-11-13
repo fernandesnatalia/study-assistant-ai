@@ -1,29 +1,34 @@
 package br.com.studyassistant.studyassistantai.controller;
 
 import br.com.studyassistant.studyassistantai.model.User;
+import br.com.studyassistant.studyassistantai.service.AuthenticatedUserService;
 import br.com.studyassistant.studyassistantai.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
 
     private final UserService userService;
+    private final AuthenticatedUserService authenticatedUserService;
 
-    public UserController(UserService userService) {
+    public UserController(
+            UserService userService,
+            AuthenticatedUserService authenticatedUserService
+    ) {
         this.userService = userService;
+        this.authenticatedUserService = authenticatedUserService;
     }
 
     @PostMapping
@@ -34,27 +39,24 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
-    @GetMapping
-    public List<User> getAllUsers() {
-        return userService.getAllUsers();
+    @GetMapping("/me")
+    public User getAuthenticatedUser(Authentication authentication) {
+        return authenticatedUserService.getAuthenticatedUser(authentication);
     }
 
-    @GetMapping("/{id}")
-    public User getUserById(@PathVariable Long id) {
-        return userService.getUserById(id);
-    }
-
-    @PutMapping("/{id}")
-    public User updateUserById(
-            @PathVariable Long id,
-            @Valid @RequestBody User updateUser
+    @PutMapping("/me")
+    public User updateAuthenticatedUser(
+            @Valid @RequestBody User updatedUser,
+            Authentication authentication
     ) {
-        return userService.updateUser(id, updateUser);
+        Long userId = authenticatedUserService.getAuthenticatedUserId(authentication);
+        return userService.updateUser(userId, updatedUser);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/me")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
+    public void deleteAuthenticatedUser(Authentication authentication) {
+        Long userId = authenticatedUserService.getAuthenticatedUserId(authentication);
+        userService.deleteUser(userId);
     }
 }

@@ -2,7 +2,9 @@ package br.com.studyassistant.studyassistantai.controller;
 
 import br.com.studyassistant.studyassistantai.dto.AnswerAttemptResponse;
 import br.com.studyassistant.studyassistantai.service.AnswerAttemptService;
+import br.com.studyassistant.studyassistantai.service.AuthenticatedUserService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,38 +19,40 @@ import java.util.List;
 public class AnswerAttemptController {
 
     private final AnswerAttemptService answerAttemptService;
+    private final AuthenticatedUserService authenticatedUserService;
 
-    public AnswerAttemptController(AnswerAttemptService answerAttemptService) {
+    public AnswerAttemptController(
+            AnswerAttemptService answerAttemptService,
+            AuthenticatedUserService authenticatedUserService
+    ) {
         this.answerAttemptService = answerAttemptService;
+        this.authenticatedUserService = authenticatedUserService;
     }
 
     @PostMapping("/give-up")
     public ResponseEntity<AnswerAttemptResponse> giveUp(
-            @RequestParam Long userId,
-            @RequestParam Long flashcardId
+            @RequestParam Long flashcardId,
+            Authentication authentication
     ) {
-        AnswerAttemptResponse response = answerAttemptService.giveUp(
-                userId,
-                flashcardId
-        );
+        Long userId = authenticatedUserService.getAuthenticatedUserId(authentication);
 
-        return ResponseEntity
-                .created(URI.create("/api/answer-attempts/" + response.id()))
-                .body(response);
+        AnswerAttemptResponse response = answerAttemptService.giveUp(userId, flashcardId);
+
+        return ResponseEntity.created(URI.create("/api/answer-attempts/" + response.id())).body(response);
     }
 
-    @GetMapping("/users/{userId}")
-    public List<AnswerAttemptResponse> findByUser(
-            @PathVariable Long userId
-    ) {
+    @GetMapping
+    public List<AnswerAttemptResponse> findByUser(Authentication authentication) {
+        Long userId = authenticatedUserService.getAuthenticatedUserId(authentication);
         return answerAttemptService.findByUser(userId);
     }
 
-    @GetMapping("/users/{userId}/flashcards/{flashcardId}")
+    @GetMapping("/flashcards/{flashcardId}")
     public List<AnswerAttemptResponse> findByUserAndFlashcard(
-            @PathVariable Long userId,
-            @PathVariable Long flashcardId
+            @PathVariable Long flashcardId,
+            Authentication authentication
     ) {
+        Long userId = authenticatedUserService.getAuthenticatedUserId(authentication);
         return answerAttemptService.findByUserAndFlashcard(userId, flashcardId);
     }
 }

@@ -1,9 +1,11 @@
 package br.com.studyassistant.studyassistantai.controller;
 
 import br.com.studyassistant.studyassistantai.model.Flashcard;
+import br.com.studyassistant.studyassistantai.service.AuthenticatedUserService;
 import br.com.studyassistant.studyassistantai.service.FlashcardService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,56 +23,67 @@ import java.util.List;
 public class FlashcardController {
 
     private final FlashcardService flashcardService;
+    private final AuthenticatedUserService authenticatedUserService;
 
-    public FlashcardController(FlashcardService flashcardService) {
+    public FlashcardController(
+            FlashcardService flashcardService,
+            AuthenticatedUserService authenticatedUserService
+    ) {
         this.flashcardService = flashcardService;
+        this.authenticatedUserService = authenticatedUserService;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Flashcard createFlashcard(
-            @RequestParam Long userId,
             @RequestParam Long deckId,
-            @Valid @RequestBody Flashcard flashcard
+            @Valid @RequestBody Flashcard flashcard,
+            Authentication authentication
     ) {
+        Long userId = authenticatedUserService.getAuthenticatedUserId(authentication);
         return flashcardService.createFlashcard(userId, deckId, flashcard);
     }
 
     @GetMapping
-    public List<Flashcard> getAllFlashcards(@RequestParam Long userId) {
+    public List<Flashcard> getAllFlashcards(Authentication authentication) {
+        Long userId = authenticatedUserService.getAuthenticatedUserId(authentication);
         return flashcardService.getAllFlashcards(userId);
     }
 
     @GetMapping("/{id}")
     public Flashcard getFlashcardById(
             @PathVariable Long id,
-            @RequestParam Long userId
+            Authentication authentication
     ) {
+        Long userId = authenticatedUserService.getAuthenticatedUserId(authentication);
         return flashcardService.getFlashcardById(id, userId);
     }
 
     @GetMapping("/deck/{deckId}")
     public List<Flashcard> getFlashcardsByDeckId(
             @PathVariable Long deckId,
-            @RequestParam Long userId
+            Authentication authentication
     ) {
+        Long userId = authenticatedUserService.getAuthenticatedUserId(authentication);
         return flashcardService.getFlashcardsByDeckId(deckId, userId);
     }
 
     @PutMapping("/{id}")
     public Flashcard updateFlashcard(
             @PathVariable Long id,
-            @RequestParam Long userId,
-            @Valid @RequestBody Flashcard updatedFlashcard
+            @Valid @RequestBody Flashcard updatedFlashcard,
+            Authentication authentication
     ) {
+        Long userId = authenticatedUserService.getAuthenticatedUserId(authentication);
         return flashcardService.updateFlashcard(id, userId, updatedFlashcard);
     }
 
     @PostMapping("/{id}/generate-answer")
     public Flashcard generateAnswer(
             @PathVariable Long id,
-            @RequestParam Long userId
+            Authentication authentication
     ) {
+        Long userId = authenticatedUserService.getAuthenticatedUserId(authentication);
         return flashcardService.generateFlashcardAnswer(id, userId);
     }
 
@@ -78,8 +91,9 @@ public class FlashcardController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteFlashcard(
             @PathVariable Long id,
-            @RequestParam Long userId
+            Authentication authentication
     ) {
+        Long userId = authenticatedUserService.getAuthenticatedUserId(authentication);
         flashcardService.deleteFlashcard(id, userId);
     }
 }

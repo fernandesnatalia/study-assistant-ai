@@ -1,6 +1,8 @@
 # =============================================================================
 # STUDY ASSISTANT AI — FLUXOS DE TESTE
 # =============================================================================
+# Após os logins, copie os tokens retornados e substitua <ADA_TOKEN> e <EMMY_TOKEN>.
+# =============================================================================
 
 # =============================================================================
 # FLUXO 1 — CADASTRO E ORGANIZAÇÃO DOS ESTUDOS
@@ -13,7 +15,8 @@ Content-Type: application/json
 
 {
   "name": "Augusta Ada Byron King",
-  "email": "ada@example.com"
+  "email": "ada@example.com",
+  "password": "ada123"
 }
 
 ### Usuário - Criar Emmy Noether (201)
@@ -22,17 +25,57 @@ Content-Type: application/json
 
 {
   "name": "Emmy Noether",
-  "email": "emmy@example.com"
+  "email": "emmy@example.com",
+  "password": "emmy123"
+}
+
+### Autenticação - Login de Ada Lovelace (200)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "ada@example.com",
+  "password": "ada123"
+}
+
+### Autenticação - Login de Emmy Noether (200)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "emmy@example.com",
+  "password": "emmy123"
+}
+
+### Autenticação - Rejeitar senha incorreta de Ada Lovelace (401)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "ada@example.com",
+  "password": "senha-incorreta"
+}
+
+### Autenticação - Rejeitar e-mail inexistente (401)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "grace@example.com",
+  "password": "grace123"
 }
 
 ### Usuário - Consultar Ada Lovelace (200)
-GET http://localhost:8080/api/users/1
+GET http://localhost:8080/api/users/me
+Authorization: Bearer <ADA_TOKEN>
 
 ### Usuário - Consultar Emmy Noether (200)
-GET http://localhost:8080/api/users/2
+GET http://localhost:8080/api/users/me
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Matéria - Ada cria Matemática (201)
-POST http://localhost:8080/api/subjects?userId=1
+POST http://localhost:8080/api/subjects
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -40,7 +83,8 @@ Content-Type: application/json
 }
 
 ### Matéria - Emmy cria Álgebra Abstrata (201)
-POST http://localhost:8080/api/subjects?userId=2
+POST http://localhost:8080/api/subjects
+Authorization: Bearer <EMMY_TOKEN>
 Content-Type: application/json
 
 {
@@ -48,7 +92,8 @@ Content-Type: application/json
 }
 
 ### Matéria - Ada cria Lógica (201)
-POST http://localhost:8080/api/subjects?userId=1
+POST http://localhost:8080/api/subjects
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -56,7 +101,8 @@ Content-Type: application/json
 }
 
 ### Matéria - Ada cria Fundamentos da Computação (201)
-POST http://localhost:8080/api/subjects?userId=1
+POST http://localhost:8080/api/subjects
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -64,13 +110,16 @@ Content-Type: application/json
 }
 
 ### Matéria - Consultar Matemática de Ada (200)
-GET http://localhost:8080/api/subjects/1?userId=1
+GET http://localhost:8080/api/subjects/1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Matéria - Consultar Álgebra Abstrata de Emmy (200)
-GET http://localhost:8080/api/subjects/2?userId=2
+GET http://localhost:8080/api/subjects/2
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Tópico - Ada cria Algoritmos em Matemática (201)
-POST http://localhost:8080/api/topics?userId=1&subjectId=1
+POST http://localhost:8080/api/topics?subjectId=1
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -78,7 +127,8 @@ Content-Type: application/json
 }
 
 ### Tópico - Emmy cria Teoria dos Anéis em Álgebra Abstrata (201)
-POST http://localhost:8080/api/topics?userId=2&subjectId=2
+POST http://localhost:8080/api/topics?subjectId=2
+Authorization: Bearer <EMMY_TOKEN>
 Content-Type: application/json
 
 {
@@ -86,7 +136,8 @@ Content-Type: application/json
 }
 
 ### Tópico - Ada cria Sequências Numéricas em Matemática (201)
-POST http://localhost:8080/api/topics?userId=1&subjectId=1
+POST http://localhost:8080/api/topics?subjectId=1
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -94,7 +145,8 @@ Content-Type: application/json
 }
 
 ### Tópico - Ada cria Máquina Analítica em Fundamentos da Computação (201)
-POST http://localhost:8080/api/topics?userId=1&subjectId=4
+POST http://localhost:8080/api/topics?subjectId=4
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -102,19 +154,24 @@ Content-Type: application/json
 }
 
 ### Tópico - Consultar tópicos da Matemática de Ada (200)
-GET http://localhost:8080/api/subjects/1/topics?userId=1
+GET http://localhost:8080/api/subjects/1/topics
+Authorization: Bearer <ADA_TOKEN>
 
 ### Tópico - Consultar tópicos da Álgebra Abstrata de Emmy (200)
-GET http://localhost:8080/api/subjects/2/topics?userId=2
+GET http://localhost:8080/api/subjects/2/topics
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Tópico - Consultar tópicos da Lógica de Ada (200)
-GET http://localhost:8080/api/subjects/3/topics?userId=1
+GET http://localhost:8080/api/subjects/3/topics
+Authorization: Bearer <ADA_TOKEN>
 
 ### Tópico - Consultar tópicos de Fundamentos da Computação de Ada (200)
-GET http://localhost:8080/api/subjects/4/topics?userId=1
+GET http://localhost:8080/api/subjects/4/topics
+Authorization: Bearer <ADA_TOKEN>
 
 ### Conteúdo - Ada cria Algoritmos e Máquinas Analíticas em Algoritmos (201)
-POST http://localhost:8080/api/contents?userId=1
+POST http://localhost:8080/api/contents
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -126,7 +183,8 @@ Content-Type: application/json
 }
 
 ### Conteúdo - Emmy cria Introdução à Teoria dos Anéis (201)
-POST http://localhost:8080/api/contents?userId=2
+POST http://localhost:8080/api/contents
+Authorization: Bearer <EMMY_TOKEN>
 Content-Type: application/json
 
 {
@@ -138,7 +196,8 @@ Content-Type: application/json
 }
 
 ### Conteúdo - Ada cria Fundamentos da Máquina Analítica (201)
-POST http://localhost:8080/api/contents?userId=1
+POST http://localhost:8080/api/contents
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -150,16 +209,20 @@ Content-Type: application/json
 }
 
 ### Conteúdo - Consultar Algoritmos e Máquinas Analíticas de Ada (200)
-GET http://localhost:8080/api/contents/1?userId=1
+GET http://localhost:8080/api/contents/1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Conteúdo - Consultar Introdução à Teoria dos Anéis de Emmy (200)
-GET http://localhost:8080/api/contents/2?userId=2
+GET http://localhost:8080/api/contents/2
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Conteúdo - Consultar Fundamentos da Máquina Analítica de Ada (200)
-GET http://localhost:8080/api/contents/3?userId=1
+GET http://localhost:8080/api/contents/3
+Authorization: Bearer <ADA_TOKEN>
 
 ### Anotação - Ada cria anotação para Matemática (201)
-POST http://localhost:8080/api/notes?userId=1
+POST http://localhost:8080/api/notes
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -171,7 +234,8 @@ Content-Type: application/json
 }
 
 ### Anotação - Emmy cria anotação para Álgebra Abstrata (201)
-POST http://localhost:8080/api/notes?userId=2
+POST http://localhost:8080/api/notes
+Authorization: Bearer <EMMY_TOKEN>
 Content-Type: application/json
 
 {
@@ -183,7 +247,8 @@ Content-Type: application/json
 }
 
 ### Anotação - Ada cria anotação para Algoritmos (201)
-POST http://localhost:8080/api/notes?userId=1
+POST http://localhost:8080/api/notes
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -195,7 +260,8 @@ Content-Type: application/json
 }
 
 ### Anotação - Emmy cria anotação para Teoria dos Anéis (201)
-POST http://localhost:8080/api/notes?userId=2
+POST http://localhost:8080/api/notes
+Authorization: Bearer <EMMY_TOKEN>
 Content-Type: application/json
 
 {
@@ -207,7 +273,8 @@ Content-Type: application/json
 }
 
 ### Anotação - Ada cria anotação para conteúdo de Algoritmos e Máquinas Analíticas (201)
-POST http://localhost:8080/api/notes?userId=1
+POST http://localhost:8080/api/notes
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -219,7 +286,8 @@ Content-Type: application/json
 }
 
 ### Anotação - Emmy cria anotação para conteúdo de Teoria dos Anéis (201)
-POST http://localhost:8080/api/notes?userId=2
+POST http://localhost:8080/api/notes
+Authorization: Bearer <EMMY_TOKEN>
 Content-Type: application/json
 
 {
@@ -231,10 +299,12 @@ Content-Type: application/json
 }
 
 ### Anotação - Listar anotações de Ada (200)
-GET http://localhost:8080/api/notes?userId=1
+GET http://localhost:8080/api/notes
+Authorization: Bearer <ADA_TOKEN>
 
 ### Anotação - Listar anotações de Emmy (200)
-GET http://localhost:8080/api/notes?userId=2
+GET http://localhost:8080/api/notes
+Authorization: Bearer <EMMY_TOKEN>
 
 # =============================================================================
 # FLUXO 2 — CRIAÇÃO ALTERNADA DE BARALHOS, FLASHCARDS E REVISÕES
@@ -242,7 +312,8 @@ GET http://localhost:8080/api/notes?userId=2
 # =============================================================================
 
 ### Baralho - Ada cria baralho de Algoritmos com primeiro flashcard sem resposta (201)
-POST http://localhost:8080/api/decks?userId=1
+POST http://localhost:8080/api/decks
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -251,7 +322,8 @@ Content-Type: application/json
 }
 
 ### Baralho - Emmy cria baralho de Teoria dos Anéis com primeiro flashcard (201)
-POST http://localhost:8080/api/decks?userId=2
+POST http://localhost:8080/api/decks
+Authorization: Bearer <EMMY_TOKEN>
 Content-Type: application/json
 
 {
@@ -261,13 +333,16 @@ Content-Type: application/json
 }
 
 ### Flashcard - Ada gera resposta do primeiro flashcard com IA (200)
-POST http://localhost:8080/api/flashcards/1/generate-answer?userId=1
+POST http://localhost:8080/api/flashcards/1/generate-answer
+Authorization: Bearer <ADA_TOKEN>
 
 ### Flashcard - Ada consulta primeiro flashcard após geração da resposta (200)
-GET http://localhost:8080/api/flashcards/1?userId=1
+GET http://localhost:8080/api/flashcards/1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Flashcard - Ada cria segundo flashcard no baralho de Algoritmos (201)
-POST http://localhost:8080/api/flashcards?userId=1&deckId=1
+POST http://localhost:8080/api/flashcards?deckId=1
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -276,7 +351,8 @@ Content-Type: application/json
 }
 
 ### Flashcard - Emmy cria segundo flashcard no baralho de Teoria dos Anéis (201)
-POST http://localhost:8080/api/flashcards?userId=2&deckId=2
+POST http://localhost:8080/api/flashcards?deckId=2
+Authorization: Bearer <EMMY_TOKEN>
 Content-Type: application/json
 
 {
@@ -285,7 +361,8 @@ Content-Type: application/json
 }
 
 ### Baralho - Ada cria baralho de Máquina Analítica com primeiro flashcard (201)
-POST http://localhost:8080/api/decks?userId=1
+POST http://localhost:8080/api/decks
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -295,49 +372,64 @@ Content-Type: application/json
 }
 
 ### Baralho - Ada consulta seus baralhos (200)
-GET http://localhost:8080/api/decks?userId=1
+GET http://localhost:8080/api/decks
+Authorization: Bearer <ADA_TOKEN>
 
 ### Baralho - Emmy consulta seus baralhos (200)
-GET http://localhost:8080/api/decks?userId=2
+GET http://localhost:8080/api/decks
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Baralho - Ada consulta baralho de Algoritmos (200)
-GET http://localhost:8080/api/decks/1?userId=1
+GET http://localhost:8080/api/decks/1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Baralho - Emmy consulta baralho de Teoria dos Anéis (200)
-GET http://localhost:8080/api/decks/2?userId=2
+GET http://localhost:8080/api/decks/2
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Baralho - Ada consulta baralho de Máquina Analítica (200)
-GET http://localhost:8080/api/decks/3?userId=1
+GET http://localhost:8080/api/decks/3
+Authorization: Bearer <ADA_TOKEN>
 
 ### Flashcard - Ada consulta seus flashcards (200)
-GET http://localhost:8080/api/flashcards?userId=1
+GET http://localhost:8080/api/flashcards
+Authorization: Bearer <ADA_TOKEN>
 
 ### Flashcard - Emmy consulta seus flashcards (200)
-GET http://localhost:8080/api/flashcards?userId=2
+GET http://localhost:8080/api/flashcards
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Flashcard - Ada consulta flashcards do baralho de Algoritmos (200)
-GET http://localhost:8080/api/flashcards/deck/1?userId=1
+GET http://localhost:8080/api/flashcards/deck/1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Flashcard - Emmy consulta flashcards do baralho de Teoria dos Anéis (200)
-GET http://localhost:8080/api/flashcards/deck/2?userId=2
+GET http://localhost:8080/api/flashcards/deck/2
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Flashcard - Ada consulta flashcards do baralho de Máquina Analítica (200)
-GET http://localhost:8080/api/flashcards/deck/3?userId=1
+GET http://localhost:8080/api/flashcards/deck/3
+Authorization: Bearer <ADA_TOKEN>
 
 ### Flashcard - Ada consulta seu primeiro flashcard (200)
-GET http://localhost:8080/api/flashcards/1?userId=1
+GET http://localhost:8080/api/flashcards/1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Flashcard - Emmy consulta seu primeiro flashcard (200)
-GET http://localhost:8080/api/flashcards/2?userId=2
+GET http://localhost:8080/api/flashcards/2
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Flashcard - Ada consulta seu segundo flashcard (200)
-GET http://localhost:8080/api/flashcards/3?userId=1
+GET http://localhost:8080/api/flashcards/3
+Authorization: Bearer <ADA_TOKEN>
 
 ### Flashcard - Emmy consulta seu segundo flashcard (200)
-GET http://localhost:8080/api/flashcards/4?userId=2
+GET http://localhost:8080/api/flashcards/4
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Flashcard - Ada consulta seu terceiro flashcard (200)
-GET http://localhost:8080/api/flashcards/5?userId=1
+GET http://localhost:8080/api/flashcards/5
+Authorization: Bearer <ADA_TOKEN>
 
 # =============================================================================
 # FLUXO 3 — MANUTENÇÃO DOS ESTUDOS
@@ -345,19 +437,23 @@ GET http://localhost:8080/api/flashcards/5?userId=1
 # =============================================================================
 
 ### Usuário - Atualizar nome de Ada Lovelace (200)
-PUT http://localhost:8080/api/users/1
+PUT http://localhost:8080/api/users/me
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
   "name": "Ada Lovelace",
-  "email": "ada@example.com"
+  "email": "ada@example.com",
+  "password": "ada123"
 }
 
 ### Usuário - Confirmar atualização do nome de Ada Byron Lovelace (200)
-GET http://localhost:8080/api/users/1
+GET http://localhost:8080/api/users/me
+Authorization: Bearer <ADA_TOKEN>
 
 ### Matéria - Atualizar Matemática de Ada para Matemática Aplicada (200)
-PUT http://localhost:8080/api/subjects/1?userId=1
+PUT http://localhost:8080/api/subjects/1
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -365,10 +461,12 @@ Content-Type: application/json
 }
 
 ### Matéria - Confirmar atualização de Matemática Aplicada (200)
-GET http://localhost:8080/api/subjects/1?userId=1
+GET http://localhost:8080/api/subjects/1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Tópico - Atualizar Algoritmos para Algoritmos Matemáticos (200)
-PUT http://localhost:8080/api/topics/1?userId=1
+PUT http://localhost:8080/api/topics/1
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -376,10 +474,12 @@ Content-Type: application/json
 }
 
 ### Tópico - Confirmar atualização de Algoritmos Matemáticos (200)
-GET http://localhost:8080/api/topics/1?userId=1
+GET http://localhost:8080/api/topics/1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Conteúdo - Atualizar título e corpo de Algoritmos e Máquinas Analíticas (200)
-PUT http://localhost:8080/api/contents/1?userId=1
+PUT http://localhost:8080/api/contents/1
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -388,10 +488,12 @@ Content-Type: application/json
 }
 
 ### Conteúdo - Confirmar atualização e preservação do tópico associado (200)
-GET http://localhost:8080/api/contents/1?userId=1
+GET http://localhost:8080/api/contents/1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Anotação - Atualizar anotação de Matemática de Ada (200)
-PUT http://localhost:8080/api/notes/1?userId=1
+PUT http://localhost:8080/api/notes/1
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -400,22 +502,28 @@ Content-Type: application/json
 }
 
 ### Anotação - Confirmar atualização da anotação de Matemática Aplicada (200)
-GET http://localhost:8080/api/notes/1?userId=1
+GET http://localhost:8080/api/notes/1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Anotação - Consultar anotação de Algoritmos de Ada (200)
-GET http://localhost:8080/api/notes/3?userId=1
+GET http://localhost:8080/api/notes/3
+Authorization: Bearer <ADA_TOKEN>
 
 ### Anotação - Consultar anotação do conteúdo de Ada (200)
-GET http://localhost:8080/api/notes/5?userId=1
+GET http://localhost:8080/api/notes/5
+Authorization: Bearer <ADA_TOKEN>
 
 ### Anotação - Listar anotações de Ada após atualização (200)
-GET http://localhost:8080/api/notes?userId=1
+GET http://localhost:8080/api/notes
+Authorization: Bearer <ADA_TOKEN>
 
 ### Anotação - Listar anotações de Emmy após atualização (200)
-GET http://localhost:8080/api/notes?userId=2
+GET http://localhost:8080/api/notes
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Flashcard - Atualizar pergunta e resposta do primeiro flashcard de Ada (200)
-PUT http://localhost:8080/api/flashcards/1?userId=1
+PUT http://localhost:8080/api/flashcards/1
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -424,7 +532,8 @@ Content-Type: application/json
 }
 
 ### Baralho - Atualizar tema do baralho de Algoritmos de Ada (200)
-PUT http://localhost:8080/api/decks/1?userId=1
+PUT http://localhost:8080/api/decks/1
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -432,43 +541,56 @@ Content-Type: application/json
 }
 
 ### Baralho - Confirmar atualização do baralho de Algoritmos Matemáticos (200)
-GET http://localhost:8080/api/decks/1?userId=1
+GET http://localhost:8080/api/decks/1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Flashcard - Confirmar atualização do primeiro flashcard de Ada (200)
-GET http://localhost:8080/api/flashcards/1?userId=1
+GET http://localhost:8080/api/flashcards/1
+Authorization: Bearer <ADA_TOKEN>
 
-### Usuário - Listar usuários após atualizações (200)
-GET http://localhost:8080/api/users
+### Usuário - Consultar Ada após atualizações (200)
+GET http://localhost:8080/api/users/me
+Authorization: Bearer <ADA_TOKEN>
 
 ### Matéria - Listar matérias de Ada após atualizações (200)
-GET http://localhost:8080/api/subjects?userId=1
+GET http://localhost:8080/api/subjects
+Authorization: Bearer <ADA_TOKEN>
 
 ### Matéria - Listar matérias de Emmy após atualizações (200)
-GET http://localhost:8080/api/subjects?userId=2
+GET http://localhost:8080/api/subjects
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Tópico - Listar tópicos de Ada após atualizações (200)
-GET http://localhost:8080/api/topics?userId=1
+GET http://localhost:8080/api/topics
+Authorization: Bearer <ADA_TOKEN>
 
 ### Tópico - Listar tópicos de Emmy após atualizações (200)
-GET http://localhost:8080/api/topics?userId=2
+GET http://localhost:8080/api/topics
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Conteúdo - Listar conteúdos de Ada após atualizações (200)
-GET http://localhost:8080/api/contents?userId=1
+GET http://localhost:8080/api/contents
+Authorization: Bearer <ADA_TOKEN>
 
 ### Conteúdo - Listar conteúdos de Emmy após atualizações (200)
-GET http://localhost:8080/api/contents?userId=
+GET http://localhost:8080/api/contents
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Baralho - Listar baralhos de Ada após atualizações (200)
-GET http://localhost:8080/api/decks?userId=1
+GET http://localhost:8080/api/decks
+Authorization: Bearer <ADA_TOKEN>
 
 ### Baralho - Listar baralhos de Emmy após atualizações (200)
-GET http://localhost:8080/api/decks?userId=2
+GET http://localhost:8080/api/decks
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Flashcard - Listar flashcards de Ada após atualizações (200)
-GET http://localhost:8080/api/flashcards?userId=1
+GET http://localhost:8080/api/flashcards
+Authorization: Bearer <ADA_TOKEN>
 
 ### Flashcard - Listar flashcards de Emmy após atualizações (200)
-GET http://localhost:8080/api/flashcards?userId=2
+GET http://localhost:8080/api/flashcards
+Authorization: Bearer <EMMY_TOKEN>
 
 # =============================================================================
 # FLUXO 4 — VALIDAÇÕES
@@ -476,7 +598,8 @@ GET http://localhost:8080/api/flashcards?userId=2
 # =============================================================================
 
 ### Flashcard - Permitir atualização pelo proprietário (200)
-PUT http://localhost:8080/api/flashcards/1?userId=1
+PUT http://localhost:8080/api/flashcards/1
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -490,7 +613,8 @@ Content-Type: application/json
 
 {
   "name": "",
-  "email": "teste@example.com"
+  "email": "teste@example.com",
+  "password": "teste123"
 }
 
 ### Usuário - Rejeitar criação com e-mail inválido (400)
@@ -499,7 +623,8 @@ Content-Type: application/json
 
 {
   "name": "Ada Lovelace",
-  "email": "email-invalido"
+  "email": "email-invalido",
+  "password": "teste123"
 }
 
 ### Usuário - Rejeitar criação com e-mail duplicado de Ada (409)
@@ -508,11 +633,13 @@ Content-Type: application/json
 
 {
   "name": "Augusta Ada Byron King",
-  "email": "ada@example.com"
+  "email": "ada@example.com",
+  "password": "ada123"
 }
 
 ### Matéria - Rejeitar criação com nome vazio para Ada (400)
-POST http://localhost:8080/api/subjects?userId=1
+POST http://localhost:8080/api/subjects
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -520,7 +647,8 @@ Content-Type: application/json
 }
 
 ### Matéria - Rejeitar criação com nome composto apenas por espaços para Ada (400)
-POST http://localhost:8080/api/subjects?userId=1
+POST http://localhost:8080/api/subjects
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -528,28 +656,22 @@ Content-Type: application/json
 }
 
 ### Matéria - Rejeitar criação sem nome para Ada (400)
-POST http://localhost:8080/api/subjects?userId=1
+POST http://localhost:8080/api/subjects
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {}
 
 ### Matéria - Rejeitar atualização com nome vazio de Matemática Aplicada (400)
-PUT http://localhost:8080/api/subjects/1?userId=1
+PUT http://localhost:8080/api/subjects/1
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
   "name": ""
 }
 
-### Matéria - Rejeitar criação para usuário inexistente (404)
-POST http://localhost:8080/api/subjects?userId=-1
-Content-Type: application/json
-
-{
-  "name": "Teoria dos Grupos"
-}
-
-### Matéria - Rejeitar criação sem informar usuário (400)
+### Matéria - Rejeitar criação sem autenticação (403)
 POST http://localhost:8080/api/subjects
 Content-Type: application/json
 
@@ -557,17 +679,30 @@ Content-Type: application/json
   "name": "Teoria dos Grupos"
 }
 
+### Matéria - Rejeitar criação com token inválido (403)
+POST http://localhost:8080/api/subjects
+Authorization: Bearer token-invalido
+Content-Type: application/json
+
+{
+  "name": "Teoria dos Grupos"
+}
+
 ### Matéria - Ada consulta sua própria matéria (200)
-GET http://localhost:8080/api/subjects/1?userId=1
+GET http://localhost:8080/api/subjects/1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Matéria - Emmy tenta consultar matéria de Ada (404)
-GET http://localhost:8080/api/subjects/1?userId=2
+GET http://localhost:8080/api/subjects/1
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Matéria - Ada tenta consultar matéria de Emmy (404)
-GET http://localhost:8080/api/subjects/2?userId=1
+GET http://localhost:8080/api/subjects/2
+Authorization: Bearer <ADA_TOKEN>
 
 ### Matéria - Bloquear atualização de matéria de Ada por Emmy (404)
-PUT http://localhost:8080/api/subjects/1?userId=2
+PUT http://localhost:8080/api/subjects/1
+Authorization: Bearer <EMMY_TOKEN>
 Content-Type: application/json
 
 {
@@ -575,22 +710,28 @@ Content-Type: application/json
 }
 
 ### Matéria - Bloquear exclusão de matéria de Ada por Emmy (404)
-DELETE http://localhost:8080/api/subjects/1?userId=2
+DELETE http://localhost:8080/api/subjects/1
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Matéria - Confirmar preservação da matéria de Ada (200)
-GET http://localhost:8080/api/subjects/1?userId=1
+GET http://localhost:8080/api/subjects/1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Tópico - Ada consulta seu próprio tópico (200)
-GET http://localhost:8080/api/topics/1?userId=1
+GET http://localhost:8080/api/topics/1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Tópico - Emmy tenta consultar tópico de Ada (404)
-GET http://localhost:8080/api/topics/1?userId=2
+GET http://localhost:8080/api/topics/1
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Tópico - Ada tenta consultar tópico de Emmy (404)
-GET http://localhost:8080/api/topics/2?userId=1
+GET http://localhost:8080/api/topics/2
+Authorization: Bearer <ADA_TOKEN>
 
 ### Tópico - Bloquear atualização de tópico de Ada por Emmy (404)
-PUT http://localhost:8080/api/topics/1?userId=2
+PUT http://localhost:8080/api/topics/1
+Authorization: Bearer <EMMY_TOKEN>
 Content-Type: application/json
 
 {
@@ -598,13 +739,16 @@ Content-Type: application/json
 }
 
 ### Tópico - Bloquear exclusão de tópico de Ada por Emmy (404)
-DELETE http://localhost:8080/api/topics/1?userId=2
+DELETE http://localhost:8080/api/topics/1
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Tópico - Confirmar preservação do tópico de Ada (200)
-GET http://localhost:8080/api/topics/1?userId=1
+GET http://localhost:8080/api/topics/1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Tópico - Bloquear criação de Ada em matéria de Emmy (404)
-POST http://localhost:8080/api/topics?userId=1&subjectId=2
+POST http://localhost:8080/api/topics?subjectId=2
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -612,7 +756,8 @@ Content-Type: application/json
 }
 
 ### Tópico - Bloquear criação de Emmy em matéria de Ada (404)
-POST http://localhost:8080/api/topics?userId=2&subjectId=1
+POST http://localhost:8080/api/topics?subjectId=1
+Authorization: Bearer <EMMY_TOKEN>
 Content-Type: application/json
 
 {
@@ -620,10 +765,12 @@ Content-Type: application/json
 }
 
 ### Tópico - Confirmar preservação dos tópicos da matéria de Emmy (200)
-GET http://localhost:8080/api/subjects/2/topics?userId=2
+GET http://localhost:8080/api/subjects/2/topics
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Conteúdo - Rejeitar atualização com título vazio (400)
-PUT http://localhost:8080/api/contents/1?userId=1
+PUT http://localhost:8080/api/contents/1
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -632,7 +779,8 @@ Content-Type: application/json
 }
 
 ### Conteúdo - Rejeitar atualização com corpo vazio (400)
-PUT http://localhost:8080/api/contents/1?userId=1
+PUT http://localhost:8080/api/contents/1
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -641,19 +789,24 @@ Content-Type: application/json
 }
 
 ### Conteúdo - Ada consulta seu próprio conteúdo (200)
-GET http://localhost:8080/api/contents/1?userId=1
+GET http://localhost:8080/api/contents/1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Conteúdo - Emmy tenta consultar conteúdo de Ada (404)
-GET http://localhost:8080/api/contents/1?userId=2
+GET http://localhost:8080/api/contents/1
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Conteúdo - Emmy consulta seu próprio conteúdo (200)
-GET http://localhost:8080/api/contents/2?userId=2
+GET http://localhost:8080/api/contents/2
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Conteúdo - Ada tenta consultar conteúdo de Emmy (404)
-GET http://localhost:8080/api/contents/2?userId=1
+GET http://localhost:8080/api/contents/2
+Authorization: Bearer <ADA_TOKEN>
 
 ### Conteúdo - Bloquear criação de Ada com tópico de Emmy (404)
-POST http://localhost:8080/api/contents?userId=1
+POST http://localhost:8080/api/contents
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -665,16 +818,20 @@ Content-Type: application/json
 }
 
 ### Anotação - Ada consulta sua própria anotação (200)
-GET http://localhost:8080/api/notes/1?userId=1
+GET http://localhost:8080/api/notes/1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Anotação - Emmy tenta consultar anotação de Ada (404)
-GET http://localhost:8080/api/notes/1?userId=2
+GET http://localhost:8080/api/notes/1
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Anotação - Ada tenta consultar anotação de Emmy (404)
-GET http://localhost:8080/api/notes/2?userId=1
+GET http://localhost:8080/api/notes/2
+Authorization: Bearer <ADA_TOKEN>
 
 ### Anotação - Bloquear segunda anotação de Ada para Matemática Aplicada (409)
-POST http://localhost:8080/api/notes?userId=1
+POST http://localhost:8080/api/notes
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -686,7 +843,8 @@ Content-Type: application/json
 }
 
 ### Anotação - Bloquear segunda anotação de Ada para Algoritmos Matemáticos (409)
-POST http://localhost:8080/api/notes?userId=1
+POST http://localhost:8080/api/notes
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -698,7 +856,8 @@ Content-Type: application/json
 }
 
 ### Anotação - Bloquear segunda anotação de Ada para o mesmo conteúdo (409)
-POST http://localhost:8080/api/notes?userId=1
+POST http://localhost:8080/api/notes
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -710,7 +869,8 @@ Content-Type: application/json
 }
 
 ### Anotação - Rejeitar criação sem contexto (400)
-POST http://localhost:8080/api/notes?userId=1
+POST http://localhost:8080/api/notes
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -719,7 +879,8 @@ Content-Type: application/json
 }
 
 ### Anotação - Rejeitar criação com matéria e tópico simultaneamente (400)
-POST http://localhost:8080/api/notes?userId=1
+POST http://localhost:8080/api/notes
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -734,7 +895,8 @@ Content-Type: application/json
 }
 
 ### Anotação - Bloquear criação de Ada para matéria de Emmy (404)
-POST http://localhost:8080/api/notes?userId=1
+POST http://localhost:8080/api/notes
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -746,7 +908,8 @@ Content-Type: application/json
 }
 
 ### Anotação - Bloquear criação de Ada para tópico de Emmy (404)
-POST http://localhost:8080/api/notes?userId=1
+POST http://localhost:8080/api/notes
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -758,7 +921,8 @@ Content-Type: application/json
 }
 
 ### Anotação - Bloquear criação de Ada para conteúdo de Emmy (404)
-POST http://localhost:8080/api/notes?userId=1
+POST http://localhost:8080/api/notes
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -770,7 +934,8 @@ Content-Type: application/json
 }
 
 ### Anotação - Bloquear atualização de anotação de Ada por Emmy (404)
-PUT http://localhost:8080/api/notes/1?userId=2
+PUT http://localhost:8080/api/notes/1
+Authorization: Bearer <EMMY_TOKEN>
 Content-Type: application/json
 
 {
@@ -779,34 +944,44 @@ Content-Type: application/json
 }
 
 ### Anotação - Bloquear exclusão de anotação de Ada por Emmy (404)
-DELETE http://localhost:8080/api/notes/1?userId=2
+DELETE http://localhost:8080/api/notes/1
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Anotação - Confirmar preservação da anotação de Ada (200)
-GET http://localhost:8080/api/notes/1?userId=1
+GET http://localhost:8080/api/notes/1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Flashcard - Listar flashcards de Ada (200)
-GET http://localhost:8080/api/flashcards?userId=1
+GET http://localhost:8080/api/flashcards
+Authorization: Bearer <ADA_TOKEN>
 
 ### Baralho - Listar baralhos de Ada (200)
-GET http://localhost:8080/api/decks?userId=1
+GET http://localhost:8080/api/decks
+Authorization: Bearer <ADA_TOKEN>
 
 ### Baralho - Listar baralhos de Emmy (200)
-GET http://localhost:8080/api/decks?userId=2
+GET http://localhost:8080/api/decks
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Baralho - Ada consulta seu próprio baralho (200)
-GET http://localhost:8080/api/decks/1?userId=1
+GET http://localhost:8080/api/decks/1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Baralho - Emmy tenta consultar baralho de Ada (404)
-GET http://localhost:8080/api/decks/1?userId=2
+GET http://localhost:8080/api/decks/1
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Baralho - Emmy consulta seu próprio baralho (200)
-GET http://localhost:8080/api/decks/2?userId=2
+GET http://localhost:8080/api/decks/2
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Baralho - Ada tenta consultar baralho de Emmy (404)
-GET http://localhost:8080/api/decks/2?userId=1
+GET http://localhost:8080/api/decks/2
+Authorization: Bearer <ADA_TOKEN>
 
 ### Baralho - Bloquear atualização de baralho de Ada por Emmy (404)
-PUT http://localhost:8080/api/decks/1?userId=2
+PUT http://localhost:8080/api/decks/1
+Authorization: Bearer <EMMY_TOKEN>
 Content-Type: application/json
 
 {
@@ -814,7 +989,8 @@ Content-Type: application/json
 }
 
 ### Baralho - Bloquear atualização de baralho de Emmy por Ada (404)
-PUT http://localhost:8080/api/decks/2?userId=1
+PUT http://localhost:8080/api/decks/2
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -822,40 +998,52 @@ Content-Type: application/json
 }
 
 ### Baralho - Confirmar preservação do baralho de Ada (200)
-GET http://localhost:8080/api/decks/1?userId=1
+GET http://localhost:8080/api/decks/1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Baralho - Confirmar preservação do baralho de Emmy (200)
-GET http://localhost:8080/api/decks/2?userId=2
+GET http://localhost:8080/api/decks/2
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Flashcard - Listar flashcards de Emmy (200)
-GET http://localhost:8080/api/flashcards?userId=2
+GET http://localhost:8080/api/flashcards
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Flashcard - Ada consulta seu próprio flashcard (200)
-GET http://localhost:8080/api/flashcards/1?userId=1
+GET http://localhost:8080/api/flashcards/1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Flashcard - Emmy tenta consultar flashcard de Ada (404)
-GET http://localhost:8080/api/flashcards/1?userId=2
+GET http://localhost:8080/api/flashcards/1
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Flashcard - Emmy consulta seu próprio flashcard (200)
-GET http://localhost:8080/api/flashcards/2?userId=2
+GET http://localhost:8080/api/flashcards/2
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Flashcard - Ada tenta consultar flashcard de Emmy (404)
-GET http://localhost:8080/api/flashcards/2?userId=1
+GET http://localhost:8080/api/flashcards/2
+Authorization: Bearer <ADA_TOKEN>
 
 ### Flashcard - Ada lista flashcards de baralho próprio (200)
-GET http://localhost:8080/api/flashcards/deck/1?userId=1
+GET http://localhost:8080/api/flashcards/deck/1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Flashcard - Emmy tenta listar flashcards de baralho de Ada (404)
-GET http://localhost:8080/api/flashcards/deck/1?userId=2
+GET http://localhost:8080/api/flashcards/deck/1
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Flashcard - Emmy lista flashcards de baralho próprio (200)
-GET http://localhost:8080/api/flashcards/deck/2?userId=2
+GET http://localhost:8080/api/flashcards/deck/2
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Flashcard - Ada tenta listar flashcards de baralho de Emmy (404)
-GET http://localhost:8080/api/flashcards/deck/2?userId=1
+GET http://localhost:8080/api/flashcards/deck/2
+Authorization: Bearer <ADA_TOKEN>
 
 ### Flashcard - Bloquear criação de Emmy em baralho de Ada (404)
-POST http://localhost:8080/api/flashcards?userId=2&deckId=1
+POST http://localhost:8080/api/flashcards?deckId=1
+Authorization: Bearer <EMMY_TOKEN>
 Content-Type: application/json
 
 {
@@ -864,7 +1052,8 @@ Content-Type: application/json
 }
 
 ### Flashcard - Bloquear criação de Ada em baralho de Emmy (404)
-POST http://localhost:8080/api/flashcards?userId=1&deckId=2
+POST http://localhost:8080/api/flashcards?deckId=2
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -873,13 +1062,16 @@ Content-Type: application/json
 }
 
 ### Flashcard - Bloquear exclusão de flashcard de Ada por Emmy (404)
-DELETE http://localhost:8080/api/flashcards/1?userId=2
+DELETE http://localhost:8080/api/flashcards/1
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Flashcard - Bloquear exclusão de flashcard de Emmy por Ada (404)
-DELETE http://localhost:8080/api/flashcards/2?userId=1
+DELETE http://localhost:8080/api/flashcards/2
+Authorization: Bearer <ADA_TOKEN>
 
 ### Flashcard - Bloquear atualização de flashcard de Ada por Emmy (404)
-PUT http://localhost:8080/api/flashcards/1?userId=2
+PUT http://localhost:8080/api/flashcards/1
+Authorization: Bearer <EMMY_TOKEN>
 Content-Type: application/json
 
 {
@@ -888,7 +1080,8 @@ Content-Type: application/json
 }
 
 ### Flashcard - Bloquear atualização de flashcard de Emmy por Ada (404)
-PUT http://localhost:8080/api/flashcards/2?userId=1
+PUT http://localhost:8080/api/flashcards/2
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -897,19 +1090,24 @@ Content-Type: application/json
 }
 
 ### Flashcard - Bloquear geração de resposta em flashcard de Ada por Emmy (404)
-POST http://localhost:8080/api/flashcards/1/generate-answer?userId=2
+POST http://localhost:8080/api/flashcards/1/generate-answer
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Flashcard - Bloquear geração de resposta em flashcard de Emmy por Ada (404)
-POST http://localhost:8080/api/flashcards/2/generate-answer?userId=1
+POST http://localhost:8080/api/flashcards/2/generate-answer
+Authorization: Bearer <ADA_TOKEN>
 
 ### Flashcard - Confirmar preservação do flashcard de Ada após tentativas de acesso (200)
-GET http://localhost:8080/api/flashcards/1?userId=1
+GET http://localhost:8080/api/flashcards/1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Flashcard - Confirmar preservação do flashcard de Emmy após tentativas de acesso (200)
-GET http://localhost:8080/api/flashcards/2?userId=2
+GET http://localhost:8080/api/flashcards/2
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Flashcard - Ada cria flashcard temporário sobre números de Bernoulli (201)
-POST http://localhost:8080/api/flashcards?userId=1&deckId=1
+POST http://localhost:8080/api/flashcards?deckId=1
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -918,10 +1116,12 @@ Content-Type: application/json
 }
 
 ### Flashcard - Ada consulta flashcard temporário (200)
-GET http://localhost:8080/api/flashcards/6?userId=1
+GET http://localhost:8080/api/flashcards/6
+Authorization: Bearer <ADA_TOKEN>
 
 ### Flashcard - Ada atualiza flashcard temporário (200)
-PUT http://localhost:8080/api/flashcards/6?userId=1
+PUT http://localhost:8080/api/flashcards/6
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -930,16 +1130,20 @@ Content-Type: application/json
 }
 
 ### Flashcard - Confirmar atualização do flashcard temporário de Ada (200)
-GET http://localhost:8080/api/flashcards/6?userId=1
+GET http://localhost:8080/api/flashcards/6
+Authorization: Bearer <ADA_TOKEN>
 
 ### Flashcard - Ada exclui flashcard temporário (204)
-DELETE http://localhost:8080/api/flashcards/6?userId=1
+DELETE http://localhost:8080/api/flashcards/6
+Authorization: Bearer <ADA_TOKEN>
 
 ### Flashcard - Confirmar exclusão do flashcard temporário (404)
-GET http://localhost:8080/api/flashcards/6?userId=1
+GET http://localhost:8080/api/flashcards/6
+Authorization: Bearer <ADA_TOKEN>
 
 ### Flashcard - Rejeitar criação com pergunta vazia (400)
-POST http://localhost:8080/api/flashcards?userId=1&deckId=1
+POST http://localhost:8080/api/flashcards?deckId=1
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -947,7 +1151,8 @@ Content-Type: application/json
 }
 
 ### Flashcard - Rejeitar criação para baralho inexistente (404)
-POST http://localhost:8080/api/flashcards?userId=1&deckId=-1
+POST http://localhost:8080/api/flashcards?deckId=-1
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -955,10 +1160,12 @@ Content-Type: application/json
 }
 
 ### Flashcard - Consultar flashcard inexistente (404)
-GET http://localhost:8080/api/flashcards/-1?userId=1
+GET http://localhost:8080/api/flashcards/-1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Flashcard - Rejeitar atualização de flashcard inexistente (404)
-PUT http://localhost:8080/api/flashcards/-1?userId=1
+PUT http://localhost:8080/api/flashcards/-1
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -966,25 +1173,32 @@ Content-Type: application/json
 }
 
 ### Treino - Rejeitar início de treino de Ada por Emmy (404)
-POST http://localhost:8080/api/decks/1/training?userId=2
+POST http://localhost:8080/api/decks/1/training
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Treino - Rejeitar início de treino de Emmy por Ada (404)
-POST http://localhost:8080/api/decks/2/training?userId=1
+POST http://localhost:8080/api/decks/2/training
+Authorization: Bearer <ADA_TOKEN>
 
 ### Treino - Ada inicia treino no baralho de Algoritmos (200)
-POST http://localhost:8080/api/decks/1/training?userId=1
+POST http://localhost:8080/api/decks/1/training
+Authorization: Bearer <ADA_TOKEN>
 
 ### Treino - Emmy inicia treino no baralho de Teoria dos Anéis (200)
-POST http://localhost:8080/api/decks/2/training?userId=2
+POST http://localhost:8080/api/decks/2/training
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Treino - Confirmar baralho de Algoritmos em treino (200)
-GET http://localhost:8080/api/decks/1?userId=1
+GET http://localhost:8080/api/decks/1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Treino - Confirmar baralho de Teoria dos Anéis em treino (200)
-GET http://localhost:8080/api/decks/2?userId=2
+GET http://localhost:8080/api/decks/2
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Flashcard - Bloquear criação manual durante treino (409)
-POST http://localhost:8080/api/flashcards?userId=1&deckId=1
+POST http://localhost:8080/api/flashcards?deckId=1
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -993,7 +1207,8 @@ Content-Type: application/json
 }
 
 ### Flashcard - Bloquear atualização manual durante treino (409)
-PUT http://localhost:8080/api/flashcards/1?userId=1
+PUT http://localhost:8080/api/flashcards/1
+Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
@@ -1002,73 +1217,95 @@ Content-Type: application/json
 }
 
 ### Flashcard - Bloquear geração manual de resposta com IA durante treino (409)
-POST http://localhost:8080/api/flashcards/1/generate-answer?userId=1
+POST http://localhost:8080/api/flashcards/1/generate-answer
+Authorization: Bearer <ADA_TOKEN>
 
 ### Flashcard - Bloquear exclusão manual durante treino (409)
-DELETE http://localhost:8080/api/flashcards/1?userId=1
+DELETE http://localhost:8080/api/flashcards/1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Flashcard - Confirmar preservação do primeiro flashcard de Ada durante treino (200)
-GET http://localhost:8080/api/flashcards/1?userId=1
+GET http://localhost:8080/api/flashcards/1
+Authorization: Bearer <ADA_TOKEN>
 
-### Tentativa de resposta - Rejeitar desistência para usuário inexistente (404)
-POST http://localhost:8080/api/answer-attempts/give-up?userId=-1&flashcardId=1
+### Tentativa de resposta - Rejeitar desistência sem autenticação (403)
+POST http://localhost:8080/api/answer-attempts/give-up?flashcardId=1
 
 ### Tentativa de resposta - Bloquear desistência de Emmy em flashcard de Ada (404)
-POST http://localhost:8080/api/answer-attempts/give-up?userId=2&flashcardId=1
+POST http://localhost:8080/api/answer-attempts/give-up?flashcardId=1
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Tentativa de resposta - Bloquear desistência de Ada em flashcard de Emmy (404)
-POST http://localhost:8080/api/answer-attempts/give-up?userId=1&flashcardId=2
+POST http://localhost:8080/api/answer-attempts/give-up?flashcardId=2
+Authorization: Bearer <ADA_TOKEN>
 
 ### Tentativa de resposta - Bloquear consulta de Emmy ao histórico de flashcard de Ada (404)
-GET http://localhost:8080/api/answer-attempts/users/2/flashcards/1
+GET http://localhost:8080/api/answer-attempts/flashcards/1
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Tentativa de resposta - Bloquear consulta de Ada ao histórico de flashcard de Emmy (404)
-GET http://localhost:8080/api/answer-attempts/users/1/flashcards/2
+GET http://localhost:8080/api/answer-attempts/flashcards/2
+Authorization: Bearer <ADA_TOKEN>
 
 ### Tentativa de resposta - Ada desiste do primeiro flashcard durante treino (201)
-POST http://localhost:8080/api/answer-attempts/give-up?userId=1&flashcardId=1
+POST http://localhost:8080/api/answer-attempts/give-up?flashcardId=1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Tentativa de resposta - Emmy desiste do primeiro flashcard durante treino (201)
-POST http://localhost:8080/api/answer-attempts/give-up?userId=2&flashcardId=2
+POST http://localhost:8080/api/answer-attempts/give-up?flashcardId=2
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Tentativa de resposta - Consultar histórico de Ada no primeiro flashcard (200)
-GET http://localhost:8080/api/answer-attempts/users/1/flashcards/1
+GET http://localhost:8080/api/answer-attempts/flashcards/1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Tentativa de resposta - Consultar histórico de Emmy no primeiro flashcard (200)
-GET http://localhost:8080/api/answer-attempts/users/2/flashcards/2
+GET http://localhost:8080/api/answer-attempts/flashcards/2
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Tentativa de resposta - Consultar histórico completo de Ada (200)
-GET http://localhost:8080/api/answer-attempts/users/1
+GET http://localhost:8080/api/answer-attempts
+Authorization: Bearer <ADA_TOKEN>
 
 ### Tentativa de resposta - Consultar histórico completo de Emmy (200)
-GET http://localhost:8080/api/answer-attempts/users/2
+GET http://localhost:8080/api/answer-attempts
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Treino - Ada encerra treino no baralho de Algoritmos (200)
-POST http://localhost:8080/api/decks/1/stop-training?userId=1
+POST http://localhost:8080/api/decks/1/stop-training
+Authorization: Bearer <ADA_TOKEN>
 
 ### Treino - Emmy encerra treino no baralho de Teoria dos Anéis (200)
-POST http://localhost:8080/api/decks/2/stop-training?userId=2
+POST http://localhost:8080/api/decks/2/stop-training
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Treino - Confirmar baralho de Algoritmos fora do treino (200)
-GET http://localhost:8080/api/decks/1?userId=1
+GET http://localhost:8080/api/decks/1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Treino - Confirmar baralho de Teoria dos Anéis fora do treino (200)
-GET http://localhost:8080/api/decks/2?userId=2
+GET http://localhost:8080/api/decks/2
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Tentativa de resposta - Confirmar remoção do histórico de Ada após encerramento do treino (200)
-GET http://localhost:8080/api/answer-attempts/users/1/flashcards/1
+GET http://localhost:8080/api/answer-attempts/flashcards/1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Tentativa de resposta - Confirmar remoção do histórico de Emmy após encerramento do treino (200)
-GET http://localhost:8080/api/answer-attempts/users/2/flashcards/2
+GET http://localhost:8080/api/answer-attempts/flashcards/2
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Tentativa de resposta - Confirmar histórico completo de Ada vazio após encerramento do treino (200)
-GET http://localhost:8080/api/answer-attempts/users/1
+GET http://localhost:8080/api/answer-attempts
+Authorization: Bearer <ADA_TOKEN>
 
 ### Tentativa de resposta - Confirmar histórico completo de Emmy vazio após encerramento do treino (200)
-GET http://localhost:8080/api/answer-attempts/users/2
+GET http://localhost:8080/api/answer-attempts
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Tentativa de resposta - Bloquear desistência fora do treino (409)
-POST http://localhost:8080/api/answer-attempts/give-up?userId=1&flashcardId=1
+POST http://localhost:8080/api/answer-attempts/give-up?flashcardId=1
+Authorization: Bearer <ADA_TOKEN>
 
 # =============================================================================
 # FLUXO 5 — EXCLUSÕES
@@ -1077,136 +1314,181 @@ POST http://localhost:8080/api/answer-attempts/give-up?userId=1&flashcardId=1
 # =============================================================================
 
 ### Anotação - Excluir anotação do conteúdo de Ada (204)
-DELETE http://localhost:8080/api/notes/5?userId=1
+DELETE http://localhost:8080/api/notes/5
+Authorization: Bearer <ADA_TOKEN>
 
 ### Anotação - Confirmar exclusão da anotação do conteúdo de Ada (404)
-GET http://localhost:8080/api/notes/5?userId=1
+GET http://localhost:8080/api/notes/5
+Authorization: Bearer <ADA_TOKEN>
 
 ### Anotação - Excluir anotação do conteúdo de Emmy (204)
-DELETE http://localhost:8080/api/notes/6?userId=2
+DELETE http://localhost:8080/api/notes/6
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Anotação - Confirmar exclusão da anotação do conteúdo de Emmy (404)
-GET http://localhost:8080/api/notes/6?userId=2
+GET http://localhost:8080/api/notes/6
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Anotação - Excluir anotação do tópico de Ada (204)
-DELETE http://localhost:8080/api/notes/3?userId=1
+DELETE http://localhost:8080/api/notes/3
+Authorization: Bearer <ADA_TOKEN>
 
 ### Anotação - Confirmar exclusão da anotação do tópico de Ada (404)
-GET http://localhost:8080/api/notes/3?userId=1
+GET http://localhost:8080/api/notes/3
+Authorization: Bearer <ADA_TOKEN>
 
 ### Anotação - Excluir anotação do tópico de Emmy (204)
-DELETE http://localhost:8080/api/notes/4?userId=2
+DELETE http://localhost:8080/api/notes/4
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Anotação - Confirmar exclusão da anotação do tópico de Emmy (404)
-GET http://localhost:8080/api/notes/4?userId=2
+GET http://localhost:8080/api/notes/4
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Anotação - Excluir anotação da matéria de Ada (204)
-DELETE http://localhost:8080/api/notes/1?userId=1
+DELETE http://localhost:8080/api/notes/1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Anotação - Confirmar exclusão da anotação da matéria de Ada (404)
-GET http://localhost:8080/api/notes/1?userId=1
+GET http://localhost:8080/api/notes/1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Anotação - Excluir anotação da matéria de Emmy (204)
-DELETE http://localhost:8080/api/notes/2?userId=2
+DELETE http://localhost:8080/api/notes/2
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Anotação - Confirmar exclusão da anotação da matéria de Emmy (404)
-GET http://localhost:8080/api/notes/2?userId=2
+GET http://localhost:8080/api/notes/2
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Flashcard - Excluir primeiro flashcard de Ada (204)
-DELETE http://localhost:8080/api/flashcards/1?userId=1
+DELETE http://localhost:8080/api/flashcards/1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Flashcard - Confirmar exclusão do primeiro flashcard de Ada (404)
-GET http://localhost:8080/api/flashcards/1?userId=1
+GET http://localhost:8080/api/flashcards/1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Flashcard - Excluir primeiro flashcard de Emmy (204)
-DELETE http://localhost:8080/api/flashcards/2?userId=2
+DELETE http://localhost:8080/api/flashcards/2
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Flashcard - Excluir segundo flashcard de Ada (204)
-DELETE http://localhost:8080/api/flashcards/3?userId=1
+DELETE http://localhost:8080/api/flashcards/3
+Authorization: Bearer <ADA_TOKEN>
 
 ### Flashcard - Excluir segundo flashcard de Emmy (204)
-DELETE http://localhost:8080/api/flashcards/4?userId=2
+DELETE http://localhost:8080/api/flashcards/4
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Flashcard - Excluir terceiro flashcard de Ada (204)
-DELETE http://localhost:8080/api/flashcards/5?userId=1
+DELETE http://localhost:8080/api/flashcards/5
+Authorization: Bearer <ADA_TOKEN>
 
 ### Flashcard - Rejeitar exclusão de flashcard inexistente (404)
-DELETE http://localhost:8080/api/flashcards/-1?userId=1
+DELETE http://localhost:8080/api/flashcards/-1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Baralho - Confirmar exclusão do baralho de Algoritmos de Ada após exclusão do último flashcard (404)
-GET http://localhost:8080/api/decks/1?userId=1
+GET http://localhost:8080/api/decks/1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Baralho - Confirmar exclusão do baralho de Teoria dos Anéis de Emmy após exclusão do último flashcard (404)
-GET http://localhost:8080/api/decks/2?userId=2
+GET http://localhost:8080/api/decks/2
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Baralho - Confirmar exclusão do baralho de Máquina Analítica de Ada após exclusão do último flashcard (404)
-GET http://localhost:8080/api/decks/3?userId=1
+GET http://localhost:8080/api/decks/3
+Authorization: Bearer <ADA_TOKEN>
 
 ### Conteúdo - Excluir Algoritmos Matemáticos e Números de Bernoulli de Ada (204)
-DELETE http://localhost:8080/api/contents/1?userId=1
+DELETE http://localhost:8080/api/contents/1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Conteúdo - Confirmar exclusão de Algoritmos Matemáticos e Números de Bernoulli (404)
-GET http://localhost:8080/api/contents/1?userId=1
+GET http://localhost:8080/api/contents/1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Conteúdo - Excluir Introdução à Teoria dos Anéis de Emmy (204)
-DELETE http://localhost:8080/api/contents/2?userId=2
+DELETE http://localhost:8080/api/contents/2
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Conteúdo - Confirmar exclusão de Introdução à Teoria dos Anéis (404)
-GET http://localhost:8080/api/contents/2?userId=2
+GET http://localhost:8080/api/contents/2
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Tópico - Excluir Algoritmos Matemáticos (204)
-DELETE http://localhost:8080/api/topics/1?userId=1
+DELETE http://localhost:8080/api/topics/1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Tópico - Confirmar exclusão de Algoritmos Matemáticos (404)
-GET http://localhost:8080/api/topics/1?userId=1
+GET http://localhost:8080/api/topics/1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Tópico - Confirmar existência da Lógica após exclusão de Algoritmos Matemáticos (200)
-GET http://localhost:8080/api/subjects/3?userId=1
+GET http://localhost:8080/api/subjects/3
+Authorization: Bearer <ADA_TOKEN>
 
 ### Tópico - Excluir Teoria dos Anéis (204)
-DELETE http://localhost:8080/api/topics/2?userId=2
+DELETE http://localhost:8080/api/topics/2
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Tópico - Excluir Sequências Numéricas (204)
-DELETE http://localhost:8080/api/topics/3?userId=1
+DELETE http://localhost:8080/api/topics/3
+Authorization: Bearer <ADA_TOKEN>
 
 ### Tópico - Excluir Máquina Analítica (204)
-DELETE http://localhost:8080/api/topics/4?userId=1
+DELETE http://localhost:8080/api/topics/4
+Authorization: Bearer <ADA_TOKEN>
 
 ### Conteúdo - Confirmar exclusão em cascata de Fundamentos da Máquina Analítica (404)
-GET http://localhost:8080/api/contents/3?userId=1
+GET http://localhost:8080/api/contents/3
+Authorization: Bearer <ADA_TOKEN>
 
 ### Matéria - Excluir Matemática Aplicada de Ada (204)
-DELETE http://localhost:8080/api/subjects/1?userId=1
+DELETE http://localhost:8080/api/subjects/1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Matéria - Confirmar exclusão de Matemática Aplicada de Ada (404)
-GET http://localhost:8080/api/subjects/1?userId=1
+GET http://localhost:8080/api/subjects/1
+Authorization: Bearer <ADA_TOKEN>
 
 ### Matéria - Excluir Álgebra Abstrata de Emmy (204)
-DELETE http://localhost:8080/api/subjects/2?userId=2
+DELETE http://localhost:8080/api/subjects/2
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Matéria - Confirmar exclusão de Álgebra Abstrata de Emmy (404)
-GET http://localhost:8080/api/subjects/2?userId=2
+GET http://localhost:8080/api/subjects/2
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Matéria - Excluir Lógica de Ada (204)
-DELETE http://localhost:8080/api/subjects/3?userId=1
+DELETE http://localhost:8080/api/subjects/3
+Authorization: Bearer <ADA_TOKEN>
 
 ### Matéria - Confirmar exclusão de Lógica de Ada (404)
-GET http://localhost:8080/api/subjects/3?userId=1
+GET http://localhost:8080/api/subjects/3
+Authorization: Bearer <ADA_TOKEN>
 
 ### Matéria - Excluir Fundamentos da Computação de Ada (204)
-DELETE http://localhost:8080/api/subjects/4?userId=1
+DELETE http://localhost:8080/api/subjects/4
+Authorization: Bearer <ADA_TOKEN>
 
 ### Matéria - Confirmar exclusão de Fundamentos da Computação de Ada (404)
-GET http://localhost:8080/api/subjects/4?userId=1
+GET http://localhost:8080/api/subjects/4
+Authorization: Bearer <ADA_TOKEN>
 
 ### Usuário - Excluir Ada Lovelace (204)
-DELETE http://localhost:8080/api/users/1
+DELETE http://localhost:8080/api/users/me
+Authorization: Bearer <ADA_TOKEN>
 
-### Usuário - Confirmar exclusão de Ada Lovelace (404)
-GET http://localhost:8080/api/users/1
+### Usuário - Confirmar exclusão de Ada Lovelace (401)
+GET http://localhost:8080/api/users/me
+Authorization: Bearer <ADA_TOKEN>
 
 ### Usuário - Excluir Emmy Noether (204)
-DELETE http://localhost:8080/api/users/2
+DELETE http://localhost:8080/api/users/me
+Authorization: Bearer <EMMY_TOKEN>
 
-### Usuário - Confirmar exclusão de Emmy Noether (404)
-GET http://localhost:8080/api/users/2
+### Usuário - Confirmar exclusão de Emmy Noether (401)
+GET http://localhost:8080/api/users/me
+Authorization: Bearer <EMMY_TOKEN>
