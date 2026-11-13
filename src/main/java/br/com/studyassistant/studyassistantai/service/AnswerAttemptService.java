@@ -1,8 +1,8 @@
 package br.com.studyassistant.studyassistantai.service;
 
-import br.com.studyassistant.studyassistantai.dto.AnswerAttemptRequest;
 import br.com.studyassistant.studyassistantai.dto.AnswerAttemptResponse;
 import br.com.studyassistant.studyassistantai.model.AnswerAttempt;
+import br.com.studyassistant.studyassistantai.model.AnswerAttemptResult;
 import br.com.studyassistant.studyassistantai.model.Flashcard;
 import br.com.studyassistant.studyassistantai.model.User;
 import br.com.studyassistant.studyassistantai.repository.AnswerAttemptRepository;
@@ -32,14 +32,20 @@ public class AnswerAttemptService {
     }
 
     @Transactional
-    public AnswerAttemptResponse create(AnswerAttemptRequest request) {
-        User user = userRepository.findById(request.userId())
+    public AnswerAttemptResponse giveUp(Long userId, Long flashcardId) {
+        User user = userRepository
+                .findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        Flashcard flashcard = flashcardRepository.findByIdAndDeckUserId(request.flashcardId(), request.userId())
+        Flashcard flashcard = flashcardRepository
+                .findByIdAndDeckUserId(flashcardId, userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Flashcard not found"));
 
-        AnswerAttempt attempt = new AnswerAttempt(user, flashcard, request.correct());
+        if (!flashcard.getDeck().isTraining()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Deck is not in training");
+        }
+
+        AnswerAttempt attempt = new AnswerAttempt(user, flashcard, null, AnswerAttemptResult.INCORRECT);
         AnswerAttempt saved = answerAttemptRepository.save(attempt);
 
         return toResponse(saved);
@@ -50,7 +56,7 @@ public class AnswerAttemptService {
         validateUserExists(userId);
 
         return answerAttemptRepository
-                .findByUserIdOrderByAnsweredAtDescIdDesc(userId)
+                .findByUserIdOrderByAttemptedAtDescIdDesc(userId)
                 .stream()
                 .map(this::toResponse)
                 .toList();
@@ -62,11 +68,12 @@ public class AnswerAttemptService {
             Long flashcardId
     ) {
         validateUserExists(userId);
+
         flashcardRepository.findByIdAndDeckUserId(flashcardId, userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Flashcard not found"));
 
         return answerAttemptRepository
-                .findByUserIdAndFlashcardIdOrderByAnsweredAtDescIdDesc(userId, flashcardId)
+                .findByUserIdAndFlashcardIdOrderByAttemptedAtDescIdDesc(userId, flashcardId)
                 .stream()
                 .map(this::toResponse)
                 .toList();
@@ -83,8 +90,10 @@ public class AnswerAttemptService {
                 attempt.getId(),
                 attempt.getUser().getId(),
                 attempt.getFlashcard().getId(),
-                attempt.isCorrect(),
-                attempt.getAnsweredAt()
+                attempt.getUserAnswer(),
+                attempt.getResult(),
+                attempt.getFlashcard().getAnswer(),
+                attempt.getAttemptedAt()
         );
     }
 }

@@ -6,10 +6,14 @@ import java.util.List;
 
 public interface AnswerAttemptRepository extends JpaRepository<AnswerAttempt, Long> {
 
-    List<AnswerAttempt> findByUserIdOrderByAnsweredAtDescIdDesc(Long userId);
+    List<AnswerAttempt> findByUserIdOrderByAttemptedAtDescIdDesc(Long userId);
 
-    List<AnswerAttempt> findByUserIdAndFlashcardIdOrderByAnsweredAtDescIdDesc(
+    List<AnswerAttempt> findByUserIdAndFlashcardIdOrderByAttemptedAtDescIdDesc(
             Long userId,
             Long flashcardId
     );
+
+    void deleteByFlashcardDeckId(Long deckId);
+
+    void deleteByUserId(Long userId);
 }

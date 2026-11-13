@@ -10,4 +10,6 @@ public interface ContentRepository extends JpaRepository<Content, Long> {
     List<Content> findByUserId(Long userId);
 
     Optional<Content> findByIdAndUserId(Long id, Long userId);
+
+    void deleteByUserId(Long userId);
 }

@@ -1,6 +1,13 @@
 package br.com.studyassistant.studyassistantai.service;
 
 import br.com.studyassistant.studyassistantai.model.User;
+import br.com.studyassistant.studyassistantai.repository.AnswerAttemptRepository;
+import br.com.studyassistant.studyassistantai.repository.ContentRepository;
+import br.com.studyassistant.studyassistantai.repository.DeckRepository;
+import br.com.studyassistant.studyassistantai.repository.FlashcardRepository;
+import br.com.studyassistant.studyassistantai.repository.NoteRepository;
+import br.com.studyassistant.studyassistantai.repository.SubjectRepository;
+import br.com.studyassistant.studyassistantai.repository.TopicRepository;
 import br.com.studyassistant.studyassistantai.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -12,9 +19,32 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final AnswerAttemptRepository answerAttemptRepository;
+    private final NoteRepository noteRepository;
+    private final FlashcardRepository flashcardRepository;
+    private final DeckRepository deckRepository;
+    private final ContentRepository contentRepository;
+    private final TopicRepository topicRepository;
+    private final SubjectRepository subjectRepository;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(
+            UserRepository userRepository,
+            AnswerAttemptRepository answerAttemptRepository,
+            NoteRepository noteRepository,
+            FlashcardRepository flashcardRepository,
+            DeckRepository deckRepository,
+            ContentRepository contentRepository,
+            TopicRepository topicRepository,
+            SubjectRepository subjectRepository
+    ) {
         this.userRepository = userRepository;
+        this.answerAttemptRepository = answerAttemptRepository;
+        this.noteRepository = noteRepository;
+        this.flashcardRepository = flashcardRepository;
+        this.deckRepository = deckRepository;
+        this.contentRepository = contentRepository;
+        this.topicRepository = topicRepository;
+        this.subjectRepository = subjectRepository;
     }
 
     public User createUser(User user) {
@@ -51,6 +81,17 @@ public class UserService {
     @Transactional
     public void deleteUser(Long id) {
         User user = getUserById(id);
+
+        answerAttemptRepository.deleteByUserId(id);
+        noteRepository.deleteByUserId(id);
+
+        flashcardRepository.deleteByDeckUserId(id);
+        deckRepository.deleteByUserId(id);
+
+        contentRepository.deleteByUserId(id);
+        topicRepository.deleteByUserId(id);
+        subjectRepository.deleteByUserId(id);
+
         userRepository.delete(user);
     }
 }

@@ -34,6 +34,8 @@ public class FlashcardService {
         Deck deck = deckRepository.findByIdAndUserId(deckId, userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Deck not found"));
 
+        validateDeckIsNotInTraining(deck);
+
         flashcard.setId(null);
         flashcard.setDeck(deck);
 
@@ -64,6 +66,8 @@ public class FlashcardService {
     ) {
         Flashcard flashcard = getFlashcardById(id, userId);
 
+        validateDeckIsNotInTraining(flashcard.getDeck());
+
         flashcard.setQuestion(updatedFlashcard.getQuestion());
         flashcard.setAnswer(updatedFlashcard.getAnswer());
 
@@ -72,6 +76,8 @@ public class FlashcardService {
 
     public Flashcard generateFlashcardAnswer(Long id, Long userId) {
         Flashcard flashcard = getFlashcardById(id, userId);
+
+        validateDeckIsNotInTraining(flashcard.getDeck());
 
         if (flashcard.getAnswer() != null && !flashcard.getAnswer().isBlank()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Flashcard already has an answer");
@@ -90,11 +96,20 @@ public class FlashcardService {
     public void deleteFlashcard(Long id, Long userId) {
         Flashcard flashcard = getFlashcardById(id, userId);
         Deck deck = flashcard.getDeck();
+        validateDeckIsNotInTraining(flashcard.getDeck());
 
         flashcardRepository.delete(flashcard);
 
         if (flashcardRepository.countByDeckId(deck.getId()) == 0) {
             deckRepository.delete(deck);
+        }
+    }
+
+    private void validateDeckIsNotInTraining(Deck deck) {
+        if (deck.isTraining()) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, "Flashcards cannot be manually modified while deck is in training"
+            );
         }
     }
 }

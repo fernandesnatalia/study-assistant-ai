@@ -10,4 +10,6 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
     List<Topic> findByUserId(Long userId);
 
     Optional<Topic> findByIdAndUserId(Long id, Long userId);
+
+    void deleteByUserId(Long userId);
 }

@@ -1,15 +1,13 @@
 package br.com.studyassistant.studyassistantai.controller;
 
-import br.com.studyassistant.studyassistantai.dto.AnswerAttemptRequest;
 import br.com.studyassistant.studyassistantai.dto.AnswerAttemptResponse;
 import br.com.studyassistant.studyassistantai.service.AnswerAttemptService;
-import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import java.net.URI;
 import java.util.List;
@@ -24,13 +22,19 @@ public class AnswerAttemptController {
         this.answerAttemptService = answerAttemptService;
     }
 
-    @PostMapping
-    public ResponseEntity<AnswerAttemptResponse> create(
-            @Valid @RequestBody AnswerAttemptRequest request
+    @PostMapping("/give-up")
+    public ResponseEntity<AnswerAttemptResponse> giveUp(
+            @RequestParam Long userId,
+            @RequestParam Long flashcardId
     ) {
-        AnswerAttemptResponse response = answerAttemptService.create(request);
+        AnswerAttemptResponse response = answerAttemptService.giveUp(
+                userId,
+                flashcardId
+        );
 
-        return ResponseEntity.created(URI.create("/api/answer-attempts/" + response.id())).body(response);
+        return ResponseEntity
+                .created(URI.create("/api/answer-attempts/" + response.id()))
+                .body(response);
     }
 
     @GetMapping("/users/{userId}")

@@ -1,6 +1,13 @@
 package br.com.studyassistant.studyassistantai.service;
 
 import br.com.studyassistant.studyassistantai.model.User;
+import br.com.studyassistant.studyassistantai.repository.AnswerAttemptRepository;
+import br.com.studyassistant.studyassistantai.repository.ContentRepository;
+import br.com.studyassistant.studyassistantai.repository.DeckRepository;
+import br.com.studyassistant.studyassistantai.repository.FlashcardRepository;
+import br.com.studyassistant.studyassistantai.repository.NoteRepository;
+import br.com.studyassistant.studyassistantai.repository.SubjectRepository;
+import br.com.studyassistant.studyassistantai.repository.TopicRepository;
 import br.com.studyassistant.studyassistantai.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,6 +26,27 @@ class UserServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private AnswerAttemptRepository answerAttemptRepository;
+
+    @Mock
+    private NoteRepository noteRepository;
+
+    @Mock
+    private FlashcardRepository flashcardRepository;
+
+    @Mock
+    private DeckRepository deckRepository;
+
+    @Mock
+    private ContentRepository contentRepository;
+
+    @Mock
+    private TopicRepository topicRepository;
+
+    @Mock
+    private SubjectRepository subjectRepository;
 
     @InjectMocks
     private UserService userService;
@@ -131,6 +159,13 @@ class UserServiceTest {
 
         userService.deleteUser(1L);
 
+        verify(answerAttemptRepository).deleteByUserId(1L);
+        verify(noteRepository).deleteByUserId(1L);
+        verify(flashcardRepository).deleteByDeckUserId(1L);
+        verify(deckRepository).deleteByUserId(1L);
+        verify(contentRepository).deleteByUserId(1L);
+        verify(topicRepository).deleteByUserId(1L);
+        verify(subjectRepository).deleteByUserId(1L);
         verify(userRepository).delete(user);
     }
 

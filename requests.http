@@ -458,7 +458,7 @@ GET http://localhost:8080/api/contents?userId=1
 ### Conteúdo - Listar conteúdos de Emmy após atualizações (200)
 GET http://localhost:8080/api/contents?userId=
 
-    ### Baralho - Listar baralhos de Ada após atualizações (200)
+### Baralho - Listar baralhos de Ada após atualizações (200)
 GET http://localhost:8080/api/decks?userId=1
 
 ### Baralho - Listar baralhos de Emmy após atualizações (200)
@@ -965,44 +965,59 @@ Content-Type: application/json
   "question": "Como os algoritmos representam procedimentos matemáticos?"
 }
 
-### Tentativa de resposta - Rejeitar registro para usuário inexistente (404)
-POST http://localhost:8080/api/answer-attempts
+### Treino - Rejeitar início de treino de Ada por Emmy (404)
+POST http://localhost:8080/api/decks/1/training?userId=2
+
+### Treino - Rejeitar início de treino de Emmy por Ada (404)
+POST http://localhost:8080/api/decks/2/training?userId=1
+
+### Treino - Ada inicia treino no baralho de Algoritmos (200)
+POST http://localhost:8080/api/decks/1/training?userId=1
+
+### Treino - Emmy inicia treino no baralho de Teoria dos Anéis (200)
+POST http://localhost:8080/api/decks/2/training?userId=2
+
+### Treino - Confirmar baralho de Algoritmos em treino (200)
+GET http://localhost:8080/api/decks/1?userId=1
+
+### Treino - Confirmar baralho de Teoria dos Anéis em treino (200)
+GET http://localhost:8080/api/decks/2?userId=2
+
+### Flashcard - Bloquear criação manual durante treino (409)
+POST http://localhost:8080/api/flashcards?userId=1&deckId=1
 Content-Type: application/json
 
 {
-  "userId": -1,
-  "flashcardId": 1,
-  "correct": true
+  "question": "Como os algoritmos podem ser classificados?",
+  "answer": "Podem ser classificados de acordo com diferentes critérios e estratégias de resolução."
 }
 
-### Tentativa de resposta - Rejeitar registro sem resultado (400)
-POST http://localhost:8080/api/answer-attempts
+### Flashcard - Bloquear atualização manual durante treino (409)
+PUT http://localhost:8080/api/flashcards/1?userId=1
 Content-Type: application/json
 
 {
-  "userId": 1,
-  "flashcardId": 1
+  "question": "O que é um algoritmo durante o treino?",
+  "answer": "É uma sequência finita de instruções."
 }
 
-### Tentativa de resposta - Bloquear registro de Emmy em flashcard de Ada (404)
-POST http://localhost:8080/api/answer-attempts
-Content-Type: application/json
+### Flashcard - Bloquear geração manual de resposta com IA durante treino (409)
+POST http://localhost:8080/api/flashcards/1/generate-answer?userId=1
 
-{
-  "userId": 2,
-  "flashcardId": 1,
-  "correct": true
-}
+### Flashcard - Bloquear exclusão manual durante treino (409)
+DELETE http://localhost:8080/api/flashcards/1?userId=1
 
-### Tentativa de resposta - Bloquear registro de Ada em flashcard de Emmy (404)
-POST http://localhost:8080/api/answer-attempts
-Content-Type: application/json
+### Flashcard - Confirmar preservação do primeiro flashcard de Ada durante treino (200)
+GET http://localhost:8080/api/flashcards/1?userId=1
 
-{
-  "userId": 1,
-  "flashcardId": 2,
-  "correct": true
-}
+### Tentativa de resposta - Rejeitar desistência para usuário inexistente (404)
+POST http://localhost:8080/api/answer-attempts/give-up?userId=-1&flashcardId=1
+
+### Tentativa de resposta - Bloquear desistência de Emmy em flashcard de Ada (404)
+POST http://localhost:8080/api/answer-attempts/give-up?userId=2&flashcardId=1
+
+### Tentativa de resposta - Bloquear desistência de Ada em flashcard de Emmy (404)
+POST http://localhost:8080/api/answer-attempts/give-up?userId=1&flashcardId=2
 
 ### Tentativa de resposta - Bloquear consulta de Emmy ao histórico de flashcard de Ada (404)
 GET http://localhost:8080/api/answer-attempts/users/2/flashcards/1
@@ -1010,25 +1025,11 @@ GET http://localhost:8080/api/answer-attempts/users/2/flashcards/1
 ### Tentativa de resposta - Bloquear consulta de Ada ao histórico de flashcard de Emmy (404)
 GET http://localhost:8080/api/answer-attempts/users/1/flashcards/2
 
-### Tentativa de resposta - Permitir registro de Ada em flashcard próprio (201)
-POST http://localhost:8080/api/answer-attempts
-Content-Type: application/json
+### Tentativa de resposta - Ada desiste do primeiro flashcard durante treino (201)
+POST http://localhost:8080/api/answer-attempts/give-up?userId=1&flashcardId=1
 
-{
-  "userId": 1,
-  "flashcardId": 1,
-  "correct": true
-}
-
-### Tentativa de resposta - Permitir registro de Emmy em flashcard próprio (201)
-POST http://localhost:8080/api/answer-attempts
-Content-Type: application/json
-
-{
-  "userId": 2,
-  "flashcardId": 2,
-  "correct": true
-}
+### Tentativa de resposta - Emmy desiste do primeiro flashcard durante treino (201)
+POST http://localhost:8080/api/answer-attempts/give-up?userId=2&flashcardId=2
 
 ### Tentativa de resposta - Consultar histórico de Ada no primeiro flashcard (200)
 GET http://localhost:8080/api/answer-attempts/users/1/flashcards/1
@@ -1041,6 +1042,33 @@ GET http://localhost:8080/api/answer-attempts/users/1
 
 ### Tentativa de resposta - Consultar histórico completo de Emmy (200)
 GET http://localhost:8080/api/answer-attempts/users/2
+
+### Treino - Ada encerra treino no baralho de Algoritmos (200)
+POST http://localhost:8080/api/decks/1/stop-training?userId=1
+
+### Treino - Emmy encerra treino no baralho de Teoria dos Anéis (200)
+POST http://localhost:8080/api/decks/2/stop-training?userId=2
+
+### Treino - Confirmar baralho de Algoritmos fora do treino (200)
+GET http://localhost:8080/api/decks/1?userId=1
+
+### Treino - Confirmar baralho de Teoria dos Anéis fora do treino (200)
+GET http://localhost:8080/api/decks/2?userId=2
+
+### Tentativa de resposta - Confirmar remoção do histórico de Ada após encerramento do treino (200)
+GET http://localhost:8080/api/answer-attempts/users/1/flashcards/1
+
+### Tentativa de resposta - Confirmar remoção do histórico de Emmy após encerramento do treino (200)
+GET http://localhost:8080/api/answer-attempts/users/2/flashcards/2
+
+### Tentativa de resposta - Confirmar histórico completo de Ada vazio após encerramento do treino (200)
+GET http://localhost:8080/api/answer-attempts/users/1
+
+### Tentativa de resposta - Confirmar histórico completo de Emmy vazio após encerramento do treino (200)
+GET http://localhost:8080/api/answer-attempts/users/2
+
+### Tentativa de resposta - Bloquear desistência fora do treino (409)
+POST http://localhost:8080/api/answer-attempts/give-up?userId=1&flashcardId=1
 
 # =============================================================================
 # FLUXO 5 — EXCLUSÕES

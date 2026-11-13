@@ -16,4 +16,6 @@ public interface NoteRepository extends JpaRepository<Note, Long> {
     boolean existsByUserIdAndTopicId(Long userId, Long topicId);
 
     boolean existsByUserIdAndContentId(Long userId, Long contentId);
+
+    void deleteByUserId(Long userId);
 }

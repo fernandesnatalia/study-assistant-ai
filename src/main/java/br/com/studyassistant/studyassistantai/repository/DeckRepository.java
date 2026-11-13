@@ -10,4 +10,6 @@ public interface DeckRepository extends JpaRepository<Deck, Long> {
     List<Deck> findByUserId(Long userId);
 
     Optional<Deck> findByIdAndUserId(Long id, Long userId);
+
+    void deleteByUserId(Long userId);
 }

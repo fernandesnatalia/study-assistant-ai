@@ -36,6 +36,22 @@ public class DeckController {
         return deckService.create(request, userId);
     }
 
+    @PostMapping("/{id}/training")
+    public Deck startTraining(
+            @PathVariable Long id,
+            @RequestParam Long userId
+    ) {
+        return deckService.startTraining(id, userId);
+    }
+
+    @PostMapping("/{id}/stop-training")
+    public Deck stopTraining(
+            @PathVariable Long id,
+            @RequestParam Long userId
+    ) {
+        return deckService.stopTraining(id, userId);
+    }
+
     @GetMapping
     public List<Deck> findAll(@RequestParam Long userId) {
         return deckService.findAll(userId);

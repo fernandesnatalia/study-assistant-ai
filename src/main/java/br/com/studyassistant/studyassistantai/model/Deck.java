@@ -7,6 +7,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Column;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -33,6 +34,9 @@ public class Deck {
     @OneToMany(mappedBy = "deck", cascade = CascadeType.REMOVE)
     private Set<Flashcard> flashcards = new HashSet<>();
 
+    @Column(nullable = false)
+    private boolean training;
+
     public Long getId() { return id; }
 
     public void setId(Long id) { this.id = id; }
@@ -50,4 +54,8 @@ public class Deck {
     public void setFlashcards(Set<Flashcard> flashcards) {
         this.flashcards = flashcards;
     }
+
+    public boolean isTraining() { return training; }
+
+    public void setTraining(boolean training) { this.training = training; }
 }

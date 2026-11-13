@@ -2,6 +2,8 @@ package br.com.studyassistant.studyassistantai.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -27,16 +29,28 @@ public class AnswerAttempt {
     @JoinColumn(name = "flashcard_id", nullable = false)
     private Flashcard flashcard;
 
+    @Column(columnDefinition = "TEXT")
+    private String userAnswer;
+
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private boolean correct;
+    private AnswerAttemptResult result;
 
     @Column(nullable = false, updatable = false)
-    private LocalDateTime answeredAt;
+    private LocalDateTime attemptedAt;
 
-    public AnswerAttempt(User user, Flashcard flashcard, boolean correct) {
+    public AnswerAttempt(
+            User user,
+            Flashcard flashcard,
+            String userAnswer,
+            AnswerAttemptResult result
+    ) {
         this.user = user;
         this.flashcard = flashcard;
-        this.correct = correct; this.answeredAt = LocalDateTime.now(); }
+        this.userAnswer = userAnswer;
+        this.result = result;
+        this.attemptedAt = LocalDateTime.now();
+    }
 
     public Long getId() { return id; }
 
@@ -44,9 +58,11 @@ public class AnswerAttempt {
 
     public Flashcard getFlashcard() { return flashcard; }
 
-    public boolean isCorrect() { return correct; }
+    public String getUserAnswer() { return userAnswer; }
 
-    public LocalDateTime getAnsweredAt() { return answeredAt; }
+    public AnswerAttemptResult getResult() { return result; }
+
+    public LocalDateTime getAttemptedAt() { return attemptedAt; }
 
     protected AnswerAttempt() {
     }

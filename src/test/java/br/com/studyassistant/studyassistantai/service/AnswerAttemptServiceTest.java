@@ -1,8 +1,9 @@
 package br.com.studyassistant.studyassistantai.service;
 
-import br.com.studyassistant.studyassistantai.dto.AnswerAttemptRequest;
 import br.com.studyassistant.studyassistantai.dto.AnswerAttemptResponse;
 import br.com.studyassistant.studyassistantai.model.AnswerAttempt;
+import br.com.studyassistant.studyassistantai.model.AnswerAttemptResult;
+import br.com.studyassistant.studyassistantai.model.Deck;
 import br.com.studyassistant.studyassistantai.model.Flashcard;
 import br.com.studyassistant.studyassistantai.model.User;
 import br.com.studyassistant.studyassistantai.repository.AnswerAttemptRepository;
@@ -19,8 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -45,88 +45,135 @@ class AnswerAttemptServiceTest {
 
     private User user;
 
+    private Deck deck;
+
     private Flashcard flashcard;
 
     @BeforeEach
     void setUp() {
-        user = org.mockito.Mockito.mock(User.class);
-        flashcard = org.mockito.Mockito.mock(Flashcard.class);
+        user = new User();
+        user.setId(1L);
+
+        deck = new Deck();
+        deck.setId(1L);
+        deck.setUser(user);
+        deck.setTheme("Algoritmos");
+        deck.setTraining(true);
+
+        flashcard = new Flashcard();
+        flashcard.setId(10L);
+        flashcard.setQuestion("O que é um algoritmo?");
+        flashcard.setAnswer("É uma sequência finita de instruções.");
+        flashcard.setDeck(deck);
     }
 
     @Test
-    void shouldCreateAnswerAttempt() {
-        AnswerAttemptRequest request = new AnswerAttemptRequest(1L, 10L, true);
-
+    void shouldRegisterGiveUpAsIncorrectAttempt() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(flashcardRepository.findByIdAndDeckUserId(10L, 1L)).thenReturn(Optional.of(flashcard));
-        when(user.getId()).thenReturn(1L);
-        when(flashcard.getId()).thenReturn(10L);
+
         when(answerAttemptRepository.save(any(AnswerAttempt.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
-        AnswerAttemptResponse response = service.create(request);
+        AnswerAttemptResponse response = service.giveUp(1L, 10L);
 
-        assertTrue(response.correct());
         assertEquals(1L, response.userId());
         assertEquals(10L, response.flashcardId());
-        assertNotNull(response.answeredAt());
+        assertNull(response.userAnswer());
+        assertEquals(AnswerAttemptResult.INCORRECT, response.result());
+        assertEquals("É uma sequência finita de instruções.", response.expectedAnswer());
 
         verify(answerAttemptRepository).save(any(AnswerAttempt.class));
     }
 
     @Test
-    void shouldRejectAttemptWhenUserDoesNotExist() {
-        AnswerAttemptRequest request = new AnswerAttemptRequest(99L, 10L, true);
-
+    void shouldRejectGiveUpWhenUserDoesNotExist() {
         when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThrows(ResponseStatusException.class, () -> service.create(request));
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class, () -> service.giveUp(99L, 10L)
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
 
         verify(answerAttemptRepository, never()).save(any(AnswerAttempt.class));
     }
 
     @Test
-    void shouldRejectAttemptWhenFlashcardDoesNotExist() {
-        AnswerAttemptRequest request = new AnswerAttemptRequest(1L, 99L, false);
-
+    void shouldRejectGiveUpWhenFlashcardDoesNotExist() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(flashcardRepository.findByIdAndDeckUserId(99L, 1L)).thenReturn(Optional.empty());
 
-        assertThrows(ResponseStatusException.class, () -> service.create(request));
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class, () -> service.giveUp(1L, 99L)
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
 
         verify(answerAttemptRepository, never()).save(any(AnswerAttempt.class));
     }
 
     @Test
-    void shouldRejectAttemptForAnotherUsersFlashcard() {
-        AnswerAttemptRequest request = new AnswerAttemptRequest(2L, 10L, true);
-
+    void shouldRejectGiveUpForAnotherUsersFlashcard() {
         when(userRepository.findById(2L)).thenReturn(Optional.of(user));
         when(flashcardRepository.findByIdAndDeckUserId(10L, 2L)).thenReturn(Optional.empty());
 
         ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class, () -> service.create(request)
+                ResponseStatusException.class, () -> service.giveUp(2L, 10L)
         );
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+
+        verify(answerAttemptRepository, never()).save(any(AnswerAttempt.class));
+    }
+
+    @Test
+    void shouldRejectGiveUpWhenDeckIsNotInTraining() {
+        deck.setTraining(false);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(flashcardRepository.findByIdAndDeckUserId(10L, 1L)).thenReturn(Optional.of(flashcard));
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class, () -> service.giveUp(1L, 10L)
+        );
+
+        assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
+
         verify(answerAttemptRepository, never()).save(any(AnswerAttempt.class));
     }
 
     @Test
     void shouldReturnUserAttemptHistory() {
-        AnswerAttempt first = new AnswerAttempt(user, flashcard, false);
-        AnswerAttempt second = new AnswerAttempt(user, flashcard, true);
+        AnswerAttempt attempt = new AnswerAttempt(user, flashcard, null, AnswerAttemptResult.INCORRECT);
 
         when(userRepository.existsById(1L)).thenReturn(true);
-        when(user.getId()).thenReturn(1L);
-        when(flashcard.getId()).thenReturn(10L);
-        when(answerAttemptRepository.findByUserIdOrderByAnsweredAtDescIdDesc(1L)).thenReturn(List.of(second, first));
+        when(answerAttemptRepository.findByUserIdOrderByAttemptedAtDescIdDesc(1L)).thenReturn(List.of(attempt));
 
         List<AnswerAttemptResponse> history = service.findByUser(1L);
 
-        assertEquals(2, history.size());
-        assertTrue(history.get(0).correct());
-        assertFalse(history.get(1).correct());
+        assertEquals(1, history.size());
+        assertEquals(AnswerAttemptResult.INCORRECT, history.get(0).result());
+        assertNull(history.get(0).userAnswer());
+    }
+
+    @Test
+    void shouldReturnUserAttemptHistoryForFlashcard() {
+        AnswerAttempt attempt = new AnswerAttempt(user, flashcard, null, AnswerAttemptResult.INCORRECT);
+
+        when(userRepository.existsById(1L)).thenReturn(true);
+        when(flashcardRepository.findByIdAndDeckUserId(10L, 1L)).thenReturn(Optional.of(flashcard));
+
+        when(answerAttemptRepository
+                .findByUserIdAndFlashcardIdOrderByAttemptedAtDescIdDesc(1L, 10L))
+                .thenReturn(List.of(attempt));
+
+        List<AnswerAttemptResponse> history = service.findByUserAndFlashcard(1L, 10L);
+
+        assertEquals(1, history.size());
+        assertEquals(AnswerAttemptResult.INCORRECT, history.get(0).result());
+
+        verify(answerAttemptRepository).findByUserIdAndFlashcardIdOrderByAttemptedAtDescIdDesc(1L, 10L);
     }
 
     @Test
@@ -141,29 +188,7 @@ class AnswerAttemptServiceTest {
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
 
         verify(answerAttemptRepository, never())
-                .findByUserIdAndFlashcardIdOrderByAnsweredAtDescIdDesc(2L, 10L);
-    }
-
-    @Test
-    void shouldReturnUserAttemptHistoryForFlashcard() {
-        AnswerAttempt first = new AnswerAttempt(user, flashcard, false);
-        AnswerAttempt second = new AnswerAttempt(user, flashcard, true);
-
-        when(userRepository.existsById(1L)).thenReturn(true);
-        when(flashcardRepository.findByIdAndDeckUserId(10L, 1L)).thenReturn(Optional.of(flashcard));
-        when(user.getId()).thenReturn(1L);
-        when(flashcard.getId()).thenReturn(10L);
-        when(answerAttemptRepository.
-                findByUserIdAndFlashcardIdOrderByAnsweredAtDescIdDesc(1L, 10L)).thenReturn(List.of(second, first)
-        );
-
-        List<AnswerAttemptResponse> history = service.findByUserAndFlashcard(1L, 10L);
-
-        assertEquals(2, history.size());
-        assertTrue(history.get(0).correct());
-        assertFalse(history.get(1).correct());
-
-        verify(answerAttemptRepository).findByUserIdAndFlashcardIdOrderByAnsweredAtDescIdDesc(1L, 10L);
+                .findByUserIdAndFlashcardIdOrderByAttemptedAtDescIdDesc(2L, 10L);
     }
 
     @Test
@@ -175,17 +200,19 @@ class AnswerAttemptServiceTest {
         );
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
-        verify(answerAttemptRepository, never()).findByUserIdOrderByAnsweredAtDescIdDesc(99L);
+
+        verify(answerAttemptRepository, never()).findByUserIdOrderByAttemptedAtDescIdDesc(99L);
     }
 
     @Test
     void shouldReturnEmptyHistoryWhenUserHasNoAttempts() {
         when(userRepository.existsById(1L)).thenReturn(true);
-        when(answerAttemptRepository.findByUserIdOrderByAnsweredAtDescIdDesc(1L)).thenReturn(List.of());
+        when(answerAttemptRepository.findByUserIdOrderByAttemptedAtDescIdDesc(1L)).thenReturn(List.of());
 
         List<AnswerAttemptResponse> history = service.findByUser(1L);
 
         assertTrue(history.isEmpty());
-        verify(answerAttemptRepository).findByUserIdOrderByAnsweredAtDescIdDesc(1L);
+
+        verify(answerAttemptRepository).findByUserIdOrderByAttemptedAtDescIdDesc(1L);
     }
 }

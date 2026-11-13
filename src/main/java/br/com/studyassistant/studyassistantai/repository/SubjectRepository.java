@@ -12,4 +12,6 @@ public interface SubjectRepository extends JpaRepository<Subject, Long> {
     List<Subject> findByUserId(Long userId);
 
     Optional<Subject> findByIdAndUserId(Long id, Long userId);
+
+    void deleteByUserId(Long userId);
 }

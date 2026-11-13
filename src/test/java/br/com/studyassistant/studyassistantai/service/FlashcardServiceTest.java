@@ -62,12 +62,8 @@ class FlashcardServiceTest {
     void shouldGenerateAnswerForFlashcardWithoutAnswer() {
         String generatedAnswer = "É uma sequência finita de instruções para resolver um problema.";
 
-        when(flashcardRepository.findByIdAndDeckUserId(1L, 1L))
-                .thenReturn(Optional.of(flashcard));
-
-        when(generativeService.generateAnswer(flashcard.getQuestion(), deck.getTheme()))
-                .thenReturn(generatedAnswer);
-
+        when(flashcardRepository.findByIdAndDeckUserId(1L, 1L)).thenReturn(Optional.of(flashcard));
+        when(generativeService.generateAnswer(flashcard.getQuestion(), deck.getTheme())).thenReturn(generatedAnswer);
         when(flashcardRepository.save(flashcard)).thenReturn(flashcard);
 
         Flashcard result = flashcardService.generateFlashcardAnswer(1L, 1L);
@@ -82,12 +78,10 @@ class FlashcardServiceTest {
     void shouldNotGenerateAnswerWhenFlashcardAlreadyHasAnswer() {
         flashcard.setAnswer("É uma sequência finita de instruções para resolver um problema.");
 
-        when(flashcardRepository.findByIdAndDeckUserId(1L, 1L))
-                .thenReturn(Optional.of(flashcard));
+        when(flashcardRepository.findByIdAndDeckUserId(1L, 1L)).thenReturn(Optional.of(flashcard));
 
         ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
-                () -> flashcardService.generateFlashcardAnswer(1L, 1L)
+                ResponseStatusException.class, () -> flashcardService.generateFlashcardAnswer(1L, 1L)
         );
 
         assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
@@ -98,12 +92,10 @@ class FlashcardServiceTest {
 
     @Test
     void shouldNotGenerateAnswerWhenFlashcardDoesNotExist() {
-        when(flashcardRepository.findByIdAndDeckUserId(99L, 1L))
-                .thenReturn(Optional.empty());
+        when(flashcardRepository.findByIdAndDeckUserId(99L, 1L)).thenReturn(Optional.empty());
 
         ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
-                () -> flashcardService.generateFlashcardAnswer(99L, 1L)
+                ResponseStatusException.class, () -> flashcardService.generateFlashcardAnswer(99L, 1L)
         );
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
@@ -114,12 +106,10 @@ class FlashcardServiceTest {
 
     @Test
     void shouldNotGenerateAnswerForAnotherUsersFlashcard() {
-        when(flashcardRepository.findByIdAndDeckUserId(1L, 2L))
-                .thenReturn(Optional.empty());
+        when(flashcardRepository.findByIdAndDeckUserId(1L, 2L)).thenReturn(Optional.empty());
 
         ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
-                () -> flashcardService.generateFlashcardAnswer(1L, 2L)
+                ResponseStatusException.class, () -> flashcardService.generateFlashcardAnswer(1L, 2L)
         );
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
@@ -130,9 +120,7 @@ class FlashcardServiceTest {
 
     @Test
     void shouldCreateFlashcardForOwnedDeck() {
-        when(deckRepository.findByIdAndUserId(1L, 1L))
-                .thenReturn(Optional.of(deck));
-
+        when(deckRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(deck));
         when(flashcardRepository.save(flashcard)).thenReturn(flashcard);
 
         Flashcard result = flashcardService.createFlashcard(1L, 1L, flashcard);
@@ -145,12 +133,10 @@ class FlashcardServiceTest {
 
     @Test
     void shouldNotCreateFlashcardForAnotherUsersDeck() {
-        when(deckRepository.findByIdAndUserId(1L, 2L))
-                .thenReturn(Optional.empty());
+        when(deckRepository.findByIdAndUserId(1L, 2L)).thenReturn(Optional.empty());
 
         ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
-                () -> flashcardService.createFlashcard(2L, 1L, flashcard)
+                ResponseStatusException.class, () -> flashcardService.createFlashcard(2L, 1L, flashcard)
         );
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
@@ -170,12 +156,10 @@ class FlashcardServiceTest {
 
     @Test
     void shouldNotGetAnotherUsersFlashcard() {
-        when(flashcardRepository.findByIdAndDeckUserId(1L, 2L))
-                .thenReturn(Optional.empty());
+        when(flashcardRepository.findByIdAndDeckUserId(1L, 2L)).thenReturn(Optional.empty());
 
         ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
-                () -> flashcardService.getFlashcardById(1L, 2L)
+                ResponseStatusException.class, () -> flashcardService.getFlashcardById(1L, 2L)
         );
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
@@ -183,11 +167,8 @@ class FlashcardServiceTest {
 
     @Test
     void shouldGetFlashcardsFromOwnedDeck() {
-        when(deckRepository.findByIdAndUserId(1L, 1L))
-                .thenReturn(Optional.of(deck));
-
-        when(flashcardRepository.findByDeckIdAndDeckUserId(1L, 1L))
-                .thenReturn(List.of(flashcard));
+        when(deckRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(deck));
+        when(flashcardRepository.findByDeckIdAndDeckUserId(1L, 1L)).thenReturn(List.of(flashcard));
 
         List<Flashcard> result = flashcardService.getFlashcardsByDeckId(1L, 1L);
 
@@ -200,8 +181,7 @@ class FlashcardServiceTest {
         when(deckRepository.findByIdAndUserId(1L, 2L)).thenReturn(Optional.empty());
 
         ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
-                () -> flashcardService.getFlashcardsByDeckId(1L, 2L)
+                ResponseStatusException.class, () -> flashcardService.getFlashcardsByDeckId(1L, 2L)
         );
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
@@ -216,8 +196,7 @@ class FlashcardServiceTest {
         updatedFlashcard.setAnswer("É uma lista ordenada de números cujos termos " +
                 "são determinados por uma regra de formação.");
 
-        when(flashcardRepository.findByIdAndDeckUserId(1L, 1L))
-                .thenReturn(Optional.of(flashcard));
+        when(flashcardRepository.findByIdAndDeckUserId(1L, 1L)).thenReturn(Optional.of(flashcard));
         when(flashcardRepository.save(flashcard)).thenReturn(flashcard);
 
         Flashcard result = flashcardService.updateFlashcard(1L, 1L, updatedFlashcard);
@@ -233,12 +212,10 @@ class FlashcardServiceTest {
         Flashcard updatedFlashcard = new Flashcard();
         updatedFlashcard.setQuestion("O que caracteriza uma sequência numérica?");
 
-        when(flashcardRepository.findByIdAndDeckUserId(1L, 2L))
-                .thenReturn(Optional.empty());
+        when(flashcardRepository.findByIdAndDeckUserId(1L, 2L)).thenReturn(Optional.empty());
 
         ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
-                () -> flashcardService.updateFlashcard(1L, 2L, updatedFlashcard)
+                ResponseStatusException.class, () -> flashcardService.updateFlashcard(1L, 2L, updatedFlashcard)
         );
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
@@ -248,9 +225,7 @@ class FlashcardServiceTest {
 
     @Test
     void shouldDeleteOwnedFlashcard() {
-        when(flashcardRepository.findByIdAndDeckUserId(1L, 1L))
-                .thenReturn(Optional.of(flashcard));
-
+        when(flashcardRepository.findByIdAndDeckUserId(1L, 1L)).thenReturn(Optional.of(flashcard));
         when(flashcardRepository.countByDeckId(1L)).thenReturn(1L);
 
         flashcardService.deleteFlashcard(1L, 1L);
@@ -261,9 +236,7 @@ class FlashcardServiceTest {
 
     @Test
     void shouldDeleteDeckWhenLastFlashcardIsDeleted() {
-        when(flashcardRepository.findByIdAndDeckUserId(1L, 1L))
-                .thenReturn(Optional.of(flashcard));
-
+        when(flashcardRepository.findByIdAndDeckUserId(1L, 1L)).thenReturn(Optional.of(flashcard));
         when(flashcardRepository.countByDeckId(1L)).thenReturn(0L);
 
         flashcardService.deleteFlashcard(1L, 1L);
@@ -274,14 +247,82 @@ class FlashcardServiceTest {
 
     @Test
     void shouldNotDeleteAnotherUsersFlashcard() {
-        when(flashcardRepository.findByIdAndDeckUserId(1L, 2L))
-                .thenReturn(Optional.empty());
+        when(flashcardRepository.findByIdAndDeckUserId(1L, 2L)).thenReturn(Optional.empty());
 
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class, () -> flashcardService.deleteFlashcard(1L, 2L)
         );
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+
+        verify(flashcardRepository, never()).delete(any(Flashcard.class));
+    }
+
+    @Test
+    void shouldNotCreateFlashcardWhileDeckIsInTraining() {
+        deck.setTraining(true);
+
+        Flashcard newFlashcard = new Flashcard();
+        newFlashcard.setQuestion("O que caracteriza uma sequência numérica?");
+        newFlashcard.setAnswer("É uma lista ordenada de números.");
+
+        when(deckRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(deck));
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class, () -> flashcardService.createFlashcard(1L, 1L, newFlashcard)
+        );
+
+        assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
+
+        verify(flashcardRepository, never()).save(any(Flashcard.class));
+    }
+
+    @Test
+    void shouldNotUpdateFlashcardWhileDeckIsInTraining() {
+        deck.setTraining(true);
+
+        Flashcard updatedFlashcard = new Flashcard();
+        updatedFlashcard.setQuestion("Como um algoritmo pode ser definido?");
+        updatedFlashcard.setAnswer("Como uma sequência finita de instruções.");
+
+        when(flashcardRepository.findByIdAndDeckUserId(1L, 1L)).thenReturn(Optional.of(flashcard));
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class, () -> flashcardService.updateFlashcard(1L, 1L, updatedFlashcard)
+        );
+
+        assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
+
+        verify(flashcardRepository, never()).save(any(Flashcard.class));
+    }
+
+    @Test
+    void shouldNotGenerateAnswerWhileDeckIsInTraining() {
+        deck.setTraining(true);
+
+        when(flashcardRepository.findByIdAndDeckUserId(1L, 1L))
+                .thenReturn(Optional.of(flashcard));
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class, () -> flashcardService.generateFlashcardAnswer(1L, 1L)
+        );
+
+        assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
+
+        verify(generativeService, never()).generateAnswer(any(), any());
+    }
+
+    @Test
+    void shouldNotDeleteFlashcardWhileDeckIsInTraining() {
+        deck.setTraining(true);
+
+        when(flashcardRepository.findByIdAndDeckUserId(1L, 1L)).thenReturn(Optional.of(flashcard));
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class, () -> flashcardService.deleteFlashcard(1L, 1L)
+        );
+
+        assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
 
         verify(flashcardRepository, never()).delete(any(Flashcard.class));
     }

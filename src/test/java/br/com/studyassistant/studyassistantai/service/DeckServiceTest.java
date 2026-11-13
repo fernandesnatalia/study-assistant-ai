@@ -7,6 +7,7 @@ import br.com.studyassistant.studyassistantai.model.User;
 import br.com.studyassistant.studyassistantai.repository.DeckRepository;
 import br.com.studyassistant.studyassistantai.repository.FlashcardRepository;
 import br.com.studyassistant.studyassistantai.repository.UserRepository;
+import br.com.studyassistant.studyassistantai.repository.AnswerAttemptRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +19,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Optional;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -37,6 +40,9 @@ class DeckServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private AnswerAttemptRepository answerAttemptRepository;
 
     @InjectMocks
     private DeckService deckService;
@@ -211,5 +217,59 @@ class DeckServiceTest {
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
 
         verify(deckRepository, never()).delete(any(Deck.class));
+    }
+
+    @Test
+    void shouldStartTraining() {
+        when(deckRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(deck));
+        when(deckRepository.save(deck)).thenReturn(deck);
+
+        Deck result = deckService.startTraining(1L, 1L);
+
+        assertTrue(result.isTraining());
+
+        verify(deckRepository).save(deck);
+    }
+
+    @Test
+    void shouldStopTrainingAndDeletePreviousAttempts() {
+        deck.setTraining(true);
+
+        when(deckRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(deck));
+        when(deckRepository.save(deck)).thenReturn(deck);
+
+        Deck result = deckService.stopTraining(1L, 1L);
+
+        assertFalse(result.isTraining());
+
+        verify(answerAttemptRepository).deleteByFlashcardDeckId(1L);
+        verify(deckRepository).save(deck);
+    }
+
+    @Test
+    void shouldNotStartTrainingForAnotherUsersDeck() {
+        when(deckRepository.findByIdAndUserId(1L, 2L)).thenReturn(Optional.empty());
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class, () -> deckService.startTraining(1L, 2L)
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+
+        verify(deckRepository, never()).save(any(Deck.class));
+    }
+
+    @Test
+    void shouldNotStopTrainingForAnotherUsersDeck() {
+        when(deckRepository.findByIdAndUserId(1L, 2L)).thenReturn(Optional.empty());
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class, () -> deckService.stopTraining(1L, 2L)
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+
+        verify(answerAttemptRepository, never()).deleteByFlashcardDeckId(any());
+        verify(deckRepository, never()).save(any(Deck.class));
     }
 }
