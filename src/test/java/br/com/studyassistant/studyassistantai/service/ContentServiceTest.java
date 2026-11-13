@@ -14,12 +14,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
-import java.util.Set;
 import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
@@ -62,7 +60,7 @@ class ContentServiceTest {
                 "adição e multiplicação, que satisfazem propriedades específicas. A teoria dos anéis " +
                 "estuda essas estruturas e suas relações."
         );
-        content.setTopics(Set.of(topic));
+        content.setTopic(topic);
         return content;
     }
 
@@ -80,7 +78,7 @@ class ContentServiceTest {
 
         assertSame(content, result);
         assertSame(user, result.getUser());
-        assertEquals(Set.of(topic), result.getTopics());
+        assertSame(topic, result.getTopic());
 
         verify(topicRepository).findByIdAndUserId(1L, 1L);
         verify(contentRepository).save(content);
@@ -173,7 +171,7 @@ class ContentServiceTest {
                 "mecanismos de processamento e armazenamento.", result.getBody()
         );
 
-        assertTrue(result.getTopics().stream().anyMatch(topic -> topic.getId().equals(1L)));
+        assertEquals(1L, result.getTopic().getId());
 
         verify(contentRepository).save(existingContent);
     }
@@ -249,37 +247,6 @@ class ContentServiceTest {
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
         verify(contentRepository, never()).delete(any());
-    }
-
-    @Test
-    void shouldCreateContentWithMultipleTopics() {
-        Topic firstTopic = createTopic();
-        Topic secondTopic = new Topic();
-
-        secondTopic.setId(2L);
-        secondTopic.setName("Álgebra Abstrata");
-
-        Content content = createContent(firstTopic);
-
-        content.setTopics(Set.of(firstTopic, secondTopic));
-
-        User user = createUser();
-
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(topicRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(firstTopic));
-        when(topicRepository.findByIdAndUserId(2L, 1L)).thenReturn(Optional.of(secondTopic));
-        when(contentRepository.save(content)).thenReturn(content);
-
-        Content result = contentService.createContent(1L, content);
-
-        assertSame(user, result.getUser());
-        assertEquals(2, result.getTopics().size());
-        assertTrue(result.getTopics().contains(firstTopic));
-        assertTrue(result.getTopics().contains(secondTopic));
-
-        verify(topicRepository).findByIdAndUserId(1L, 1L);
-        verify(topicRepository).findByIdAndUserId(2L, 1L);
-        verify(contentRepository).save(content);
     }
 
     @Test

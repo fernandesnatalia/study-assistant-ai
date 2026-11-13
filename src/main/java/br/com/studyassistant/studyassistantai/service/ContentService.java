@@ -9,9 +9,7 @@ import br.com.studyassistant.studyassistantai.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Service
 public class ContentService {
@@ -38,23 +36,15 @@ public class ContentService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        if (content.getTopics() == null || content.getTopics().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At least one topic is required");
+        if (content.getTopic() == null || content.getTopic().getId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Topic ID is required");
         }
 
-        Set<Topic> topics = new HashSet<>();
-
-        for (Topic topic : content.getTopics()) {
-            if (topic == null || topic.getId() == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Topic ID is required");
-            }
-
-            topics.add(getExistingTopic(topic.getId(), userId));
-        }
+        Topic topic = getExistingTopic(content.getTopic().getId(), userId);
 
         content.setId(null);
         content.setUser(user);
-        content.setTopics(topics);
+        content.setTopic(topic);
 
         return contentRepository.save(content);
     }

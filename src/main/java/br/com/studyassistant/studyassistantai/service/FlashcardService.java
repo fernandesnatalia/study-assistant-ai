@@ -1,8 +1,8 @@
 package br.com.studyassistant.studyassistantai.service;
 
-import br.com.studyassistant.studyassistantai.model.Content;
+import br.com.studyassistant.studyassistantai.model.Deck;
 import br.com.studyassistant.studyassistantai.model.Flashcard;
-import br.com.studyassistant.studyassistantai.repository.ContentRepository;
+import br.com.studyassistant.studyassistantai.repository.DeckRepository;
 import br.com.studyassistant.studyassistantai.repository.FlashcardRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -13,47 +13,48 @@ import java.util.List;
 public class FlashcardService {
 
     private final FlashcardRepository flashcardRepository;
-    private final ContentRepository contentRepository;
+    private final DeckRepository deckRepository;
     private final GenerativeService generativeService;
 
     public FlashcardService(
             FlashcardRepository flashcardRepository,
-            ContentRepository contentRepository, GenerativeService generativeService
+            DeckRepository deckRepository,
+            GenerativeService generativeService
     ) {
         this.flashcardRepository = flashcardRepository;
-        this.contentRepository = contentRepository;
+        this.deckRepository = deckRepository;
         this.generativeService = generativeService;
     }
 
     public Flashcard createFlashcard(
             Long userId,
-            Long contentId,
+            Long deckId,
             Flashcard flashcard
     ) {
-        Content content = contentRepository.findByIdAndUserId(contentId, userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Content not found"));
+        Deck deck = deckRepository.findByIdAndUserId(deckId, userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Deck not found"));
 
         flashcard.setId(null);
-        flashcard.setContent(content);
+        flashcard.setDeck(deck);
 
         return flashcardRepository.save(flashcard);
     }
 
     public List<Flashcard> getAllFlashcards(Long userId) {
-        return flashcardRepository.findByContentUserId(userId);
+        return flashcardRepository.findByDeckUserId(userId);
     }
 
     public Flashcard getFlashcardById(Long id, Long userId) {
-        return flashcardRepository.findByIdAndContentUserId(id, userId)
+        return flashcardRepository.findByIdAndDeckUserId(id, userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Flashcard not found"));
     }
 
-    public List<Flashcard> getFlashcardsByContentId(Long contentId, Long userId) {
-        if (contentRepository.findByIdAndUserId(contentId, userId).isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Content not found");
+    public List<Flashcard> getFlashcardsByDeckId(Long deckId, Long userId) {
+        if (deckRepository.findByIdAndUserId(deckId, userId).isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Deck not found");
         }
 
-        return flashcardRepository.findByContentIdAndContentUserId(contentId, userId);
+        return flashcardRepository.findByDeckIdAndDeckUserId(deckId, userId);
     }
 
     public Flashcard updateFlashcard(
@@ -76,14 +77,24 @@ public class FlashcardService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Flashcard already has an answer");
         }
 
-        Content content = flashcard.getContent();
-        String generatedAnswer = generativeService.generateAnswer(flashcard.getQuestion(), content.getBody());
+        String generatedAnswer = generativeService.generateAnswer(
+                flashcard.getQuestion(),
+                flashcard.getDeck().getTheme()
+        );
+
         flashcard.setAnswer(generatedAnswer);
+
         return flashcardRepository.save(flashcard);
     }
 
     public void deleteFlashcard(Long id, Long userId) {
         Flashcard flashcard = getFlashcardById(id, userId);
+        Deck deck = flashcard.getDeck();
+
         flashcardRepository.delete(flashcard);
+
+        if (flashcardRepository.countByDeckId(deck.getId()) == 0) {
+            deckRepository.delete(deck);
+        }
     }
 }

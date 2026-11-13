@@ -30,10 +30,10 @@ public class FlashcardController {
     @ResponseStatus(HttpStatus.CREATED)
     public Flashcard createFlashcard(
             @RequestParam Long userId,
-            @RequestParam Long contentId,
+            @RequestParam Long deckId,
             @Valid @RequestBody Flashcard flashcard
     ) {
-        return flashcardService.createFlashcard(userId, contentId, flashcard);
+        return flashcardService.createFlashcard(userId, deckId, flashcard);
     }
 
     @GetMapping
@@ -49,12 +49,12 @@ public class FlashcardController {
         return flashcardService.getFlashcardById(id, userId);
     }
 
-    @GetMapping("/content/{contentId}")
-    public List<Flashcard> getFlashcardsByContentId(
-            @PathVariable Long contentId,
+    @GetMapping("/deck/{deckId}")
+    public List<Flashcard> getFlashcardsByDeckId(
+            @PathVariable Long deckId,
             @RequestParam Long userId
     ) {
-        return flashcardService.getFlashcardsByContentId(contentId, userId);
+        return flashcardService.getFlashcardsByDeckId(deckId, userId);
     }
 
     @PutMapping("/{id}")

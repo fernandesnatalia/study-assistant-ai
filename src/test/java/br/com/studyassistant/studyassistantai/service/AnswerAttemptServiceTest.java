@@ -58,7 +58,7 @@ class AnswerAttemptServiceTest {
         AnswerAttemptRequest request = new AnswerAttemptRequest(1L, 10L, true);
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(flashcardRepository.findByIdAndContentUserId(10L, 1L)).thenReturn(Optional.of(flashcard));
+        when(flashcardRepository.findByIdAndDeckUserId(10L, 1L)).thenReturn(Optional.of(flashcard));
         when(user.getId()).thenReturn(1L);
         when(flashcard.getId()).thenReturn(10L);
         when(answerAttemptRepository.save(any(AnswerAttempt.class)))
@@ -90,7 +90,7 @@ class AnswerAttemptServiceTest {
         AnswerAttemptRequest request = new AnswerAttemptRequest(1L, 99L, false);
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(flashcardRepository.findByIdAndContentUserId(99L, 1L)).thenReturn(Optional.empty());
+        when(flashcardRepository.findByIdAndDeckUserId(99L, 1L)).thenReturn(Optional.empty());
 
         assertThrows(ResponseStatusException.class, () -> service.create(request));
 
@@ -102,7 +102,7 @@ class AnswerAttemptServiceTest {
         AnswerAttemptRequest request = new AnswerAttemptRequest(2L, 10L, true);
 
         when(userRepository.findById(2L)).thenReturn(Optional.of(user));
-        when(flashcardRepository.findByIdAndContentUserId(10L, 2L)).thenReturn(Optional.empty());
+        when(flashcardRepository.findByIdAndDeckUserId(10L, 2L)).thenReturn(Optional.empty());
 
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class, () -> service.create(request)
@@ -132,7 +132,7 @@ class AnswerAttemptServiceTest {
     @Test
     void shouldRejectHistoryAccessForAnotherUsersFlashcard() {
         when(userRepository.existsById(2L)).thenReturn(true);
-        when(flashcardRepository.findByIdAndContentUserId(10L, 2L)).thenReturn(Optional.empty());
+        when(flashcardRepository.findByIdAndDeckUserId(10L, 2L)).thenReturn(Optional.empty());
 
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class, () -> service.findByUserAndFlashcard(2L, 10L)
@@ -150,7 +150,7 @@ class AnswerAttemptServiceTest {
         AnswerAttempt second = new AnswerAttempt(user, flashcard, true);
 
         when(userRepository.existsById(1L)).thenReturn(true);
-        when(flashcardRepository.findByIdAndContentUserId(10L, 1L)).thenReturn(Optional.of(flashcard));
+        when(flashcardRepository.findByIdAndDeckUserId(10L, 1L)).thenReturn(Optional.of(flashcard));
         when(user.getId()).thenReturn(1L);
         when(flashcard.getId()).thenReturn(10L);
         when(answerAttemptRepository.

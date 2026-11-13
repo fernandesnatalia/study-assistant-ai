@@ -36,7 +36,7 @@ public class AnswerAttemptService {
         User user = userRepository.findById(request.userId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        Flashcard flashcard = flashcardRepository.findByIdAndContentUserId(request.flashcardId(), request.userId())
+        Flashcard flashcard = flashcardRepository.findByIdAndDeckUserId(request.flashcardId(), request.userId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Flashcard not found"));
 
         AnswerAttempt attempt = new AnswerAttempt(user, flashcard, request.correct());
@@ -62,7 +62,7 @@ public class AnswerAttemptService {
             Long flashcardId
     ) {
         validateUserExists(userId);
-        flashcardRepository.findByIdAndContentUserId(flashcardId, userId)
+        flashcardRepository.findByIdAndDeckUserId(flashcardId, userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Flashcard not found"));
 
         return answerAttemptRepository

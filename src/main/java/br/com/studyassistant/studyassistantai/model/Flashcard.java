@@ -29,8 +29,8 @@ public class Flashcard {
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "content_id", nullable = false)
-    private Content content;
+    @JoinColumn(name = "deck_id", nullable = false)
+    private Deck deck;
 
     public Long getId() { return id; }
 
@@ -44,7 +44,7 @@ public class Flashcard {
 
     public void setAnswer(String answer) { this.answer = answer; }
 
-    public Content getContent() { return content; }
+    public Deck getDeck() { return deck; }
 
-    public void setContent(Content content) { this.content = content; }
+    public void setDeck(Deck deck) { this.deck = deck; }
 }

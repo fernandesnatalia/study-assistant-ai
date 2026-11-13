@@ -6,14 +6,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Column;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.JoinTable;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.FetchType;
 import jakarta.validation.constraints.NotBlank;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 public class Content {
@@ -30,13 +26,9 @@ public class Content {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String body;
 
-    @ManyToMany
-    @JoinTable(
-            name = "content_topics",
-            joinColumns = @JoinColumn(name = "content_id"),
-            inverseJoinColumns = @JoinColumn(name = "topic_id")
-    )
-    private Set<Topic> topics = new HashSet<>();
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "topic_id", nullable = false)
+    private Topic topic;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -55,9 +47,9 @@ public class Content {
 
     public void setBody(String body) { this.body = body; }
 
-    public Set<Topic> getTopics() { return topics; }
+    public Topic getTopic() { return topic; }
 
-    public void setTopics(Set<Topic> topics) { this.topics = topics; }
+    public void setTopic(Topic topic) { this.topic = topic; }
 
     public User getUser() { return user; }
 
