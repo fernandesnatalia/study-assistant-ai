@@ -7,6 +7,7 @@ import br.com.studyassistant.studyassistantai.repository.FlashcardRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
 import java.util.List;
 
 @Service
@@ -14,16 +15,16 @@ public class FlashcardService {
 
     private final FlashcardRepository flashcardRepository;
     private final DeckRepository deckRepository;
-    private final GenerativeService generativeService;
+    private final FlashcardAiService flashcardAiService;
 
     public FlashcardService(
             FlashcardRepository flashcardRepository,
             DeckRepository deckRepository,
-            GenerativeService generativeService
+            FlashcardAiService flashcardAiService
     ) {
         this.flashcardRepository = flashcardRepository;
         this.deckRepository = deckRepository;
-        this.generativeService = generativeService;
+        this.flashcardAiService = flashcardAiService;
     }
 
     public Flashcard createFlashcard(
@@ -83,7 +84,7 @@ public class FlashcardService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Flashcard already has an answer");
         }
 
-        String generatedAnswer = generativeService.generateAnswer(
+        String generatedAnswer = flashcardAiService.generateAnswer(
                 flashcard.getQuestion(),
                 flashcard.getDeck().getTheme()
         );
@@ -96,6 +97,7 @@ public class FlashcardService {
     public void deleteFlashcard(Long id, Long userId) {
         Flashcard flashcard = getFlashcardById(id, userId);
         Deck deck = flashcard.getDeck();
+
         validateDeckIsNotInTraining(flashcard.getDeck());
 
         flashcardRepository.delete(flashcard);

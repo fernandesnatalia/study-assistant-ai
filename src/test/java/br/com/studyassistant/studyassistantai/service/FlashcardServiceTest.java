@@ -34,7 +34,7 @@ class FlashcardServiceTest {
     private DeckRepository deckRepository;
 
     @Mock
-    private GenerativeService generativeService;
+    private FlashcardAiService flashcardAiService;
 
     @InjectMocks
     private FlashcardService flashcardService;
@@ -63,14 +63,14 @@ class FlashcardServiceTest {
         String generatedAnswer = "É uma sequência finita de instruções para resolver um problema.";
 
         when(flashcardRepository.findByIdAndDeckUserId(1L, 1L)).thenReturn(Optional.of(flashcard));
-        when(generativeService.generateAnswer(flashcard.getQuestion(), deck.getTheme())).thenReturn(generatedAnswer);
+        when(flashcardAiService.generateAnswer(flashcard.getQuestion(), deck.getTheme())).thenReturn(generatedAnswer);
         when(flashcardRepository.save(flashcard)).thenReturn(flashcard);
 
         Flashcard result = flashcardService.generateFlashcardAnswer(1L, 1L);
 
         assertEquals(generatedAnswer, result.getAnswer());
 
-        verify(generativeService).generateAnswer(flashcard.getQuestion(), deck.getTheme());
+        verify(flashcardAiService).generateAnswer(flashcard.getQuestion(), deck.getTheme());
         verify(flashcardRepository).save(flashcard);
     }
 
@@ -86,7 +86,7 @@ class FlashcardServiceTest {
 
         assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
 
-        verifyNoInteractions(generativeService);
+        verifyNoInteractions(flashcardAiService);
         verify(flashcardRepository, never()).save(any(Flashcard.class));
     }
 
@@ -100,7 +100,7 @@ class FlashcardServiceTest {
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
 
-        verifyNoInteractions(generativeService);
+        verifyNoInteractions(flashcardAiService);
         verify(flashcardRepository, never()).save(any(Flashcard.class));
     }
 
@@ -114,7 +114,7 @@ class FlashcardServiceTest {
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
 
-        verifyNoInteractions(generativeService);
+        verifyNoInteractions(flashcardAiService);
         verify(flashcardRepository, never()).save(any(Flashcard.class));
     }
 
@@ -300,8 +300,7 @@ class FlashcardServiceTest {
     void shouldNotGenerateAnswerWhileDeckIsInTraining() {
         deck.setTraining(true);
 
-        when(flashcardRepository.findByIdAndDeckUserId(1L, 1L))
-                .thenReturn(Optional.of(flashcard));
+        when(flashcardRepository.findByIdAndDeckUserId(1L, 1L)).thenReturn(Optional.of(flashcard));
 
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class, () -> flashcardService.generateFlashcardAnswer(1L, 1L)
@@ -309,7 +308,7 @@ class FlashcardServiceTest {
 
         assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
 
-        verify(generativeService, never()).generateAnswer(any(), any());
+        verify(flashcardAiService, never()).generateAnswer(any(), any());
     }
 
     @Test
