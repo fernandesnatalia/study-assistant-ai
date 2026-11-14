@@ -20,32 +20,67 @@ public class AnswerAttemptService {
     private final AnswerAttemptRepository answerAttemptRepository;
     private final UserRepository userRepository;
     private final FlashcardRepository flashcardRepository;
+    private final AnswerEvaluationAiService answerEvaluationAiService;
 
     public AnswerAttemptService(
             AnswerAttemptRepository answerAttemptRepository,
             UserRepository userRepository,
-            FlashcardRepository flashcardRepository
+            FlashcardRepository flashcardRepository,
+            AnswerEvaluationAiService answerEvaluationAiService
     ) {
         this.answerAttemptRepository = answerAttemptRepository;
         this.userRepository = userRepository;
         this.flashcardRepository = flashcardRepository;
+        this.answerEvaluationAiService = answerEvaluationAiService;
+    }
+
+    @Transactional
+    public AnswerAttemptResponse answer(
+            Long userId,
+            Long flashcardId,
+            String userAnswer
+    ) {
+        User user = getExistingUser(userId);
+        Flashcard flashcard = getExistingFlashcard(flashcardId, userId);
+
+        validateDeckIsInTraining(flashcard);
+
+        if (flashcard.getAnswer() == null || flashcard.getAnswer().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Flashcard does not have an expected answer");
+        }
+
+        AnswerAttemptResult result = answerEvaluationAiService.evaluate(
+                flashcard.getQuestion(),
+                flashcard.getAnswer(),
+                userAnswer
+        );
+
+        AnswerAttempt attempt = new AnswerAttempt(
+                user,
+                flashcard,
+                userAnswer,
+                result
+        );
+
+        AnswerAttempt saved = answerAttemptRepository.save(attempt);
+
+        return toResponse(saved);
     }
 
     @Transactional
     public AnswerAttemptResponse giveUp(Long userId, Long flashcardId) {
-        User user = userRepository
-                .findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        User user = getExistingUser(userId);
+        Flashcard flashcard = getExistingFlashcard(flashcardId, userId);
 
-        Flashcard flashcard = flashcardRepository
-                .findByIdAndDeckUserId(flashcardId, userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Flashcard not found"));
+        validateDeckIsInTraining(flashcard);
 
-        if (!flashcard.getDeck().isTraining()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Deck is not in training");
-        }
+        AnswerAttempt attempt = new AnswerAttempt(
+                user,
+                flashcard,
+                null,
+                AnswerAttemptResult.INCORRECT
+        );
 
-        AnswerAttempt attempt = new AnswerAttempt(user, flashcard, null, AnswerAttemptResult.INCORRECT);
         AnswerAttempt saved = answerAttemptRepository.save(attempt);
 
         return toResponse(saved);
@@ -69,14 +104,29 @@ public class AnswerAttemptService {
     ) {
         validateUserExists(userId);
 
-        flashcardRepository.findByIdAndDeckUserId(flashcardId, userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Flashcard not found"));
+        getExistingFlashcard(flashcardId, userId);
 
         return answerAttemptRepository
                 .findByUserIdAndFlashcardIdOrderByAttemptedAtDescIdDesc(userId, flashcardId)
                 .stream()
                 .map(this::toResponse)
                 .toList();
+    }
+
+    private User getExistingUser(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+    }
+
+    private Flashcard getExistingFlashcard(Long flashcardId, Long userId) {
+        return flashcardRepository.findByIdAndDeckUserId(flashcardId, userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Flashcard not found"));
+    }
+
+    private void validateDeckIsInTraining(Flashcard flashcard) {
+        if (!flashcard.getDeck().isTraining()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Deck is not in training");
+        }
     }
 
     private void validateUserExists(Long userId) {

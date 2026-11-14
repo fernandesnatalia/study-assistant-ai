@@ -1,6 +1,11 @@
 package br.com.studyassistant.studyassistantai.service;
 
+import br.com.studyassistant.studyassistantai.dto.GeneratedFlashcard;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class FlashcardAiService {
@@ -30,8 +35,87 @@ public class FlashcardAiService {
 
                 Tema do baralho:
                 %s
-                """.formatted(question, theme); //v1
+                """.formatted(question, theme); // v1
 
         return generativeService.generate(systemPrompt, userPrompt);
+    }
+
+    public List<GeneratedFlashcard> generateFlashcards(String theme, int quantity) {
+        String systemPrompt = """
+                Você é um assistente de estudos multidisciplinar que gera flashcards.
+                Regras:
+                1. Gere exatamente a quantidade solicitada de flashcards.
+                2. Todos os flashcards devem pertencer ao tema informado.
+                3. Cada flashcard deve conter uma pergunta clara e uma resposta conceitualmente correta.
+                4. As perguntas devem abordar conhecimentos relevantes para estudo e revisão.
+                5. As respostas devem ser curtas, objetivas e suficientes para responder à pergunta.
+                6. Não repita perguntas.
+                7. Responda em português brasileiro.
+                8. Não inclua introduções, explicações adicionais ou blocos Markdown.
+                9. Retorne cada flashcard exatamente no formato:
+
+                PERGUNTA: <pergunta>
+                RESPOSTA: <resposta>
+                ---
+                """;
+
+        String userPrompt = """
+                Tema do baralho:
+                %s
+
+                Quantidade de flashcards:
+                %d
+                """.formatted(theme, quantity); // v1
+
+        String generatedContent = generativeService.generate(systemPrompt, userPrompt);
+
+        return parseGeneratedFlashcards(generatedContent, quantity);
+    }
+
+    private List<GeneratedFlashcard> parseGeneratedFlashcards(
+            String generatedContent,
+            int expectedQuantity
+    ) {
+        String[] blocks = generatedContent.split("---");
+        List<GeneratedFlashcard> flashcards = new ArrayList<>();
+
+        for (String block : blocks) {
+            String trimmedBlock = block.trim();
+
+            if (trimmedBlock.isBlank()) {
+                continue;
+            }
+
+            int questionIndex = trimmedBlock.indexOf("PERGUNTA:");
+            int answerIndex = trimmedBlock.indexOf("RESPOSTA:");
+
+            if (questionIndex == -1 || answerIndex == -1 || answerIndex <= questionIndex) {
+                throw invalidAiResponse();
+            }
+
+            String question = trimmedBlock
+                    .substring(questionIndex + "PERGUNTA:".length(), answerIndex)
+                    .trim();
+
+            String answer = trimmedBlock
+                    .substring(answerIndex + "RESPOSTA:".length())
+                    .trim();
+
+            if (question.isBlank() || answer.isBlank()) {
+                throw invalidAiResponse();
+            }
+
+            flashcards.add(new GeneratedFlashcard(question, answer));
+        }
+
+        if (flashcards.size() != expectedQuantity) {
+            throw invalidAiResponse();
+        }
+
+        return flashcards;
+    }
+
+    private ResponseStatusException invalidAiResponse() {
+        return new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI returned an invalid flashcard format");
     }
 }

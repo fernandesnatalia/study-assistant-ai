@@ -1,13 +1,14 @@
 package br.com.studyassistant.studyassistantai.service;
 
+import br.com.studyassistant.studyassistantai.dto.GeneratedFlashcard;
 import br.com.studyassistant.studyassistantai.model.Deck;
 import br.com.studyassistant.studyassistantai.model.Flashcard;
 import br.com.studyassistant.studyassistantai.repository.DeckRepository;
 import br.com.studyassistant.studyassistantai.repository.FlashcardRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-
 import java.util.List;
 
 @Service
@@ -41,6 +42,33 @@ public class FlashcardService {
         flashcard.setDeck(deck);
 
         return flashcardRepository.save(flashcard);
+    }
+
+    @Transactional
+    public List<Flashcard> generateFlashcards(
+            Long userId,
+            Long deckId,
+            int quantity
+    ) {
+        Deck deck = deckRepository.findByIdAndUserId(deckId, userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Deck not found"));
+
+        List<GeneratedFlashcard> generatedFlashcards = flashcardAiService.generateFlashcards(
+                deck.getTheme(),
+                quantity
+        );
+
+        List<Flashcard> flashcards = generatedFlashcards.stream()
+                .map(generatedFlashcard -> {
+                    Flashcard flashcard = new Flashcard();
+                    flashcard.setQuestion(generatedFlashcard.question());
+                    flashcard.setAnswer(generatedFlashcard.answer());
+                    flashcard.setDeck(deck);
+                    return flashcard;
+                })
+                .toList();
+
+        return flashcardRepository.saveAll(flashcards);
     }
 
     public List<Flashcard> getAllFlashcards(Long userId) {
