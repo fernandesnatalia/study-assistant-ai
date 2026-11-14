@@ -1,7 +1,12 @@
 package br.com.studyassistant.studyassistantai.controller;
 
+import br.com.studyassistant.studyassistantai.dto.ContentApprovalRequest;
+import br.com.studyassistant.studyassistantai.dto.ContentGenerationRequest;
+import br.com.studyassistant.studyassistantai.dto.GeneratedContentResponse;
 import br.com.studyassistant.studyassistantai.model.Content;
+import br.com.studyassistant.studyassistantai.model.Topic;
 import br.com.studyassistant.studyassistantai.service.AuthenticatedUserService;
+import br.com.studyassistant.studyassistantai.service.ContentAiService;
 import br.com.studyassistant.studyassistantai.service.ContentService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -23,13 +28,16 @@ import java.util.List;
 public class ContentController {
 
     private final ContentService contentService;
+    private final ContentAiService contentAiService;
     private final AuthenticatedUserService authenticatedUserService;
 
     public ContentController(
             ContentService contentService,
+            ContentAiService contentAiService,
             AuthenticatedUserService authenticatedUserService
     ) {
         this.contentService = contentService;
+        this.contentAiService = contentAiService;
         this.authenticatedUserService = authenticatedUserService;
     }
 
@@ -40,6 +48,35 @@ public class ContentController {
     ) {
         Long userId = authenticatedUserService.getAuthenticatedUserId(authentication);
         Content result = contentService.createContent(userId, content);
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
+    }
+
+    @PostMapping("/generate")
+    public GeneratedContentResponse generateContent(
+            @Valid @RequestBody ContentGenerationRequest request,
+            Authentication authentication
+    ) {
+        Long userId = authenticatedUserService.getAuthenticatedUserId(authentication);
+        return contentAiService.generateContent(userId, request);
+    }
+
+    @PostMapping("/approve")
+    public ResponseEntity<Content> approveGeneratedContent(
+            @Valid @RequestBody ContentApprovalRequest request,
+            Authentication authentication
+    ) {
+        Long userId = authenticatedUserService.getAuthenticatedUserId(authentication);
+
+        Topic topic = new Topic();
+        topic.setId(request.topicId());
+
+        Content content = new Content();
+        content.setTitle(request.title());
+        content.setBody(request.body());
+        content.setTopic(topic);
+
+        Content result = contentService.createContent(userId, content);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
