@@ -1,5 +1,7 @@
 package br.com.studyassistant.studyassistantai.service;
 
+import br.com.studyassistant.studyassistantai.dto.DeckAiCreateRequest;
+import br.com.studyassistant.studyassistantai.dto.GeneratedFlashcard;
 import br.com.studyassistant.studyassistantai.dto.DeckCreateRequest;
 import br.com.studyassistant.studyassistantai.model.Deck;
 import br.com.studyassistant.studyassistantai.model.Flashcard;
@@ -43,6 +45,9 @@ class DeckServiceTest {
 
     @Mock
     private AnswerAttemptRepository answerAttemptRepository;
+
+    @Mock
+    private FlashcardAiService flashcardAiService;
 
     @InjectMocks
     private DeckService deckService;
@@ -101,6 +106,88 @@ class DeckServiceTest {
         assertSame(result, savedFlashcard.getDeck());
 
         verify(deckRepository).save(any(Deck.class));
+    }
+
+    @Test
+    void shouldCreateDeckWithGeneratedFlashcards() {
+        DeckAiCreateRequest request = new DeckAiCreateRequest("Sequências Numéricas", 2);
+
+        List<GeneratedFlashcard> generatedFlashcards = List.of(
+                new GeneratedFlashcard(
+                        "O que é uma sequência numérica?",
+                        "É uma lista ordenada de números definida por uma regra."
+                ),
+                new GeneratedFlashcard(
+                        "O que é uma progressão aritmética?",
+                        "É uma sequência em que a diferença entre termos consecutivos é constante."
+                )
+        );
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+        when(flashcardAiService.generateFlashcards("Sequências Numéricas", 2))
+                .thenReturn(generatedFlashcards);
+
+        when(deckRepository.save(any(Deck.class)))
+                .thenAnswer(invocation -> {
+                    Deck savedDeck = invocation.getArgument(0);savedDeck.setId(1L);return savedDeck;}
+                );
+
+        Deck result = deckService.createWithAi(request, 1L);
+
+        assertEquals(1L, result.getId());
+        assertEquals("Sequências Numéricas", result.getTheme());
+        assertSame(user, result.getUser());
+        assertFalse(result.isTraining());
+
+        ArgumentCaptor<List<Flashcard>> flashcardsCaptor = ArgumentCaptor.forClass(List.class);
+
+        verify(flashcardRepository).saveAll(flashcardsCaptor.capture());
+
+        List<Flashcard> savedFlashcards = flashcardsCaptor.getValue();
+
+        assertEquals(2, savedFlashcards.size());
+
+        assertEquals(
+                "O que é uma sequência numérica?",
+                savedFlashcards.get(0).getQuestion()
+        );
+
+        assertEquals(
+                "É uma lista ordenada de números definida por uma regra.",
+                savedFlashcards.get(0).getAnswer()
+        );
+
+        assertEquals(
+                "O que é uma progressão aritmética?",
+                savedFlashcards.get(1).getQuestion()
+        );
+
+        assertEquals(
+                "É uma sequência em que a diferença entre termos consecutivos é constante.",
+                savedFlashcards.get(1).getAnswer()
+        );
+
+        assertSame(result, savedFlashcards.get(0).getDeck());
+        assertSame(result, savedFlashcards.get(1).getDeck());
+    }
+
+    @Test
+    void shouldNotCreateDeckWhenAiGenerationFails() {
+        DeckAiCreateRequest request = new DeckAiCreateRequest("Sequências Numéricas", 2);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(flashcardAiService.generateFlashcards("Sequências Numéricas", 2))
+                .thenThrow(new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI returned an invalid flashcard format"));
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class, () -> deckService.createWithAi(request, 1L)
+        );
+
+        assertEquals(HttpStatus.BAD_GATEWAY, exception.getStatusCode());
+
+        verify(deckRepository, never()).save(any(Deck.class));
+        verify(flashcardRepository, never()).saveAll(any());
     }
 
     @Test

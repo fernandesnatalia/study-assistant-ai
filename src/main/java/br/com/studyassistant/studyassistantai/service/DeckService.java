@@ -1,6 +1,8 @@
 package br.com.studyassistant.studyassistantai.service;
 
+import br.com.studyassistant.studyassistantai.dto.DeckAiCreateRequest;
 import br.com.studyassistant.studyassistantai.dto.DeckCreateRequest;
+import br.com.studyassistant.studyassistantai.dto.GeneratedFlashcard;
 import br.com.studyassistant.studyassistantai.model.Deck;
 import br.com.studyassistant.studyassistantai.model.Flashcard;
 import br.com.studyassistant.studyassistantai.model.User;
@@ -21,18 +23,20 @@ public class DeckService {
     private final FlashcardRepository flashcardRepository;
     private final UserRepository userRepository;
     private final AnswerAttemptRepository answerAttemptRepository;
+    private final FlashcardAiService flashcardAiService;
 
     public DeckService(
             DeckRepository deckRepository,
             FlashcardRepository flashcardRepository,
             UserRepository userRepository,
-            AnswerAttemptRepository answerAttemptRepository
-
+            AnswerAttemptRepository answerAttemptRepository,
+            FlashcardAiService flashcardAiService
     ) {
         this.deckRepository = deckRepository;
         this.flashcardRepository = flashcardRepository;
         this.userRepository = userRepository;
         this.answerAttemptRepository = answerAttemptRepository;
+        this.flashcardAiService = flashcardAiService;
     }
 
     @Transactional
@@ -52,6 +56,37 @@ public class DeckService {
         flashcard.setDeck(savedDeck);
 
         flashcardRepository.save(flashcard);
+
+        return savedDeck;
+    }
+
+    @Transactional
+    public Deck createWithAi(DeckAiCreateRequest request, Long userId) {
+        User user = getExistingUser(userId);
+
+        List<GeneratedFlashcard> generatedFlashcards = flashcardAiService.generateFlashcards(
+                request.theme(),
+                request.quantity()
+        );
+
+        Deck deck = new Deck();
+        deck.setTheme(request.theme());
+        deck.setUser(user);
+        deck.setTraining(false);
+
+        Deck savedDeck = deckRepository.save(deck);
+
+        List<Flashcard> flashcards = generatedFlashcards.stream()
+                .map(generatedFlashcard -> {
+                    Flashcard flashcard = new Flashcard();
+                    flashcard.setQuestion(generatedFlashcard.question());
+                    flashcard.setAnswer(generatedFlashcard.answer());
+                    flashcard.setDeck(savedDeck);
+                    return flashcard;
+                })
+                .toList();
+
+        flashcardRepository.saveAll(flashcards);
 
         return savedDeck;
     }

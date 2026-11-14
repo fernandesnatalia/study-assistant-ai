@@ -40,6 +40,9 @@ class AnswerAttemptServiceTest {
     @Mock
     private FlashcardRepository flashcardRepository;
 
+    @Mock
+    private AnswerEvaluationAiService answerEvaluationAiService;
+
     @InjectMocks
     private AnswerAttemptService service;
 
@@ -65,6 +68,109 @@ class AnswerAttemptServiceTest {
         flashcard.setQuestion("O que é um algoritmo?");
         flashcard.setAnswer("É uma sequência finita de instruções.");
         flashcard.setDeck(deck);
+    }
+
+    @Test
+    void shouldRegisterCorrectAnswerEvaluatedByAi() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(flashcardRepository.findByIdAndDeckUserId(10L, 1L)).thenReturn(Optional.of(flashcard));
+
+        when(answerEvaluationAiService.evaluate(
+                flashcard.getQuestion(),
+                flashcard.getAnswer(),
+                "É uma sequência de passos para resolver um problema."
+        )).thenReturn(AnswerAttemptResult.CORRECT);
+
+        when(answerAttemptRepository.save(any(AnswerAttempt.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        AnswerAttemptResponse response = service.answer(
+                1L,
+                10L,
+                "É uma sequência de passos para resolver um problema."
+        );
+
+        assertEquals(1L, response.userId());
+        assertEquals(10L, response.flashcardId());
+        assertEquals(
+                "É uma sequência de passos para resolver um problema.",
+                response.userAnswer()
+        );
+        assertEquals(AnswerAttemptResult.CORRECT, response.result());
+        assertEquals("É uma sequência finita de instruções.", response.expectedAnswer());
+
+        verify(answerEvaluationAiService).evaluate(
+                flashcard.getQuestion(),
+                flashcard.getAnswer(),
+                "É uma sequência de passos para resolver um problema."
+        );
+        verify(answerAttemptRepository).save(any(AnswerAttempt.class));
+    }
+
+    @Test
+    void shouldRegisterIncorrectAnswerEvaluatedByAi() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(flashcardRepository.findByIdAndDeckUserId(10L, 1L)).thenReturn(Optional.of(flashcard));
+
+        when(answerEvaluationAiService.evaluate(
+                flashcard.getQuestion(),
+                flashcard.getAnswer(),
+                "É um tipo de banco de dados."
+        )).thenReturn(AnswerAttemptResult.INCORRECT);
+
+        when(answerAttemptRepository.save(any(AnswerAttempt.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        AnswerAttemptResponse response = service.answer(
+                1L,
+                10L,
+                "É um tipo de banco de dados."
+        );
+
+        assertEquals("É um tipo de banco de dados.", response.userAnswer());
+        assertEquals(AnswerAttemptResult.INCORRECT, response.result());
+
+        verify(answerAttemptRepository).save(any(AnswerAttempt.class));
+    }
+
+    @Test
+    void shouldRejectAnswerWhenDeckIsNotInTraining() {
+        deck.setTraining(false);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(flashcardRepository.findByIdAndDeckUserId(10L, 1L)).thenReturn(Optional.of(flashcard));
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> service.answer(
+                        1L,
+                        10L,
+                        "É uma sequência de passos para resolver um problema."
+                )
+        );
+
+        assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
+
+        verify(answerEvaluationAiService, never()).evaluate(any(), any(), any());
+        verify(answerAttemptRepository, never()).save(any(AnswerAttempt.class));
+    }
+
+    @Test
+    void shouldRejectAnswerWhenFlashcardDoesNotHaveExpectedAnswer() {
+        flashcard.setAnswer(null);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(flashcardRepository.findByIdAndDeckUserId(10L, 1L)).thenReturn(Optional.of(flashcard));
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> service.answer(1L, 10L, "Minha resposta")
+        );
+
+        assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
+
+        verify(answerEvaluationAiService, never()).evaluate(any(), any(), any());
+        verify(answerAttemptRepository, never()).save(any(AnswerAttempt.class));
     }
 
     @Test

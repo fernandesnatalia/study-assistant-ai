@@ -1,5 +1,6 @@
 package br.com.studyassistant.studyassistantai.controller;
 
+import br.com.studyassistant.studyassistantai.dto.DeckAiCreateRequest;
 import br.com.studyassistant.studyassistantai.dto.DeckCreateRequest;
 import br.com.studyassistant.studyassistantai.model.Deck;
 import br.com.studyassistant.studyassistantai.service.AuthenticatedUserService;
@@ -41,6 +42,16 @@ public class DeckController {
     ) {
         Long userId = authenticatedUserService.getAuthenticatedUserId(authentication);
         return deckService.create(request, userId);
+    }
+
+    @PostMapping("/generate")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Deck createWithAi(
+            @Valid @RequestBody DeckAiCreateRequest request,
+            Authentication authentication
+    ) {
+        Long userId = authenticatedUserService.getAuthenticatedUserId(authentication);
+        return deckService.createWithAi(request, userId);
     }
 
     @PostMapping("/{id}/training")

@@ -40,6 +40,10 @@ public class Topic {
     @JsonIgnore
     private Set<Content> contents = new HashSet<>();
 
+    @OneToMany(mappedBy = "topic", cascade = CascadeType.REMOVE)
+    @JsonIgnore
+    private Set<Note> notes = new HashSet<>();
+
     public Long getId() { return id; }
 
     public void setId(Long id) { this.id = id; }
@@ -59,6 +63,10 @@ public class Topic {
     public Set<Content> getContents() { return contents; }
 
     public void setContents(Set<Content> contents) { this.contents = contents; }
+
+    public Set<Note> getNotes() { return notes; }
+
+    public void setNotes(Set<Note> notes) { this.notes = notes; }
 
     public Topic() {
     }

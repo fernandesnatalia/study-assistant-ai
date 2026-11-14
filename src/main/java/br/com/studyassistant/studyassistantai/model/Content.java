@@ -7,9 +7,13 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Column;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.CascadeType;
 import jakarta.validation.constraints.NotBlank;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 public class Content {
@@ -35,6 +39,10 @@ public class Content {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @OneToMany(mappedBy = "content", cascade = CascadeType.REMOVE)
+    @JsonIgnore
+    private Set<Note> notes = new HashSet<>();
+
     public Long getId() { return id; }
 
     public void setId(Long id) { this.id = id; }
@@ -54,4 +62,8 @@ public class Content {
     public User getUser() { return user; }
 
     public void setUser(User user) { this.user = user; }
+
+    public Set<Note> getNotes() { return notes; }
+
+    public void setNotes(Set<Note> notes) { this.notes = notes; }
 }

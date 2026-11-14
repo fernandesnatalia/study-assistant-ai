@@ -29,6 +29,10 @@ public class Subject {
     @OneToMany(mappedBy = "subject", cascade = CascadeType.REMOVE)
     private Set<Topic> topics = new HashSet<>();
 
+    @OneToMany(mappedBy = "subject", cascade = CascadeType.REMOVE)
+    @JsonIgnore
+    private Set<Note> notes = new HashSet<>();
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     @JsonIgnore
@@ -45,6 +49,10 @@ public class Subject {
     public Set<Topic> getTopics() { return topics; }
 
     public void setTopics(Set<Topic> topics) { this.topics = topics; }
+
+    public Set<Note> getNotes() { return notes; }
+
+    public void setNotes(Set<Note> notes) { this.notes = notes; }
 
     public User getUser() { return user; }
 
