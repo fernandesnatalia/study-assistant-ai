@@ -9,7 +9,7 @@
 # Ada Lovelace e Emmy Noether criam suas contas, matérias, tópicos e conteúdos.
 # =============================================================================
 
-### Usuário - Criar Ada Lovelace (201)
+### Usuário - Cadastrar Ada Lovelace (201)
 POST http://localhost:8080/api/users
 Content-Type: application/json
 
@@ -19,7 +19,7 @@ Content-Type: application/json
   "password": "ada123"
 }
 
-### Usuário - Criar Emmy Noether (201)
+### Usuário - Cadastrar Emmy Noether (201)
 POST http://localhost:8080/api/users
 Content-Type: application/json
 

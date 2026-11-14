@@ -12,7 +12,7 @@
     <artifactId>study-assistant-ai</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>study-assistant-ai</name>
-    <description>study-assistant-ai</description>
+    <description>Backend application for AI-assisted study organization, flashcards, training and performance tracking.</description>
     <url/>
     <licenses>
         <license/>
