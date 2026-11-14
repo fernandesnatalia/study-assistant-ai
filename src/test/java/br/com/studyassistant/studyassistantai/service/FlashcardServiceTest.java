@@ -1,10 +1,15 @@
 package br.com.studyassistant.studyassistantai.service;
 
+import br.com.studyassistant.studyassistantai.dto.GeneratedFlashcard;
+import br.com.studyassistant.studyassistantai.model.Content;
 import br.com.studyassistant.studyassistantai.model.Deck;
 import br.com.studyassistant.studyassistantai.model.Flashcard;
+import br.com.studyassistant.studyassistantai.model.Topic;
 import br.com.studyassistant.studyassistantai.model.User;
+import br.com.studyassistant.studyassistantai.repository.ContentRepository;
 import br.com.studyassistant.studyassistantai.repository.DeckRepository;
 import br.com.studyassistant.studyassistantai.repository.FlashcardRepository;
+import br.com.studyassistant.studyassistantai.repository.TopicRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,6 +37,12 @@ class FlashcardServiceTest {
 
     @Mock
     private DeckRepository deckRepository;
+
+    @Mock
+    private ContentRepository contentRepository;
+
+    @Mock
+    private TopicRepository topicRepository;
 
     @Mock
     private FlashcardAiService flashcardAiService;
@@ -145,6 +156,165 @@ class FlashcardServiceTest {
     }
 
     @Test
+    void shouldGenerateFlashcardsWithoutAdditionalContext() {
+        GeneratedFlashcard generatedFlashcard = new GeneratedFlashcard(
+                "O que é um algoritmo?",
+                "É uma sequência finita de instruções para resolver um problema."
+        );
+
+        Flashcard savedFlashcard = new Flashcard();
+        savedFlashcard.setQuestion(generatedFlashcard.question());
+        savedFlashcard.setAnswer(generatedFlashcard.answer());
+        savedFlashcard.setDeck(deck);
+
+        when(deckRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(deck));
+        when(flashcardAiService.generateFlashcards("Algoritmos", 1, ""))
+                .thenReturn(List.of(generatedFlashcard));
+        when(flashcardRepository.saveAll(any())).thenReturn(List.of(savedFlashcard));
+
+        List<Flashcard> result = flashcardService.generateFlashcards(
+                1L, 1L, 1, null, null, null
+        );
+
+        assertEquals(1, result.size());
+        assertEquals(generatedFlashcard.question(), result.get(0).getQuestion());
+        assertEquals(generatedFlashcard.answer(), result.get(0).getAnswer());
+        assertSame(deck, result.get(0).getDeck());
+
+        verify(flashcardAiService).generateFlashcards("Algoritmos", 1, "");
+        verify(flashcardRepository).saveAll(any());
+    }
+
+    @Test
+    void shouldGenerateFlashcardsUsingOwnedContentAsContext() {
+        Content content = new Content();
+        content.setId(1L);
+        content.setTitle("Algoritmos e Máquinas Analíticas");
+        content.setBody("Um algoritmo descreve uma sequência finita de instruções para resolver um problema.");
+
+        String expectedContext = """
+                Conteúdo de estudo selecionado:
+                Título: Algoritmos e Máquinas Analíticas
+                Conteúdo: Um algoritmo descreve uma sequência finita de instruções para resolver um problema.
+                """.trim();
+
+        GeneratedFlashcard generatedFlashcard = new GeneratedFlashcard(
+                "O que é um algoritmo?",
+                "É uma sequência finita de instruções para resolver um problema."
+        );
+
+        when(deckRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(deck));
+        when(contentRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(content));
+        when(flashcardAiService.generateFlashcards("Algoritmos", 1, expectedContext))
+                .thenReturn(List.of(generatedFlashcard));
+        when(flashcardRepository.saveAll(any())).thenReturn(List.of(flashcard));
+
+        flashcardService.generateFlashcards(
+                1L, 1L, 1, 1L, null, null
+        );
+
+        verify(contentRepository).findByIdAndUserId(1L, 1L);
+        verify(flashcardAiService).generateFlashcards("Algoritmos", 1, expectedContext);
+        verify(flashcardRepository).saveAll(any());
+    }
+
+    @Test
+    void shouldGenerateFlashcardsUsingOwnedTopicAsContext() {
+        Topic topic = new Topic();
+        topic.setId(1L);
+        topic.setName("Algoritmos Matemáticos");
+
+        String expectedContext = """
+                Tópico selecionado:
+                Algoritmos Matemáticos
+                """.trim();
+
+        GeneratedFlashcard generatedFlashcard = new GeneratedFlashcard(
+                "O que é um algoritmo?",
+                "É uma sequência finita de instruções para resolver um problema."
+        );
+
+        when(deckRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(deck));
+        when(topicRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(topic));
+        when(flashcardAiService.generateFlashcards("Algoritmos", 1, expectedContext))
+                .thenReturn(List.of(generatedFlashcard));
+        when(flashcardRepository.saveAll(any())).thenReturn(List.of(flashcard));
+
+        flashcardService.generateFlashcards(
+                1L, 1L, 1, null, 1L, null
+        );
+
+        verify(topicRepository).findByIdAndUserId(1L, 1L);
+        verify(flashcardAiService).generateFlashcards("Algoritmos", 1, expectedContext);
+        verify(flashcardRepository).saveAll(any());
+    }
+
+    @Test
+    void shouldGenerateFlashcardsUsingProvidedTextContext() {
+        String context = "Priorize conceitos relacionados à representação de procedimentos matemáticos.";
+
+        String expectedContext = """
+                Contexto adicional fornecido pelo usuário:
+                Priorize conceitos relacionados à representação de procedimentos matemáticos.
+                """.trim();
+
+        GeneratedFlashcard generatedFlashcard = new GeneratedFlashcard(
+                "Como algoritmos representam procedimentos matemáticos?",
+                "Por meio de sequências definidas de instruções e operações."
+        );
+
+        when(deckRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(deck));
+        when(flashcardAiService.generateFlashcards("Algoritmos", 1, expectedContext))
+                .thenReturn(List.of(generatedFlashcard));
+        when(flashcardRepository.saveAll(any())).thenReturn(List.of(flashcard));
+
+        flashcardService.generateFlashcards(
+                1L, 1L, 1, null, null, context
+        );
+
+        verify(flashcardAiService).generateFlashcards("Algoritmos", 1, expectedContext);
+        verify(flashcardRepository).saveAll(any());
+    }
+
+    @Test
+    void shouldNotGenerateFlashcardsUsingAnotherUsersContent() {
+        when(deckRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(deck));
+        when(contentRepository.findByIdAndUserId(2L, 1L)).thenReturn(Optional.empty());
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> flashcardService.generateFlashcards(
+                        1L, 1L, 1, 2L, null, null
+                )
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+
+        verify(contentRepository).findByIdAndUserId(2L, 1L);
+        verifyNoInteractions(flashcardAiService);
+        verify(flashcardRepository, never()).saveAll(any());
+    }
+
+    @Test
+    void shouldNotGenerateFlashcardsUsingAnotherUsersTopic() {
+        when(deckRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(deck));
+        when(topicRepository.findByIdAndUserId(2L, 1L)).thenReturn(Optional.empty());
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> flashcardService.generateFlashcards(
+                        1L, 1L, 1, null, 2L, null
+                )
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+
+        verify(topicRepository).findByIdAndUserId(2L, 1L);
+        verifyNoInteractions(flashcardAiService);
+        verify(flashcardRepository, never()).saveAll(any());
+    }
+
+    @Test
     void shouldGetOnlyFlashcardsFromUser() {
         when(flashcardRepository.findByDeckUserId(1L)).thenReturn(List.of(flashcard));
 
@@ -193,8 +363,9 @@ class FlashcardServiceTest {
     void shouldUpdateOwnedFlashcard() {
         Flashcard updatedFlashcard = new Flashcard();
         updatedFlashcard.setQuestion("O que caracteriza uma sequência numérica?");
-        updatedFlashcard.setAnswer("É uma lista ordenada de números cujos termos " +
-                "são determinados por uma regra de formação.");
+        updatedFlashcard.setAnswer(
+                "É uma lista ordenada de números cujos termos são determinados por uma regra de formação."
+        );
 
         when(flashcardRepository.findByIdAndDeckUserId(1L, 1L)).thenReturn(Optional.of(flashcard));
         when(flashcardRepository.save(flashcard)).thenReturn(flashcard);

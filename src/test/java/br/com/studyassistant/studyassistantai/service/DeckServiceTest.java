@@ -125,7 +125,7 @@ class DeckServiceTest {
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
-        when(flashcardAiService.generateFlashcards("Sequências Numéricas", 2))
+        when(flashcardAiService.generateFlashcards("Sequências Numéricas", 2, ""))
                 .thenReturn(generatedFlashcards);
 
         when(deckRepository.save(any(Deck.class)))
@@ -177,7 +177,7 @@ class DeckServiceTest {
         DeckAiCreateRequest request = new DeckAiCreateRequest("Sequências Numéricas", 2);
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(flashcardAiService.generateFlashcards("Sequências Numéricas", 2))
+        when(flashcardAiService.generateFlashcards("Sequências Numéricas", 2, ""))
                 .thenThrow(new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI returned an invalid flashcard format"));
 
         ResponseStatusException exception = assertThrows(

@@ -8,10 +8,11 @@ public interface AnswerAttemptRepository extends JpaRepository<AnswerAttempt, Lo
 
     List<AnswerAttempt> findByUserIdOrderByAttemptedAtDescIdDesc(Long userId);
 
-    List<AnswerAttempt> findByUserIdAndFlashcardIdOrderByAttemptedAtDescIdDesc(
-            Long userId,
-            Long flashcardId
-    );
+    List<AnswerAttempt> findByUserIdAndFlashcardIdOrderByAttemptedAtDescIdDesc(Long userId, Long flashcardId);
+
+    List<AnswerAttempt> findByUserIdAndFlashcardDeckId(Long userId, Long deckId);
+
+    List<AnswerAttempt> findByUserIdAndFlashcardDeckTrainingTrueOrderByAttemptedAtDescIdDesc(Long userId);
 
     void deleteByFlashcardDeckId(Long deckId);
 

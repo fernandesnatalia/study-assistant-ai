@@ -66,7 +66,8 @@ public class DeckService {
 
         List<GeneratedFlashcard> generatedFlashcards = flashcardAiService.generateFlashcards(
                 request.theme(),
-                request.quantity()
+                request.quantity(),
+                ""
         );
 
         Deck deck = new Deck();

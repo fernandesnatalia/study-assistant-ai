@@ -8,6 +8,9 @@ public record FlashcardGenerationRequest(
         @NotNull
         @Min(1)
         @Max(10)
-        Integer quantity
+        Integer quantity,
+        Long contentId,
+        Long topicId,
+        String context
 ) {
 }

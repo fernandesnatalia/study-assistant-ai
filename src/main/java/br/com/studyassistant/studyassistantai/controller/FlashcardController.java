@@ -57,7 +57,10 @@ public class FlashcardController {
         return flashcardService.generateFlashcards(
                 userId,
                 deckId,
-                request.quantity()
+                request.quantity(),
+                request.contentId(),
+                request.topicId(),
+                request.context()
         );
     }
 

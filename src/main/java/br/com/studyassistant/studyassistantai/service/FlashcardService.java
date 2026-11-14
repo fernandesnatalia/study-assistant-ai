@@ -1,10 +1,14 @@
 package br.com.studyassistant.studyassistantai.service;
 
 import br.com.studyassistant.studyassistantai.dto.GeneratedFlashcard;
+import br.com.studyassistant.studyassistantai.model.Content;
 import br.com.studyassistant.studyassistantai.model.Deck;
 import br.com.studyassistant.studyassistantai.model.Flashcard;
+import br.com.studyassistant.studyassistantai.model.Topic;
+import br.com.studyassistant.studyassistantai.repository.ContentRepository;
 import br.com.studyassistant.studyassistantai.repository.DeckRepository;
 import br.com.studyassistant.studyassistantai.repository.FlashcardRepository;
+import br.com.studyassistant.studyassistantai.repository.TopicRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,15 +20,21 @@ public class FlashcardService {
 
     private final FlashcardRepository flashcardRepository;
     private final DeckRepository deckRepository;
+    private final ContentRepository contentRepository;
+    private final TopicRepository topicRepository;
     private final FlashcardAiService flashcardAiService;
 
     public FlashcardService(
             FlashcardRepository flashcardRepository,
             DeckRepository deckRepository,
+            ContentRepository contentRepository,
+            TopicRepository topicRepository,
             FlashcardAiService flashcardAiService
     ) {
         this.flashcardRepository = flashcardRepository;
         this.deckRepository = deckRepository;
+        this.contentRepository = contentRepository;
+        this.topicRepository = topicRepository;
         this.flashcardAiService = flashcardAiService;
     }
 
@@ -48,14 +58,25 @@ public class FlashcardService {
     public List<Flashcard> generateFlashcards(
             Long userId,
             Long deckId,
-            int quantity
+            int quantity,
+            Long contentId,
+            Long topicId,
+            String context
     ) {
         Deck deck = deckRepository.findByIdAndUserId(deckId, userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Deck not found"));
 
+        String generationContext = buildGenerationContext(
+                userId,
+                contentId,
+                topicId,
+                context
+        );
+
         List<GeneratedFlashcard> generatedFlashcards = flashcardAiService.generateFlashcards(
                 deck.getTheme(),
-                quantity
+                quantity,
+                generationContext
         );
 
         List<Flashcard> flashcards = generatedFlashcards.stream()
@@ -133,6 +154,56 @@ public class FlashcardService {
         if (flashcardRepository.countByDeckId(deck.getId()) == 0) {
             deckRepository.delete(deck);
         }
+    }
+
+    private String buildGenerationContext(
+            Long userId,
+            Long contentId,
+            Long topicId,
+            String context
+    ) {
+        StringBuilder generationContext = new StringBuilder();
+
+        if (contentId != null) {
+            Content content = contentRepository.findByIdAndUserId(contentId, userId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Content not found"));
+
+            generationContext
+                    .append("Conteúdo de estudo selecionado:\n")
+                    .append("Título: ")
+                    .append(content.getTitle())
+                    .append("\n")
+                    .append("Conteúdo: ")
+                    .append(content.getBody())
+                    .append("\n");
+        }
+
+        if (topicId != null) {
+            Topic topic = topicRepository.findByIdAndUserId(topicId, userId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Topic not found"));
+
+            if (!generationContext.isEmpty()) {
+                generationContext.append("\n");
+            }
+
+            generationContext
+                    .append("Tópico selecionado:\n")
+                    .append(topic.getName())
+                    .append("\n");
+        }
+
+        if (context != null && !context.isBlank()) {
+            if (!generationContext.isEmpty()) {
+                generationContext.append("\n");
+            }
+
+            generationContext
+                    .append("Contexto adicional fornecido pelo usuário:\n")
+                    .append(context.trim())
+                    .append("\n");
+        }
+
+        return generationContext.toString().trim();
     }
 
     private void validateDeckIsNotInTraining(Deck deck) {

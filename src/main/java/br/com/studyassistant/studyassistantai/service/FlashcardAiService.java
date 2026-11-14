@@ -40,24 +40,35 @@ public class FlashcardAiService {
         return generativeService.generate(systemPrompt, userPrompt);
     }
 
-    public List<GeneratedFlashcard> generateFlashcards(String theme, int quantity) {
+    public List<GeneratedFlashcard> generateFlashcards(
+            String theme,
+            int quantity,
+            String generationContext
+    ) {
         String systemPrompt = """
                 Você é um assistente de estudos multidisciplinar que gera flashcards.
                 Regras:
                 1. Gere exatamente a quantidade solicitada de flashcards.
                 2. Todos os flashcards devem pertencer ao tema informado.
-                3. Cada flashcard deve conter uma pergunta clara e uma resposta conceitualmente correta.
-                4. As perguntas devem abordar conhecimentos relevantes para estudo e revisão.
-                5. As respostas devem ser curtas, objetivas e suficientes para responder à pergunta.
-                6. Não repita perguntas.
-                7. Responda em português brasileiro.
-                8. Não inclua introduções, explicações adicionais ou blocos Markdown.
-                9. Retorne cada flashcard exatamente no formato:
+                3. O tema do baralho define o escopo conceitual principal da geração.
+                4. Quando houver contexto adicional, utilize-o para orientar ou delimitar a geração\s
+                sem substituir o tema do baralho.
+                5. Cada flashcard deve conter uma pergunta clara e uma resposta conceitualmente correta.
+                6. As perguntas devem abordar conhecimentos relevantes para estudo e revisão.
+                7. As respostas devem ser curtas, objetivas e suficientes para responder à pergunta.
+                8. Não repita perguntas.
+                9. Responda em português brasileiro.
+                10. Não inclua introduções, explicações adicionais ou blocos Markdown.
+                11. Retorne cada flashcard exatamente no formato:
 
                 PERGUNTA: <pergunta>
                 RESPOSTA: <resposta>
                 ---
-                """;
+               \s""";
+
+        String context = generationContext == null || generationContext.isBlank()
+                ? "Nenhum contexto adicional fornecido."
+                : generationContext;
 
         String userPrompt = """
                 Tema do baralho:
@@ -65,7 +76,14 @@ public class FlashcardAiService {
 
                 Quantidade de flashcards:
                 %d
-                """.formatted(theme, quantity); // v1
+
+                Contexto adicional:
+                %s
+                """.formatted(
+                theme,
+                quantity,
+                context
+        );
 
         String generatedContent = generativeService.generate(systemPrompt, userPrompt);
 

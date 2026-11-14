@@ -76,20 +76,95 @@ class FlashcardAiServiceTest {
 
         List<GeneratedFlashcard> result = flashcardAiService.generateFlashcards(
                 "Sequências Numéricas",
-                2
+                2,
+                ""
         );
 
         assertEquals(2, result.size());
+
         assertEquals("O que é uma sequência numérica?", result.get(0).question());
+
         assertEquals(
                 "É uma lista ordenada de números definida por uma regra.",
                 result.get(0).answer()
         );
+
         assertEquals("O que é uma progressão aritmética?", result.get(1).question());
+
         assertEquals(
                 "É uma sequência em que a diferença entre termos consecutivos é constante.",
                 result.get(1).answer()
         );
+    }
+
+    @Test
+    void shouldIncludeAdditionalContextInFlashcardGenerationPrompt() {
+        String theme = "Algoritmos";
+        int quantity = 1;
+        String generationContext = """
+                Conteúdo de estudo selecionado:
+                Título: Algoritmos e Máquinas Analíticas
+                Conteúdo: Um algoritmo descreve uma sequência finita de instruções para resolver um problema.
+                """.trim();
+
+        String generatedContent = """
+                PERGUNTA: O que é um algoritmo?
+                RESPOSTA: É uma sequência finita de instruções para resolver um problema.
+                ---
+                """;
+
+        String systemPrompt = """
+                Você é um assistente de estudos multidisciplinar que gera flashcards.
+                Regras:
+                1. Gere exatamente a quantidade solicitada de flashcards.
+                2. Todos os flashcards devem pertencer ao tema informado.
+                3. O tema do baralho define o escopo conceitual principal da geração.
+                4. Quando houver contexto adicional, utilize-o para orientar ou delimitar a geração\s
+                sem substituir o tema do baralho.
+                5. Cada flashcard deve conter uma pergunta clara e uma resposta conceitualmente correta.
+                6. As perguntas devem abordar conhecimentos relevantes para estudo e revisão.
+                7. As respostas devem ser curtas, objetivas e suficientes para responder à pergunta.
+                8. Não repita perguntas.
+                9. Responda em português brasileiro.
+                10. Não inclua introduções, explicações adicionais ou blocos Markdown.
+                11. Retorne cada flashcard exatamente no formato:
+
+                PERGUNTA: <pergunta>
+                RESPOSTA: <resposta>
+                ---
+               \s""";
+
+        String userPrompt = """
+                Tema do baralho:
+                %s
+
+                Quantidade de flashcards:
+                %d
+
+                Contexto adicional:
+                %s
+                """.formatted(
+                theme,
+                quantity,
+                generationContext
+        );
+
+        when(generativeService.generate(systemPrompt, userPrompt)).thenReturn(generatedContent);
+
+        List<GeneratedFlashcard> result = flashcardAiService.generateFlashcards(
+                theme,
+                quantity,
+                generationContext
+        );
+
+        assertEquals(1, result.size());
+        assertEquals("O que é um algoritmo?", result.get(0).question());
+        assertEquals(
+                "É uma sequência finita de instruções para resolver um problema.",
+                result.get(0).answer()
+        );
+
+        verify(generativeService).generate(systemPrompt, userPrompt);
     }
 
     @Test
@@ -106,7 +181,7 @@ class FlashcardAiServiceTest {
 
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class,
-                () -> flashcardAiService.generateFlashcards("Sequências Numéricas", 1)
+                () -> flashcardAiService.generateFlashcards("Sequências Numéricas", 1, "")
         );
 
         assertEquals(HttpStatus.BAD_GATEWAY, exception.getStatusCode());
@@ -127,7 +202,7 @@ class FlashcardAiServiceTest {
 
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class,
-                () -> flashcardAiService.generateFlashcards("Sequências Numéricas", 2)
+                () -> flashcardAiService.generateFlashcards("Sequências Numéricas", 2, "")
         );
 
         assertEquals(HttpStatus.BAD_GATEWAY, exception.getStatusCode());
