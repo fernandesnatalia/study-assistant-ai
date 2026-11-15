@@ -604,6 +604,10 @@ A interface deverá disponibilizar os fluxos de:
 
 A API permanecerá como contrato de comunicação entre frontend e backend.
 
+Uma proposta inicial para o dashboard da aplicação Web é apresentada abaixo:
+
+![Mockup do dashboard da aplicação Web](src/docs/dashboard-mockup.png)
+
 ---
 
 ## Princípios técnicos
