@@ -4,6 +4,7 @@ import br.com.studyassistant.studyassistantai.dto.DeckPerformanceResponse;
 import br.com.studyassistant.studyassistantai.model.AnswerAttempt;
 import br.com.studyassistant.studyassistantai.model.AnswerAttemptResult;
 import br.com.studyassistant.studyassistantai.model.Deck;
+import br.com.studyassistant.studyassistantai.model.DeckMode;
 import br.com.studyassistant.studyassistantai.repository.AnswerAttemptRepository;
 import br.com.studyassistant.studyassistantai.repository.DeckRepository;
 import org.springframework.http.HttpStatus;
@@ -31,7 +32,7 @@ public class PerformanceService {
         Deck deck = deckRepository.findByIdAndUserId(deckId, userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Deck not found"));
 
-        if (!deck.isTraining()) {
+        if (deck.getMode() != DeckMode.TRAINING) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Deck is not in training");
         }
 

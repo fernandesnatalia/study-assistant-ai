@@ -5,6 +5,7 @@ import br.com.studyassistant.studyassistantai.model.Content;
 import br.com.studyassistant.studyassistantai.model.Deck;
 import br.com.studyassistant.studyassistantai.model.Flashcard;
 import br.com.studyassistant.studyassistantai.model.Topic;
+import br.com.studyassistant.studyassistantai.model.DeckMode;
 import br.com.studyassistant.studyassistantai.model.User;
 import br.com.studyassistant.studyassistantai.repository.ContentRepository;
 import br.com.studyassistant.studyassistantai.repository.DeckRepository;
@@ -431,7 +432,7 @@ class FlashcardServiceTest {
 
     @Test
     void shouldNotCreateFlashcardWhileDeckIsInTraining() {
-        deck.setTraining(true);
+        deck.setMode(DeckMode.TRAINING);
 
         Flashcard newFlashcard = new Flashcard();
         newFlashcard.setQuestion("O que caracteriza uma sequência numérica?");
@@ -450,7 +451,7 @@ class FlashcardServiceTest {
 
     @Test
     void shouldNotUpdateFlashcardWhileDeckIsInTraining() {
-        deck.setTraining(true);
+        deck.setMode(DeckMode.TRAINING);
 
         Flashcard updatedFlashcard = new Flashcard();
         updatedFlashcard.setQuestion("Como um algoritmo pode ser definido?");
@@ -469,7 +470,7 @@ class FlashcardServiceTest {
 
     @Test
     void shouldNotGenerateAnswerWhileDeckIsInTraining() {
-        deck.setTraining(true);
+        deck.setMode(DeckMode.TRAINING);
 
         when(flashcardRepository.findByIdAndDeckUserId(1L, 1L)).thenReturn(Optional.of(flashcard));
 
@@ -484,7 +485,7 @@ class FlashcardServiceTest {
 
     @Test
     void shouldNotDeleteFlashcardWhileDeckIsInTraining() {
-        deck.setTraining(true);
+        deck.setMode(DeckMode.TRAINING);
 
         when(flashcardRepository.findByIdAndDeckUserId(1L, 1L)).thenReturn(Optional.of(flashcard));
 

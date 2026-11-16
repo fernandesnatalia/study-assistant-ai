@@ -5,6 +5,7 @@ import br.com.studyassistant.studyassistantai.model.AnswerAttempt;
 import br.com.studyassistant.studyassistantai.model.AnswerAttemptResult;
 import br.com.studyassistant.studyassistantai.model.Flashcard;
 import br.com.studyassistant.studyassistantai.model.User;
+import br.com.studyassistant.studyassistantai.model.DeckMode;
 import br.com.studyassistant.studyassistantai.repository.AnswerAttemptRepository;
 import br.com.studyassistant.studyassistantai.repository.FlashcardRepository;
 import br.com.studyassistant.studyassistantai.repository.UserRepository;
@@ -124,8 +125,8 @@ public class AnswerAttemptService {
     }
 
     private void validateDeckIsInTraining(Flashcard flashcard) {
-        if (!flashcard.getDeck().isTraining()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Deck is not in training");
+        if (flashcard.getDeck().getMode() != DeckMode.TRAINING) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Deck is not in TRAINING mode");
         }
     }
 

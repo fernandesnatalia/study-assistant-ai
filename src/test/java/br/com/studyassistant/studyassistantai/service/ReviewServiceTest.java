@@ -6,6 +6,7 @@ import br.com.studyassistant.studyassistantai.model.AnswerAttemptResult;
 import br.com.studyassistant.studyassistantai.model.Deck;
 import br.com.studyassistant.studyassistantai.model.Flashcard;
 import br.com.studyassistant.studyassistantai.model.User;
+import br.com.studyassistant.studyassistantai.model.DeckMode;
 import br.com.studyassistant.studyassistantai.repository.AnswerAttemptRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,7 +41,7 @@ class ReviewServiceTest {
         deck.setId(1L);
         deck.setTheme("Teoria dos Anéis");
         deck.setUser(user);
-        deck.setTraining(true);
+        deck.setMode(DeckMode.TRAINING);
 
         flashcard = new Flashcard();
         flashcard.setId(10L);
@@ -56,7 +57,7 @@ class ReviewServiceTest {
         );
 
         when(answerAttemptRepository
-                .findByUserIdAndFlashcardDeckTrainingTrueOrderByAttemptedAtDescIdDesc(1L))
+                .findByUserIdAndFlashcardDeckModeOrderByAttemptedAtDescIdDesc(1L, DeckMode.TRAINING))
                 .thenReturn(List.of(attempt));
 
         List<ReviewFlashcardResponse> result = service.findPendingReviews(1L);
@@ -74,7 +75,7 @@ class ReviewServiceTest {
         );
 
         when(answerAttemptRepository
-                .findByUserIdAndFlashcardDeckTrainingTrueOrderByAttemptedAtDescIdDesc(1L))
+                .findByUserIdAndFlashcardDeckModeOrderByAttemptedAtDescIdDesc(1L, DeckMode.TRAINING))
                 .thenReturn(List.of(attempt));
 
         List<ReviewFlashcardResponse> result = service.findPendingReviews(1L);
@@ -93,7 +94,7 @@ class ReviewServiceTest {
         );
 
         when(answerAttemptRepository
-                .findByUserIdAndFlashcardDeckTrainingTrueOrderByAttemptedAtDescIdDesc(1L))
+                .findByUserIdAndFlashcardDeckModeOrderByAttemptedAtDescIdDesc(1L, DeckMode.TRAINING))
                 .thenReturn(List.of(latestAttempt, olderAttempt));
 
         List<ReviewFlashcardResponse> result = service.findPendingReviews(1L);
@@ -104,7 +105,7 @@ class ReviewServiceTest {
     @Test
     void shouldReturnEmptyListWhenUserHasNoPendingReviews() {
         when(answerAttemptRepository
-                .findByUserIdAndFlashcardDeckTrainingTrueOrderByAttemptedAtDescIdDesc(1L))
+                .findByUserIdAndFlashcardDeckModeOrderByAttemptedAtDescIdDesc(1L, DeckMode.TRAINING))
                 .thenReturn(List.of());
 
         List<ReviewFlashcardResponse> result = service.findPendingReviews(1L);

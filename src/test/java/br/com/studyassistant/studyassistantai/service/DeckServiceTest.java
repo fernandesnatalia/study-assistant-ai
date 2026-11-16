@@ -1,15 +1,18 @@
 package br.com.studyassistant.studyassistantai.service;
 
 import br.com.studyassistant.studyassistantai.dto.DeckAiCreateRequest;
-import br.com.studyassistant.studyassistantai.dto.GeneratedFlashcard;
 import br.com.studyassistant.studyassistantai.dto.DeckCreateRequest;
+import br.com.studyassistant.studyassistantai.dto.GeneratedFlashcard;
 import br.com.studyassistant.studyassistantai.model.Deck;
 import br.com.studyassistant.studyassistantai.model.Flashcard;
 import br.com.studyassistant.studyassistantai.model.User;
+import br.com.studyassistant.studyassistantai.model.AnswerAttempt;
+import br.com.studyassistant.studyassistantai.model.AnswerAttemptResult;
+import br.com.studyassistant.studyassistantai.model.DeckMode;
+import br.com.studyassistant.studyassistantai.repository.AnswerAttemptRepository;
 import br.com.studyassistant.studyassistantai.repository.DeckRepository;
 import br.com.studyassistant.studyassistantai.repository.FlashcardRepository;
 import br.com.studyassistant.studyassistantai.repository.UserRepository;
-import br.com.studyassistant.studyassistantai.repository.AnswerAttemptRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,8 +24,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Optional;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -64,6 +65,7 @@ class DeckServiceTest {
         deck.setId(1L);
         deck.setTheme("Algoritmos");
         deck.setUser(user);
+        deck.setMode(DeckMode.STUDY);
     }
 
     @Test
@@ -72,6 +74,7 @@ class DeckServiceTest {
         request.setTheme("Algoritmos");
         request.setQuestion("O que é um algoritmo?");
         request.setAnswer("É uma sequência finita de instruções para resolver um problema.");
+        request.setMode(DeckMode.STUDY);
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
@@ -89,6 +92,7 @@ class DeckServiceTest {
 
         assertEquals(1L, result.getId());
         assertEquals("Algoritmos", result.getTheme());
+        assertEquals(DeckMode.STUDY, result.getMode());
         assertSame(user, result.getUser());
 
         ArgumentCaptor<Flashcard> flashcardCaptor = ArgumentCaptor.forClass(Flashcard.class);
@@ -109,8 +113,24 @@ class DeckServiceTest {
     }
 
     @Test
+    void shouldNotCreateTrainingDeckManually() {
+        DeckCreateRequest request = new DeckCreateRequest();
+        request.setTheme("Algoritmos");
+        request.setQuestion("O que é um algoritmo?");
+        request.setAnswer("Uma sequência de instruções.");
+        request.setMode(DeckMode.TRAINING);
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class, () -> deckService.create(request, 1L)
+        );
+
+        assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
+        verify(deckRepository, never()).save(any(Deck.class));
+    }
+
+    @Test
     void shouldCreateDeckWithGeneratedFlashcards() {
-        DeckAiCreateRequest request = new DeckAiCreateRequest("Sequências Numéricas", 2);
+        DeckAiCreateRequest request = new DeckAiCreateRequest("Sequências Numéricas", DeckMode.STUDY, 2);
 
         List<GeneratedFlashcard> generatedFlashcards = List.of(
                 new GeneratedFlashcard(
@@ -137,9 +157,10 @@ class DeckServiceTest {
 
         assertEquals(1L, result.getId());
         assertEquals("Sequências Numéricas", result.getTheme());
+        assertEquals(DeckMode.STUDY, result.getMode());
         assertSame(user, result.getUser());
-        assertFalse(result.isTraining());
 
+        @SuppressWarnings("unchecked")
         ArgumentCaptor<List<Flashcard>> flashcardsCaptor = ArgumentCaptor.forClass(List.class);
 
         verify(flashcardRepository).saveAll(flashcardsCaptor.capture());
@@ -173,8 +194,33 @@ class DeckServiceTest {
     }
 
     @Test
+    void shouldCreateTrainingDeckWithAi() {
+        DeckAiCreateRequest request = new DeckAiCreateRequest("Algoritmos", DeckMode.TRAINING, 1);
+
+        List<GeneratedFlashcard> generatedFlashcards = List.of(
+                new GeneratedFlashcard(
+                        "O que é um algoritmo?",
+                        "Uma sequência finita de instruções."
+                )
+        );
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+        when(flashcardAiService.generateFlashcards("Algoritmos", 1, ""))
+                .thenReturn(generatedFlashcards);
+
+        when(deckRepository.save(any(Deck.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        Deck result = deckService.createWithAi(request, 1L);
+
+        assertEquals(DeckMode.TRAINING, result.getMode());
+        verify(flashcardRepository).saveAll(any());
+    }
+
+    @Test
     void shouldNotCreateDeckWhenAiGenerationFails() {
-        DeckAiCreateRequest request = new DeckAiCreateRequest("Sequências Numéricas", 2);
+        DeckAiCreateRequest request = new DeckAiCreateRequest("Sequências Numéricas", DeckMode.STUDY, 2);
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(flashcardAiService.generateFlashcards("Sequências Numéricas", 2, ""))
@@ -196,6 +242,7 @@ class DeckServiceTest {
         request.setTheme("Algoritmos");
         request.setQuestion("O que é um algoritmo?");
         request.setAnswer("É uma sequência finita de instruções para resolver um problema.");
+        request.setMode(DeckMode.STUDY);
 
         when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
@@ -229,7 +276,6 @@ class DeckServiceTest {
         );
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
-
         verify(deckRepository, never()).findByUserId(99L);
     }
 
@@ -264,6 +310,7 @@ class DeckServiceTest {
         Deck result = deckService.update(1L, updatedDeck, 1L);
 
         assertEquals("Sequências Numéricas", result.getTheme());
+        assertEquals(DeckMode.STUDY, result.getMode());
 
         verify(deckRepository).save(deck);
     }
@@ -307,56 +354,69 @@ class DeckServiceTest {
     }
 
     @Test
-    void shouldStartTraining() {
+    void shouldConvertTrainingDeckToStudy() {
+        deck.setMode(DeckMode.TRAINING);
+
         when(deckRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(deck));
+        when(answerAttemptRepository.findByUserIdAndFlashcardDeckId(1L, 1L)).thenReturn(List.of());
         when(deckRepository.save(deck)).thenReturn(deck);
 
-        Deck result = deckService.startTraining(1L, 1L);
+        Deck result = deckService.convertToStudy(1L, 1L);
 
-        assertTrue(result.isTraining());
+        assertEquals(DeckMode.STUDY, result.getMode());
 
         verify(deckRepository).save(deck);
+        verify(answerAttemptRepository, never()).deleteByFlashcardDeckId(any());
     }
 
     @Test
-    void shouldStopTrainingAndDeletePreviousAttempts() {
-        deck.setTraining(true);
-
+    void shouldNotConvertStudyDeckToStudyAgain() {
         when(deckRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(deck));
-        when(deckRepository.save(deck)).thenReturn(deck);
-
-        Deck result = deckService.stopTraining(1L, 1L);
-
-        assertFalse(result.isTraining());
-
-        verify(answerAttemptRepository).deleteByFlashcardDeckId(1L);
-        verify(deckRepository).save(deck);
-    }
-
-    @Test
-    void shouldNotStartTrainingForAnotherUsersDeck() {
-        when(deckRepository.findByIdAndUserId(1L, 2L)).thenReturn(Optional.empty());
 
         ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class, () -> deckService.startTraining(1L, 2L)
+                ResponseStatusException.class, () -> deckService.convertToStudy(1L, 1L)
         );
 
-        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
-
+        assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
         verify(deckRepository, never()).save(any(Deck.class));
     }
 
+
     @Test
-    void shouldNotStopTrainingForAnotherUsersDeck() {
+    void shouldNotConvertTrainingDeckWithAttemptsBeforeHistoryPreservation() {
+        deck.setMode(DeckMode.TRAINING);
+
+        Flashcard flashcard = new Flashcard();
+        flashcard.setId(10L);
+        flashcard.setDeck(deck);
+
+        AnswerAttempt attempt = new AnswerAttempt(
+                user, flashcard, "Resposta incorreta", AnswerAttemptResult.INCORRECT
+        );
+
+        when(deckRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(deck));
+        when(answerAttemptRepository.findByUserIdAndFlashcardDeckId(1L, 1L)).thenReturn(List.of(attempt));
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class, () -> deckService.convertToStudy(1L, 1L)
+        );
+
+        assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
+        assertEquals(DeckMode.TRAINING, deck.getMode());
+
+        verify(deckRepository, never()).save(any(Deck.class));
+        verify(answerAttemptRepository, never()).deleteByFlashcardDeckId(any());
+    }
+
+    @Test
+    void shouldNotConvertAnotherUsersDeck() {
         when(deckRepository.findByIdAndUserId(1L, 2L)).thenReturn(Optional.empty());
 
         ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class, () -> deckService.stopTraining(1L, 2L)
+                ResponseStatusException.class, () -> deckService.convertToStudy(1L, 2L)
         );
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
-
-        verify(answerAttemptRepository, never()).deleteByFlashcardDeckId(any());
         verify(deckRepository, never()).save(any(Deck.class));
     }
 }

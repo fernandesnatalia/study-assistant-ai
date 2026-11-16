@@ -6,6 +6,7 @@ import br.com.studyassistant.studyassistantai.model.AnswerAttemptResult;
 import br.com.studyassistant.studyassistantai.model.Deck;
 import br.com.studyassistant.studyassistantai.model.Flashcard;
 import br.com.studyassistant.studyassistantai.model.User;
+import br.com.studyassistant.studyassistantai.model.DeckMode;
 import br.com.studyassistant.studyassistantai.repository.AnswerAttemptRepository;
 import br.com.studyassistant.studyassistantai.repository.FlashcardRepository;
 import br.com.studyassistant.studyassistantai.repository.UserRepository;
@@ -61,7 +62,7 @@ class AnswerAttemptServiceTest {
         deck.setId(1L);
         deck.setUser(user);
         deck.setTheme("Algoritmos");
-        deck.setTraining(true);
+        deck.setMode(DeckMode.TRAINING);
 
         flashcard = new Flashcard();
         flashcard.setId(10L);
@@ -135,7 +136,7 @@ class AnswerAttemptServiceTest {
 
     @Test
     void shouldRejectAnswerWhenDeckIsNotInTraining() {
-        deck.setTraining(false);
+        deck.setMode(DeckMode.STUDY);
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(flashcardRepository.findByIdAndDeckUserId(10L, 1L)).thenReturn(Optional.of(flashcard));
@@ -235,7 +236,7 @@ class AnswerAttemptServiceTest {
 
     @Test
     void shouldRejectGiveUpWhenDeckIsNotInTraining() {
-        deck.setTraining(false);
+        deck.setMode(DeckMode.STUDY);
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(flashcardRepository.findByIdAndDeckUserId(10L, 1L)).thenReturn(Optional.of(flashcard));

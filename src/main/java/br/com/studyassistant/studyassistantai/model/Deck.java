@@ -3,6 +3,8 @@ package br.com.studyassistant.studyassistantai.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -34,8 +36,9 @@ public class Deck {
     @OneToMany(mappedBy = "deck", cascade = CascadeType.REMOVE)
     private Set<Flashcard> flashcards = new HashSet<>();
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private boolean training;
+    private DeckMode mode;
 
     public Long getId() { return id; }
 
@@ -55,7 +58,7 @@ public class Deck {
         this.flashcards = flashcards;
     }
 
-    public boolean isTraining() { return training; }
+    public DeckMode getMode() { return mode; }
 
-    public void setTraining(boolean training) { this.training = training; }
+    public void setMode(DeckMode mode) { this.mode = mode; }
 }

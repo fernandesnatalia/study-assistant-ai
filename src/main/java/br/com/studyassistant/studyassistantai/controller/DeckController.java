@@ -54,23 +54,15 @@ public class DeckController {
         return deckService.createWithAi(request, userId);
     }
 
-    @PostMapping("/{id}/training")
-    public Deck startTraining(
+    @PostMapping("/{id}/convert-to-study")
+    public Deck convertToStudy(
             @PathVariable Long id,
             Authentication authentication
     ) {
         Long userId = authenticatedUserService.getAuthenticatedUserId(authentication);
-        return deckService.startTraining(id, userId);
+        return deckService.convertToStudy(id, userId);
     }
 
-    @PostMapping("/{id}/stop-training")
-    public Deck stopTraining(
-            @PathVariable Long id,
-            Authentication authentication
-    ) {
-        Long userId = authenticatedUserService.getAuthenticatedUserId(authentication);
-        return deckService.stopTraining(id, userId);
-    }
 
     @GetMapping
     public List<Deck> findAll(Authentication authentication) {

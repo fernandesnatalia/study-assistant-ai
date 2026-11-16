@@ -4,6 +4,7 @@ import br.com.studyassistant.studyassistantai.dto.DeckAiCreateRequest;
 import br.com.studyassistant.studyassistantai.dto.DeckCreateRequest;
 import br.com.studyassistant.studyassistantai.dto.GeneratedFlashcard;
 import br.com.studyassistant.studyassistantai.model.Deck;
+import br.com.studyassistant.studyassistantai.model.DeckMode;
 import br.com.studyassistant.studyassistantai.model.Flashcard;
 import br.com.studyassistant.studyassistantai.model.User;
 import br.com.studyassistant.studyassistantai.repository.AnswerAttemptRepository;
@@ -41,12 +42,17 @@ public class DeckService {
 
     @Transactional
     public Deck create(DeckCreateRequest request, Long userId) {
+        if (request.getMode() != DeckMode.STUDY) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, "Manually created decks must use STUDY mode");
+        }
+
         User user = getExistingUser(userId);
 
         Deck deck = new Deck();
         deck.setTheme(request.getTheme());
         deck.setUser(user);
-        deck.setTraining(false);
+        deck.setMode(request.getMode());
 
         Deck savedDeck = deckRepository.save(deck);
 
@@ -70,10 +76,14 @@ public class DeckService {
                 ""
         );
 
+        if (generatedFlashcards.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "AI did not generate any flashcards");
+        }
+
         Deck deck = new Deck();
         deck.setTheme(request.theme());
         deck.setUser(user);
-        deck.setTraining(false);
+        deck.setMode(request.mode());
 
         Deck savedDeck = deckRepository.save(deck);
 
@@ -93,21 +103,22 @@ public class DeckService {
     }
 
     @Transactional
-    public Deck startTraining(Long id, Long userId) {
-        Deck deck = findById(id, userId);
+    public Deck convertToStudy(Long id, Long userId) {
+        Deck deck = getExistingDeck(id, userId);
 
-        deck.setTraining(true);
+        if (deck.getMode() != DeckMode.TRAINING) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Only TRAINING decks can be converted to STUDY");
+        }
 
-        return deckRepository.save(deck);
-    }
+        if (!answerAttemptRepository
+                .findByUserIdAndFlashcardDeckId(userId, id)
+                .isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, "Deck performance history must be preserved before conversion"
+            );
+        }
 
-    @Transactional
-    public Deck stopTraining(Long id, Long userId) {
-        Deck deck = findById(id, userId);
-
-        answerAttemptRepository.deleteByFlashcardDeckId(deck.getId());
-
-        deck.setTraining(false);
+        deck.setMode(DeckMode.STUDY);
 
         return deckRepository.save(deck);
     }
@@ -132,6 +143,14 @@ public class DeckService {
 
     public void delete(Long id, Long userId) {
         Deck deck = getExistingDeck(id, userId);
+
+        if (deck.getMode() == DeckMode.TRAINING && !answerAttemptRepository
+                .findByUserIdAndFlashcardDeckId(userId, id)
+                .isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, "Deck performance history must be preserved before deletion"
+            );
+        }
 
         deckRepository.delete(deck);
     }

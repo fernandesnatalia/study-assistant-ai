@@ -280,6 +280,7 @@ Content-Type: application/json
 
 {
   "theme": "Algoritmos",
+  "mode": "STUDY",
   "question": "O que é um algoritmo?"
 }
 
@@ -290,6 +291,7 @@ Content-Type: application/json
 
 {
   "theme": "Teoria dos Anéis",
+  "mode": "STUDY",
   "question": "O que é um anel na Álgebra Abstrata?",
   "answer": "É um conjunto com duas operações, adição e multiplicação, cuja adição forma um grupo abeliano e cuja multiplicação é associativa e distributiva em relação à adição."
 }
@@ -325,6 +327,7 @@ Content-Type: application/json
 
 {
   "theme": "Máquina Analítica",
+  "mode": "STUDY",
   "question": "Qual era a finalidade da Máquina Analítica?",
   "answer": "Executar cálculos matemáticos programáveis por meio de instruções, utilizando mecanismos de processamento e armazenamento."
 }
@@ -372,13 +375,14 @@ Content-Type: application/json
   "contentId": 1
 }
 
-### Baralho com IA - Ada cria baralho de Sequências Numéricas com dois flashcards (201)
+### Baralho com IA - Ada cria baralho de Sequências Numéricas para treino (201)
 POST http://localhost:8080/api/decks/generate
 Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
   "theme": "Sequências Numéricas",
+  "mode": "TRAINING",
   "quantity": 2
 }
 
@@ -667,44 +671,29 @@ Content-Type: application/json
   "question": ""
 }
 
-### Treino - Rejeitar início de treino de Emmy por Ada (404)
-POST http://localhost:8080/api/decks/2/training
-Authorization: Bearer <ADA_TOKEN>
-
-### Treino - Ada inicia treino no baralho de Algoritmos (200)
-POST http://localhost:8080/api/decks/1/training
-Authorization: Bearer <ADA_TOKEN>
-
-### Treino - Emmy inicia treino no baralho de Teoria dos Anéis (200)
-POST http://localhost:8080/api/decks/2/training
-Authorization: Bearer <EMMY_TOKEN>
-
-### Flashcard - Bloquear criação manual durante treino (409)
-POST http://localhost:8080/api/flashcards?deckId=1
+### Baralho - Rejeitar criação manual em TRAINING (409)
+POST http://localhost:8080/api/decks
 Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
-  "question": "Como os algoritmos podem ser classificados?",
-  "answer": "Podem ser classificados de acordo com diferentes critérios e estratégias de resolução."
+  "theme": "Baralho inválido",
+  "mode": "TRAINING",
+  "question": "O que é um algoritmo?",
+  "answer": "Uma sequência de instruções."
 }
 
-### Flashcard - Bloquear atualização manual durante treino (409)
-PUT http://localhost:8080/api/flashcards/1
+### Flashcard com IA - Permitir geração de flashcard durante treino (201)
+POST http://localhost:8080/api/flashcards/generate?deckId=4
 Authorization: Bearer <ADA_TOKEN>
 Content-Type: application/json
 
 {
-  "question": "O que é um algoritmo durante o treino?",
-  "answer": "É uma sequência finita de instruções."
+  "quantity": 1
 }
 
-### Flashcard - Bloquear geração manual de resposta com IA durante treino (409)
-POST http://localhost:8080/api/flashcards/1/generate-answer
-Authorization: Bearer <ADA_TOKEN>
-
-### Flashcard - Bloquear exclusão manual durante treino (409)
-DELETE http://localhost:8080/api/flashcards/1
+### Flashcard com IA - Confirmar flashcard gerado durante treino (200)
+GET http://localhost:8080/api/flashcards/deck/4
 Authorization: Bearer <ADA_TOKEN>
 
 ### Flashcard com IA - Permitir geração de flashcard durante treino (201)
@@ -800,17 +789,17 @@ Content-Type: application/json
 GET http://localhost:8080/api/reviews/pending
 Authorization: Bearer <ADA_TOKEN>
 
-### Treino - Ada encerra treino no baralho de Algoritmos (200)
-POST http://localhost:8080/api/decks/1/stop-training
+### Baralho - Ada converte baralho de treino para estudo (200)
+POST http://localhost:8080/api/decks/4/convert-to-study
 Authorization: Bearer <ADA_TOKEN>
 
-### Treino - Emmy encerra treino no baralho de Teoria dos Anéis (200)
-POST http://localhost:8080/api/decks/2/stop-training
+### Baralho - Bloquear conversão repetida para estudo (409)
+POST http://localhost:8080/api/decks/4/convert-to-study
+Authorization: Bearer <ADA_TOKEN>
+
+### Baralho - Bloquear conversão de baralho de outro usuário (404)
+POST http://localhost:8080/api/decks/4/convert-to-study
 Authorization: Bearer <EMMY_TOKEN>
-
-### Tentativa de resposta - Confirmar histórico completo de Ada vazio após encerramento do treino (200)
-GET http://localhost:8080/api/answer-attempts
-Authorization: Bearer <ADA_TOKEN>
 
 ### Tentativa de resposta - Bloquear desistência fora do treino (409)
 POST http://localhost:8080/api/answer-attempts/give-up?flashcardId=1

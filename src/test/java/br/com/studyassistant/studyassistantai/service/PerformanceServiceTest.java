@@ -6,6 +6,7 @@ import br.com.studyassistant.studyassistantai.model.AnswerAttemptResult;
 import br.com.studyassistant.studyassistantai.model.Deck;
 import br.com.studyassistant.studyassistantai.model.Flashcard;
 import br.com.studyassistant.studyassistantai.model.User;
+import br.com.studyassistant.studyassistantai.model.DeckMode;
 import br.com.studyassistant.studyassistantai.repository.AnswerAttemptRepository;
 import br.com.studyassistant.studyassistantai.repository.DeckRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,7 +50,7 @@ class PerformanceServiceTest {
         deck.setId(1L);
         deck.setTheme("Teoria dos Anéis");
         deck.setUser(user);
-        deck.setTraining(true);
+        deck.setMode(DeckMode.TRAINING);
 
         flashcard = new Flashcard();
         flashcard.setId(10L);
@@ -107,7 +108,7 @@ class PerformanceServiceTest {
 
     @Test
     void shouldRejectPerformanceWhenDeckIsNotInTraining() {
-        deck.setTraining(false);
+        deck.setMode(DeckMode.STUDY);
 
         when(deckRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(deck));
 
