@@ -1,9 +1,12 @@
 package br.com.studyassistant.studyassistantai.service;
 
 import br.com.studyassistant.studyassistantai.model.Content;
+import br.com.studyassistant.studyassistantai.model.ContentOrigin;
+import br.com.studyassistant.studyassistantai.model.Document;
 import br.com.studyassistant.studyassistantai.model.Topic;
 import br.com.studyassistant.studyassistantai.model.User;
 import br.com.studyassistant.studyassistantai.repository.ContentRepository;
+import br.com.studyassistant.studyassistantai.repository.DocumentRepository;
 import br.com.studyassistant.studyassistantai.repository.TopicRepository;
 import br.com.studyassistant.studyassistantai.repository.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -16,13 +19,14 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ContentServiceTest {
@@ -33,11 +37,14 @@ class ContentServiceTest {
     @Mock
     private TopicRepository topicRepository;
 
-    @InjectMocks
-    private ContentService contentService;
-
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private DocumentRepository documentRepository;
+
+    @InjectMocks
+    private ContentService contentService;
 
     private Topic createTopic() {
         Topic topic = new Topic();
@@ -79,9 +86,109 @@ class ContentServiceTest {
         assertSame(content, result);
         assertSame(user, result.getUser());
         assertSame(topic, result.getTopic());
+        assertEquals(ContentOrigin.MANUAL, result.getOrigin());
+        assertNull(result.getDocument());
 
         verify(topicRepository).findByIdAndUserId(1L, 1L);
         verify(contentRepository).save(content);
+        verifyNoInteractions(documentRepository);
+    }
+
+    @Test
+    void shouldApproveGeneratedContentWithAiOrigin() {
+        Topic topic = createTopic();
+        Content content = createContent(topic);
+        User user = createUser();
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(topicRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(topic));
+        when(contentRepository.save(content)).thenReturn(content);
+
+        Content result = contentService.approveGeneratedContent(1L, content);
+
+        assertEquals(ContentOrigin.AI_GENERATED, result.getOrigin());
+        assertNull(result.getDocument());
+
+        verify(contentRepository).save(content);
+        verifyNoInteractions(documentRepository);
+    }
+
+    @Test
+    void shouldIgnoreProvidedOriginWhenCreatingManualContent() {
+        Topic topic = createTopic();
+        Content content = createContent(topic);
+        content.setOrigin(ContentOrigin.DOCUMENT);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(createUser()));
+        when(topicRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(topic));
+        when(contentRepository.save(content)).thenReturn(content);
+
+        Content result = contentService.createContent(1L, content);
+
+        assertEquals(ContentOrigin.MANUAL, result.getOrigin());
+        assertNull(result.getDocument());
+
+        verify(contentRepository).save(content);
+    }
+
+    @Test
+    void shouldIgnoreProvidedOriginWhenApprovingGeneratedContent() {
+        Topic topic = createTopic();
+        Content content = createContent(topic);
+        content.setOrigin(ContentOrigin.DOCUMENT);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(createUser()));
+        when(topicRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(topic));
+        when(contentRepository.save(content)).thenReturn(content);
+
+        Content result = contentService.approveGeneratedContent(1L, content);
+
+        assertEquals(ContentOrigin.AI_GENERATED, result.getOrigin());
+        assertNull(result.getDocument());
+
+        verify(contentRepository).save(content);
+    }
+
+    @Test
+    void shouldRejectDocumentAssociationWhenCreatingManualContent() {
+        Topic topic = createTopic();
+        Content content = createContent(topic);
+        Document document = new Document(createUser(), "material.pdf", "PDF", 1024L);
+
+        content.setDocument(document);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(createUser()));
+        when(topicRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(topic));
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class, () -> contentService.createContent(1L, content)
+        );
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+
+        verify(contentRepository, never()).save(any());
+        verifyNoInteractions(documentRepository);
+    }
+
+    @Test
+    void shouldRejectDocumentAssociationWhenApprovingGeneratedContent() {
+        Topic topic = createTopic();
+        Content content = createContent(topic);
+        Document document = new Document(createUser(), "material.pdf", "PDF", 1024L);
+
+        content.setDocument(document);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(createUser()));
+        when(topicRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(topic));
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class, () -> contentService.approveGeneratedContent(1L, content)
+        );
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+
+        verify(contentRepository, never()).save(any());
+        verifyNoInteractions(documentRepository);
     }
 
     @Test
@@ -155,16 +262,20 @@ class ContentServiceTest {
     @Test
     void shouldUpdateContent() {
         Content existingContent = createContent(createTopic());
+        existingContent.setOrigin(ContentOrigin.AI_GENERATED);
 
         Content updatedContent = new Content();
+
         updatedContent.setTitle("Qual era a finalidade da Máquina Analítica?");
         updatedContent.setBody("Executar cálculos matemáticos programáveis por meio de instruções, utilizando " +
                 "mecanismos de processamento e armazenamento.");
 
+        updatedContent.setOrigin(ContentOrigin.DOCUMENT);
+
         when(contentRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(existingContent));
         when(contentRepository.save(existingContent)).thenReturn(existingContent);
 
-        Content result = contentService.updateContent(1L, 1L, updatedContent);;
+        Content result = contentService.updateContent(1L, 1L, updatedContent);
 
         assertEquals("Qual era a finalidade da Máquina Analítica?", result.getTitle());
         assertEquals("Executar cálculos matemáticos programáveis por meio de instruções, utilizando " +
@@ -172,6 +283,7 @@ class ContentServiceTest {
         );
 
         assertEquals(1L, result.getTopic().getId());
+        assertEquals(ContentOrigin.AI_GENERATED, result.getOrigin());
 
         verify(contentRepository).save(existingContent);
     }
@@ -197,8 +309,8 @@ class ContentServiceTest {
     @Test
     void shouldThrowBadRequestWhenUpdatingWithBlankBody() {
         Content existingContent = createContent(createTopic());
-
         Content updatedContent = new Content();
+
         updatedContent.setTitle("Teoria dos Anéis");
         updatedContent.setBody("");
 

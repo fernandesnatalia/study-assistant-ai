@@ -47,7 +47,7 @@ public class ContentController {
             Authentication authentication
     ) {
         Long userId = authenticatedUserService.getAuthenticatedUserId(authentication);
-        Content result = contentService.createContent(userId, content);
+        Content result = contentService.approveGeneratedContent(userId, content);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
