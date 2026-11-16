@@ -63,6 +63,7 @@ class FlashcardServiceTest {
         deck.setId(1L);
         deck.setTheme("Algoritmos");
         deck.setUser(user);
+        deck.setMode(DeckMode.STUDY);
 
         flashcard = new Flashcard();
         flashcard.setId(1L);

@@ -6,10 +6,7 @@ import br.com.studyassistant.studyassistantai.dto.GeneratedFlashcard;
 import br.com.studyassistant.studyassistantai.model.Deck;
 import br.com.studyassistant.studyassistantai.model.Flashcard;
 import br.com.studyassistant.studyassistantai.model.User;
-import br.com.studyassistant.studyassistantai.model.AnswerAttempt;
-import br.com.studyassistant.studyassistantai.model.AnswerAttemptResult;
 import br.com.studyassistant.studyassistantai.model.DeckMode;
-import br.com.studyassistant.studyassistantai.repository.AnswerAttemptRepository;
 import br.com.studyassistant.studyassistantai.repository.DeckRepository;
 import br.com.studyassistant.studyassistantai.repository.FlashcardRepository;
 import br.com.studyassistant.studyassistantai.repository.UserRepository;
@@ -45,7 +42,7 @@ class DeckServiceTest {
     private UserRepository userRepository;
 
     @Mock
-    private AnswerAttemptRepository answerAttemptRepository;
+    private PerformanceService performanceService;
 
     @Mock
     private FlashcardAiService flashcardAiService;
@@ -339,6 +336,19 @@ class DeckServiceTest {
 
         verify(deckRepository).delete(deck);
     }
+    @Test
+    void shouldConsolidatePerformanceBeforeDeletingTrainingDeck() {
+        deck.setMode(DeckMode.TRAINING);
+
+        when(deckRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(deck));
+
+        deckService.delete(1L, 1L);
+
+        var inOrder = org.mockito.Mockito.inOrder(performanceService, deckRepository);
+
+        inOrder.verify(performanceService).consolidateDeckPerformance(1L, 1L);
+        inOrder.verify(deckRepository).delete(deck);
+    }
 
     @Test
     void shouldNotDeleteAnotherUsersDeck() {
@@ -358,15 +368,14 @@ class DeckServiceTest {
         deck.setMode(DeckMode.TRAINING);
 
         when(deckRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(deck));
-        when(answerAttemptRepository.findByUserIdAndFlashcardDeckId(1L, 1L)).thenReturn(List.of());
         when(deckRepository.save(deck)).thenReturn(deck);
 
         Deck result = deckService.convertToStudy(1L, 1L);
 
         assertEquals(DeckMode.STUDY, result.getMode());
 
+        verify(performanceService).consolidateDeckPerformance(1L, 1L);
         verify(deckRepository).save(deck);
-        verify(answerAttemptRepository, never()).deleteByFlashcardDeckId(any());
     }
 
     @Test
@@ -379,33 +388,6 @@ class DeckServiceTest {
 
         assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
         verify(deckRepository, never()).save(any(Deck.class));
-    }
-
-
-    @Test
-    void shouldNotConvertTrainingDeckWithAttemptsBeforeHistoryPreservation() {
-        deck.setMode(DeckMode.TRAINING);
-
-        Flashcard flashcard = new Flashcard();
-        flashcard.setId(10L);
-        flashcard.setDeck(deck);
-
-        AnswerAttempt attempt = new AnswerAttempt(
-                user, flashcard, "Resposta incorreta", AnswerAttemptResult.INCORRECT
-        );
-
-        when(deckRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(deck));
-        when(answerAttemptRepository.findByUserIdAndFlashcardDeckId(1L, 1L)).thenReturn(List.of(attempt));
-
-        ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class, () -> deckService.convertToStudy(1L, 1L)
-        );
-
-        assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
-        assertEquals(DeckMode.TRAINING, deck.getMode());
-
-        verify(deckRepository, never()).save(any(Deck.class));
-        verify(answerAttemptRepository, never()).deleteByFlashcardDeckId(any());
     }
 
     @Test

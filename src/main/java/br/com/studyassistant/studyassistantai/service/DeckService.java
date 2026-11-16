@@ -7,7 +7,6 @@ import br.com.studyassistant.studyassistantai.model.Deck;
 import br.com.studyassistant.studyassistantai.model.DeckMode;
 import br.com.studyassistant.studyassistantai.model.Flashcard;
 import br.com.studyassistant.studyassistantai.model.User;
-import br.com.studyassistant.studyassistantai.repository.AnswerAttemptRepository;
 import br.com.studyassistant.studyassistantai.repository.DeckRepository;
 import br.com.studyassistant.studyassistantai.repository.FlashcardRepository;
 import br.com.studyassistant.studyassistantai.repository.UserRepository;
@@ -23,21 +22,20 @@ public class DeckService {
     private final DeckRepository deckRepository;
     private final FlashcardRepository flashcardRepository;
     private final UserRepository userRepository;
-    private final AnswerAttemptRepository answerAttemptRepository;
     private final FlashcardAiService flashcardAiService;
+    private final PerformanceService performanceService;
 
     public DeckService(
             DeckRepository deckRepository,
             FlashcardRepository flashcardRepository,
             UserRepository userRepository,
-            AnswerAttemptRepository answerAttemptRepository,
-            FlashcardAiService flashcardAiService
+            FlashcardAiService flashcardAiService, PerformanceService performanceService
     ) {
         this.deckRepository = deckRepository;
         this.flashcardRepository = flashcardRepository;
         this.userRepository = userRepository;
-        this.answerAttemptRepository = answerAttemptRepository;
         this.flashcardAiService = flashcardAiService;
+        this.performanceService = performanceService;
     }
 
     @Transactional
@@ -110,13 +108,7 @@ public class DeckService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Only TRAINING decks can be converted to STUDY");
         }
 
-        if (!answerAttemptRepository
-                .findByUserIdAndFlashcardDeckId(userId, id)
-                .isEmpty()) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT, "Deck performance history must be preserved before conversion"
-            );
-        }
+        performanceService.consolidateDeckPerformance(userId, id);
 
         deck.setMode(DeckMode.STUDY);
 
@@ -141,15 +133,12 @@ public class DeckService {
         return deckRepository.save(existingDeck);
     }
 
+    @Transactional
     public void delete(Long id, Long userId) {
         Deck deck = getExistingDeck(id, userId);
 
-        if (deck.getMode() == DeckMode.TRAINING && !answerAttemptRepository
-                .findByUserIdAndFlashcardDeckId(userId, id)
-                .isEmpty()) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT, "Deck performance history must be preserved before deletion"
-            );
+        if (deck.getMode() == DeckMode.TRAINING) {
+            performanceService.consolidateDeckPerformance(userId, id);
         }
 
         deckRepository.delete(deck);

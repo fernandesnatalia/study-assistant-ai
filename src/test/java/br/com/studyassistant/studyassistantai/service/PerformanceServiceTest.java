@@ -7,6 +7,8 @@ import br.com.studyassistant.studyassistantai.model.Deck;
 import br.com.studyassistant.studyassistantai.model.Flashcard;
 import br.com.studyassistant.studyassistantai.model.User;
 import br.com.studyassistant.studyassistantai.model.DeckMode;
+import br.com.studyassistant.studyassistantai.model.DeckPerformanceHistory;
+import br.com.studyassistant.studyassistantai.repository.DeckPerformanceHistoryRepository;
 import br.com.studyassistant.studyassistantai.repository.AnswerAttemptRepository;
 import br.com.studyassistant.studyassistantai.repository.DeckRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +17,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
@@ -31,6 +35,9 @@ class PerformanceServiceTest {
 
     @Mock
     private DeckRepository deckRepository;
+
+    @Mock
+    private DeckPerformanceHistoryRepository deckPerformanceHistoryRepository;
 
     @InjectMocks
     private PerformanceService service;
@@ -117,4 +124,38 @@ class PerformanceServiceTest {
 
         assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
     }
+
+    @Test
+    void shouldConsolidatePerformanceAndDeleteAttempts() {
+        AnswerAttempt correctAttempt = new AnswerAttempt(
+                user, flashcard, "Resposta correta", AnswerAttemptResult.CORRECT
+        );
+
+        AnswerAttempt incorrectAttempt = new AnswerAttempt(
+                user, flashcard, "Resposta incorreta", AnswerAttemptResult.INCORRECT
+        );
+
+        when(deckRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(deck));
+
+        when(deckPerformanceHistoryRepository
+                .findByOriginalDeckIdAndUserId(1L, 1L))
+                .thenReturn(Optional.empty());
+
+        when(answerAttemptRepository.findByUserIdAndFlashcardDeckId(1L, 1L))
+                .thenReturn(List.of(correctAttempt, incorrectAttempt));
+
+        when(deckPerformanceHistoryRepository.save(any(DeckPerformanceHistory.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        DeckPerformanceHistory history = service.consolidateDeckPerformance(1L, 1L);
+
+        assertEquals(2, history.getTotalAttempts());
+        assertEquals(1, history.getCorrectAnswers());
+        assertEquals(1, history.getIncorrectAnswers());
+        assertEquals(50.0, history.getAccuracyPercentage());
+
+        verify(deckPerformanceHistoryRepository).save(any(DeckPerformanceHistory.class));
+        verify(answerAttemptRepository).deleteByFlashcardDeckId(1L);
+    }
+
 }

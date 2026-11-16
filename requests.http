@@ -390,6 +390,21 @@ Content-Type: application/json
 GET http://localhost:8080/api/flashcards/deck/4
 Authorization: Bearer <ADA_TOKEN>
 
+### Baralho com IA - Emmy cria baralho de Teoria dos Anéis para treino (201)
+POST http://localhost:8080/api/decks/generate
+Authorization: Bearer <EMMY_TOKEN>
+Content-Type: application/json
+
+{
+  "theme": "Teoria dos Anéis",
+  "mode": "TRAINING",
+  "quantity": 2
+}
+
+### Baralho com IA - Consultar flashcards do treino de Emmy (200)
+GET http://localhost:8080/api/flashcards/deck/5
+Authorization: Bearer <EMMY_TOKEN>
+
 # =============================================================================
 # FLUXO 3 — MANUTENÇÃO DOS ESTUDOS
 # Atualização de dados existentes e confirmação das alterações.
@@ -793,6 +808,18 @@ Authorization: Bearer <ADA_TOKEN>
 POST http://localhost:8080/api/decks/4/convert-to-study
 Authorization: Bearer <ADA_TOKEN>
 
+### Histórico de desempenho - Ada lista seus históricos após conversão (200)
+GET http://localhost:8080/api/performance/history
+Authorization: Bearer <ADA_TOKEN>
+
+### Histórico de desempenho - Ada consulta histórico do baralho convertido (200)
+GET http://localhost:8080/api/performance/history/1
+Authorization: Bearer <ADA_TOKEN>
+
+### Histórico de desempenho - Bloquear consulta de Emmy ao histórico de Ada (404)
+GET http://localhost:8080/api/performance/history/1
+Authorization: Bearer <EMMY_TOKEN>
+
 ### Baralho - Bloquear conversão repetida para estudo (409)
 POST http://localhost:8080/api/decks/4/convert-to-study
 Authorization: Bearer <ADA_TOKEN>
@@ -889,6 +916,42 @@ Authorization: Bearer <EMMY_TOKEN>
 ### Baralho com IA - Ada exclui baralho de Sequências Numéricas (204)
 DELETE http://localhost:8080/api/decks/4
 Authorization: Bearer <ADA_TOKEN>
+
+### Histórico de desempenho - Confirmar preservação após excluir baralho convertido (200)
+GET http://localhost:8080/api/performance/history/1
+Authorization: Bearer <ADA_TOKEN>
+
+### Histórico de desempenho - Bloquear exclusão por Emmy (404)
+DELETE http://localhost:8080/api/performance/history/1
+Authorization: Bearer <EMMY_TOKEN>
+
+### Histórico de desempenho - Ada exclui histórico consolidado (204)
+DELETE http://localhost:8080/api/performance/history/1
+Authorization: Bearer <ADA_TOKEN>
+
+### Histórico de desempenho - Confirmar exclusão do histórico de Ada (404)
+GET http://localhost:8080/api/performance/history/1
+Authorization: Bearer <ADA_TOKEN>
+
+### Baralho TRAINING - Emmy exclui baralho sem conversão (204)
+DELETE http://localhost:8080/api/decks/5
+Authorization: Bearer <EMMY_TOKEN>
+
+### Histórico de desempenho - Emmy lista históricos após exclusão direta (200)
+GET http://localhost:8080/api/performance/history
+Authorization: Bearer <EMMY_TOKEN>
+
+### Histórico de desempenho - Emmy consulta histórico preservado (200)
+GET http://localhost:8080/api/performance/history/2
+Authorization: Bearer <EMMY_TOKEN>
+
+### Histórico de desempenho - Emmy exclui histórico consolidado (204)
+DELETE http://localhost:8080/api/performance/history/2
+Authorization: Bearer <EMMY_TOKEN>
+
+### Histórico de desempenho - Confirmar exclusão do histórico de Emmy (404)
+GET http://localhost:8080/api/performance/history/2
+Authorization: Bearer <EMMY_TOKEN>
 
 ### Conteúdo - Excluir Algoritmos Matemáticos e Números de Bernoulli de Ada (204)
 DELETE http://localhost:8080/api/contents/1
