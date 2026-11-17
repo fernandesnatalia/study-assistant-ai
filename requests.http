@@ -188,6 +188,46 @@ Content-Type: application/json
 GET http://localhost:8080/api/contents
 Authorization: Bearer <ADA_TOKEN>
 
+### Documento - Ada pré-visualiza arquivo TXT (200)
+POST http://localhost:8080/api/documents/preview
+Authorization: Bearer <ADA_TOKEN>
+Content-Type: multipart/form-data; boundary=StudyBoundary
+
+--StudyBoundary
+Content-Disposition: form-data; name="file"; filename="algoritmos.txt"
+Content-Type: text/plain
+
+Algoritmos são sequências finitas de instruções para resolver problemas.
+--StudyBoundary--
+
+### Documento - Ada confirma arquivo TXT no tópico Algoritmos (201)
+POST http://localhost:8080/api/documents/confirm
+Authorization: Bearer <ADA_TOKEN>
+Content-Type: multipart/form-data; boundary=StudyBoundary
+
+--StudyBoundary
+Content-Disposition: form-data; name="file"; filename="algoritmos.txt"
+Content-Type: text/plain
+
+Algoritmos são sequências finitas de instruções para resolver problemas.
+--StudyBoundary
+Content-Disposition: form-data; name="topicId"
+
+1
+--StudyBoundary
+Content-Disposition: form-data; name="title"
+
+Algoritmos - Material Importado
+--StudyBoundary
+Content-Disposition: form-data; name="body"
+
+Algoritmos são sequências finitas de instruções para resolver problemas.
+--StudyBoundary--
+
+### Documento - Confirmar persistência do conteúdo importado (200)
+GET http://localhost:8080/api/contents
+Authorization: Bearer <ADA_TOKEN>
+
 ### Anotação - Ada cria anotação para Matemática (201)
 POST http://localhost:8080/api/notes
 Authorization: Bearer <ADA_TOKEN>
@@ -581,6 +621,47 @@ Content-Type: application/json
   }
 }
 
+### Documento - Rejeitar arquivo com extensão não permitida (400)
+POST http://localhost:8080/api/documents/preview
+Authorization: Bearer <ADA_TOKEN>
+Content-Type: multipart/form-data; boundary=StudyBoundary
+
+--StudyBoundary
+Content-Disposition: form-data; name="file"; filename="material.csv"
+Content-Type: text/csv
+
+titulo,conteudo
+Algoritmos,Introducao
+--StudyBoundary--
+
+### Documento - Bloquear confirmação de Ada em tópico de Emmy (404)
+POST http://localhost:8080/api/documents/confirm
+Authorization: Bearer <ADA_TOKEN>
+Content-Type: multipart/form-data; boundary=StudyBoundary
+
+--StudyBoundary
+Content-Disposition: form-data; name="file"; filename="material.txt"
+Content-Type: text/plain
+
+Material de estudo sobre estruturas algebricas.
+--StudyBoundary
+Content-Disposition: form-data; name="topicId"
+
+2
+--StudyBoundary
+Content-Disposition: form-data; name="title"
+
+Material de Algebra
+--StudyBoundary
+Content-Disposition: form-data; name="body"
+
+Material de estudo sobre estruturas algebricas.
+--StudyBoundary--
+
+### Documento - Bloquear exclusão por outro usuário (404)
+DELETE http://localhost:8080/api/documents/1
+Authorization: Bearer <EMMY_TOKEN>
+
 ### Flashcard com IA - Bloquear geração de Ada com tópico de Emmy como contexto (404)
 POST http://localhost:8080/api/flashcards/generate?deckId=1
 Authorization: Bearer <ADA_TOKEN>
@@ -955,6 +1036,14 @@ Authorization: Bearer <EMMY_TOKEN>
 
 ### Conteúdo - Excluir Algoritmos Matemáticos e Números de Bernoulli de Ada (204)
 DELETE http://localhost:8080/api/contents/1
+Authorization: Bearer <ADA_TOKEN>
+
+### Documento - Ada exclui documento importado e conteúdo associado (204)
+DELETE http://localhost:8080/api/documents/1
+Authorization: Bearer <ADA_TOKEN>
+
+### Documento - Confirmar exclusão do conteúdo associado (404)
+GET http://localhost:8080/api/contents/1
 Authorization: Bearer <ADA_TOKEN>
 
 ### Anotação - Confirmar exclusão em cascata da anotação do conteúdo de Ada (404)

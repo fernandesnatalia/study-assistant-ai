@@ -9,7 +9,11 @@ public interface ContentRepository extends JpaRepository<Content, Long> {
 
     List<Content> findByUserId(Long userId);
 
+    List<Content> findByDocumentIdAndUserId(Long documentId, Long userId);
+
     Optional<Content> findByIdAndUserId(Long id, Long userId);
 
     void deleteByUserId(Long userId);
+
+    long countByDocumentId(Long documentId);
 }

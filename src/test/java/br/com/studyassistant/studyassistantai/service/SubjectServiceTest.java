@@ -5,9 +5,11 @@ import br.com.studyassistant.studyassistantai.model.Topic;
 import br.com.studyassistant.studyassistantai.model.User;
 import br.com.studyassistant.studyassistantai.repository.SubjectRepository;
 import br.com.studyassistant.studyassistantai.repository.UserRepository;
+import br.com.studyassistant.studyassistantai.repository.DocumentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -23,6 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.inOrder;
 
 @ExtendWith(MockitoExtension.class)
 class SubjectServiceTest {
@@ -32,6 +35,12 @@ class SubjectServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private DocumentRepository documentRepository;
+
+    @Mock
+    private DocumentService documentService;
 
     @InjectMocks
     private SubjectService subjectService;
@@ -210,5 +219,24 @@ class SubjectServiceTest {
         );
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+    }
+
+    @Test
+    void shouldCleanOrphanDocumentsWhenDeletingSubject() {
+        Topic topic = new Topic();
+        topic.setId(2L);
+
+        subject.setTopics(Set.of(topic));
+
+        when(subjectRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(subject));
+        when(documentRepository.findDocumentIdsByTopicIdAndUserId(2L, 1L)).thenReturn(List.of(10L));
+
+        subjectService.deleteSubject(1L, 1L);
+
+        InOrder order = inOrder(subjectRepository, documentService);
+
+        order.verify(subjectRepository).delete(subject);
+        order.verify(subjectRepository).flush();
+        order.verify(documentService).deleteOrphanDocuments(List.of(10L), 1L);
     }
 }

@@ -10,6 +10,7 @@ import br.com.studyassistant.studyassistantai.repository.DocumentRepository;
 import br.com.studyassistant.studyassistantai.repository.TopicRepository;
 import br.com.studyassistant.studyassistantai.repository.UserRepository;
 import org.springframework.http.HttpStatus;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
@@ -94,9 +95,22 @@ public class ContentService {
         return contentRepository.save(content);
     }
 
+    @Transactional
     public void deleteContent(Long id, Long userId) {
         Content content = getContentById(id, userId);
+
+        Document document = content.getDocument();
+
         contentRepository.delete(content);
+        contentRepository.flush();
+
+        if (document == null) {
+            return;
+        }
+
+        if (contentRepository.countByDocumentId(document.getId()) == 0) {
+            documentRepository.delete(document);
+        }
     }
 
     private Topic getExistingTopic(Long topicId, Long userId) {

@@ -9,6 +9,7 @@ import br.com.studyassistant.studyassistantai.repository.NoteRepository;
 import br.com.studyassistant.studyassistantai.repository.SubjectRepository;
 import br.com.studyassistant.studyassistantai.repository.TopicRepository;
 import br.com.studyassistant.studyassistantai.repository.UserRepository;
+import br.com.studyassistant.studyassistantai.repository.DocumentRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ public class UserService {
     private final ContentRepository contentRepository;
     private final TopicRepository topicRepository;
     private final SubjectRepository subjectRepository;
+    private final DocumentRepository documentRepository;
     private final PasswordEncoder passwordEncoder;
 
     public UserService(
@@ -37,7 +39,7 @@ public class UserService {
             DeckRepository deckRepository,
             ContentRepository contentRepository,
             TopicRepository topicRepository,
-            SubjectRepository subjectRepository,
+            SubjectRepository subjectRepository, DocumentRepository documentRepository,
             PasswordEncoder passwordEncoder
     ) {
         this.userRepository = userRepository;
@@ -48,6 +50,7 @@ public class UserService {
         this.contentRepository = contentRepository;
         this.topicRepository = topicRepository;
         this.subjectRepository = subjectRepository;
+        this.documentRepository = documentRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -91,14 +94,12 @@ public class UserService {
 
         answerAttemptRepository.deleteByUserId(id);
         noteRepository.deleteByUserId(id);
-
         flashcardRepository.deleteByDeckUserId(id);
         deckRepository.deleteByUserId(id);
-
         contentRepository.deleteByUserId(id);
+        documentRepository.deleteByUserId(id);
         topicRepository.deleteByUserId(id);
         subjectRepository.deleteByUserId(id);
-
         userRepository.delete(user);
     }
 }

@@ -9,6 +9,7 @@ import br.com.studyassistant.studyassistantai.repository.NoteRepository;
 import br.com.studyassistant.studyassistantai.repository.SubjectRepository;
 import br.com.studyassistant.studyassistantai.repository.TopicRepository;
 import br.com.studyassistant.studyassistantai.repository.UserRepository;
+import br.com.studyassistant.studyassistantai.repository.DocumentRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -45,6 +46,9 @@ class UserServiceTest {
 
     @Mock
     private TopicRepository topicRepository;
+
+    @Mock
+    private DocumentRepository documentRepository;
 
     @Mock
     private SubjectRepository subjectRepository;
@@ -172,6 +176,7 @@ class UserServiceTest {
         verify(flashcardRepository).deleteByDeckUserId(1L);
         verify(deckRepository).deleteByUserId(1L);
         verify(contentRepository).deleteByUserId(1L);
+        verify(documentRepository).deleteByUserId(1L);
         verify(topicRepository).deleteByUserId(1L);
         verify(subjectRepository).deleteByUserId(1L);
         verify(userRepository).delete(user);

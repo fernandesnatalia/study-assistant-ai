@@ -11,6 +11,7 @@ import br.com.studyassistant.studyassistantai.repository.TopicRepository;
 import br.com.studyassistant.studyassistantai.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -27,6 +28,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.inOrder;
 
 @ExtendWith(MockitoExtension.class)
 class ContentServiceTest {
@@ -400,5 +403,50 @@ class ContentServiceTest {
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
         verify(contentRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldDeleteDocumentWhenLastContentIsDeleted() {
+        Content content = createContent(createTopic());
+
+        Document document = mock(Document.class);
+        when(document.getId()).thenReturn(10L);
+
+        content.setOrigin(ContentOrigin.DOCUMENT);
+        content.setDocument(document);
+
+        when(contentRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(content));
+        when(contentRepository.countByDocumentId(10L)).thenReturn(0L);
+
+        contentService.deleteContent(1L, 1L);
+
+        InOrder inOrder = inOrder(contentRepository, documentRepository);
+
+        inOrder.verify(contentRepository).delete(content);
+        inOrder.verify(contentRepository).flush();
+        inOrder.verify(contentRepository).countByDocumentId(10L);
+        inOrder.verify(documentRepository).delete(document);
+    }
+
+    @Test
+    void shouldPreserveDocumentWhenOtherContentsExist() {
+        Content content = createContent(createTopic());
+
+        Document document = mock(Document.class);
+        when(document.getId()).thenReturn(10L);
+
+        content.setOrigin(ContentOrigin.DOCUMENT);
+        content.setDocument(document);
+
+        when(contentRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(content));
+        when(contentRepository.countByDocumentId(10L)).thenReturn(1L);
+
+        contentService.deleteContent(1L, 1L);
+
+        verify(contentRepository).delete(content);
+        verify(contentRepository).flush();
+        verify(contentRepository).countByDocumentId(10L);
+
+        verify(documentRepository, never()).delete(any(Document.class));
     }
 }

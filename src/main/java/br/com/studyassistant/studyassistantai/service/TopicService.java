@@ -3,6 +3,7 @@ package br.com.studyassistant.studyassistantai.service;
 import br.com.studyassistant.studyassistantai.model.Subject;
 import br.com.studyassistant.studyassistantai.model.Topic;
 import br.com.studyassistant.studyassistantai.model.User;
+import br.com.studyassistant.studyassistantai.repository.DocumentRepository;
 import br.com.studyassistant.studyassistantai.repository.UserRepository;
 import br.com.studyassistant.studyassistantai.repository.TopicRepository;
 import br.com.studyassistant.studyassistantai.repository.SubjectRepository;
@@ -18,17 +19,21 @@ public class TopicService {
     private final TopicRepository topicRepository;
     private final SubjectRepository subjectRepository;
     private final UserRepository userRepository;
-
-
+    private final DocumentRepository documentRepository;
+    private final DocumentService documentService;
 
     public TopicService(
             TopicRepository topicRepository,
             SubjectRepository subjectRepository,
-            UserRepository userRepository
+            UserRepository userRepository,
+            DocumentRepository documentRepository,
+            DocumentService documentService
     ) {
         this.topicRepository = topicRepository;
         this.subjectRepository = subjectRepository;
         this.userRepository = userRepository;
+        this.documentRepository = documentRepository;
+        this.documentService = documentService;
     }
 
     public Topic createTopic(Topic topic, Long userId, Long subjectId) {
@@ -62,6 +67,11 @@ public class TopicService {
     @Transactional
     public void deleteTopic(Long id, Long userId) {
         Topic topic = getTopicById(id, userId);
+
+        List<Long> documentIds = documentRepository.findDocumentIdsByTopicIdAndUserId(id, userId);
+
         topicRepository.delete(topic);
+        topicRepository.flush();
+        documentService.deleteOrphanDocuments(documentIds, userId);
     }
 }

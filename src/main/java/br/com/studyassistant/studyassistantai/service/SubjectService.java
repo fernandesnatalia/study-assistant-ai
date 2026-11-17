@@ -5,10 +5,13 @@ import br.com.studyassistant.studyassistantai.model.Topic;
 import br.com.studyassistant.studyassistantai.model.User;
 import br.com.studyassistant.studyassistantai.repository.SubjectRepository;
 import br.com.studyassistant.studyassistantai.repository.UserRepository;
+import br.com.studyassistant.studyassistantai.repository.DocumentRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -17,10 +20,19 @@ public class SubjectService {
 
     private final SubjectRepository subjectRepository;
     private final UserRepository userRepository;
+    private final DocumentRepository documentRepository;
+    private final DocumentService documentService;
 
-    public SubjectService(SubjectRepository subjectRepository, UserRepository userRepository) {
+    public SubjectService(
+            SubjectRepository subjectRepository,
+            UserRepository userRepository,
+            DocumentRepository documentRepository,
+            DocumentService documentService
+    ) {
         this.subjectRepository = subjectRepository;
         this.userRepository = userRepository;
+        this.documentRepository = documentRepository;
+        this.documentService = documentService;
     }
 
     public Subject createSubject(Subject subject, Long userId) {
@@ -50,7 +62,17 @@ public class SubjectService {
     @Transactional
     public void deleteSubject(Long id, Long userId) {
         Subject subject = getSubjectById(id, userId);
+
+        Set<Long> documentIds = new HashSet<>();
+
+        for (Topic topic : subject.getTopics()) {
+            documentIds.addAll(documentRepository.findDocumentIdsByTopicIdAndUserId(topic.getId(), userId));
+        }
+
         subjectRepository.delete(subject);
+        subjectRepository.flush();
+
+        documentService.deleteOrphanDocuments(new ArrayList<>(documentIds), userId);
     }
 
     @Transactional(readOnly = true)

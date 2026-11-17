@@ -6,9 +6,11 @@ import br.com.studyassistant.studyassistantai.model.User;
 import br.com.studyassistant.studyassistantai.repository.TopicRepository;
 import br.com.studyassistant.studyassistantai.repository.UserRepository;
 import br.com.studyassistant.studyassistantai.repository.SubjectRepository;
+import br.com.studyassistant.studyassistantai.repository.DocumentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -30,6 +32,12 @@ class TopicServiceTest {
 
     @Mock
     private SubjectRepository subjectRepository;
+
+    @Mock
+    private DocumentRepository documentRepository;
+
+    @Mock
+    private DocumentService documentService;
 
     @InjectMocks
     private TopicService topicService;
@@ -225,5 +233,19 @@ class TopicServiceTest {
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
 
         verify(topicRepository, never()).delete(any(Topic.class));
+    }
+
+    @Test
+    void shouldCleanOrphanDocumentsWhenDeletingTopic() {
+        when(topicRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(topic));
+        when(documentRepository.findDocumentIdsByTopicIdAndUserId(1L, 1L)).thenReturn(List.of(10L));
+
+        topicService.deleteTopic(1L, 1L);
+
+        InOrder order = inOrder(topicRepository, documentService);
+
+        order.verify(topicRepository).delete(topic);
+        order.verify(topicRepository).flush();
+        order.verify(documentService).deleteOrphanDocuments(List.of(10L), 1L);
     }
 }
