@@ -56,10 +56,7 @@ class ContentAiServiceTest {
 
         assertEquals(1L, result.topicId());
         assertEquals("Anéis Comutativos", result.title());
-        assertEquals(
-                "Um anel comutativo é um anel em que a operação de multiplicação é comutativa.",
-                result.body()
-        );
+        assertEquals("Um anel comutativo é um anel em que a operação de multiplicação é comutativa.", result.body());
 
         verify(topicRepository).findByIdAndUserId(1L, 1L);
         verify(generativeService).generate(anyString(), anyString());
@@ -71,11 +68,7 @@ class ContentAiServiceTest {
         topic.setId(1L);
         topic.setName("Teoria dos Anéis");
 
-        ContentGenerationRequest request = new ContentGenerationRequest(
-                1L,
-                "Explique o conceito de anel.",
-                null
-        );
+        ContentGenerationRequest request = new ContentGenerationRequest(1L, "Explique o conceito de anel.", null);
 
         String generatedContent = """
                 TÍTULO: Introdução aos Anéis
@@ -88,24 +81,13 @@ class ContentAiServiceTest {
 
         GeneratedContentResponse result = contentAiService.generateContent(1L, request);
 
-        assertEquals(
-                "Introdução aos Anéis",
-                result.title()
-        );
-
-        assertEquals(
-                "Um anel é uma estrutura algébrica definida por duas operações.",
-                result.body()
-        );
+        assertEquals("Introdução aos Anéis", result.title());
+        assertEquals("Um anel é uma estrutura algébrica definida por duas operações.", result.body());
     }
 
     @Test
     void shouldNotGenerateContentForAnotherUsersTopic() {
-        ContentGenerationRequest request = new ContentGenerationRequest(
-                1L,
-                "Explique o conceito de anel.",
-                null
-        );
+        ContentGenerationRequest request = new ContentGenerationRequest(1L, "Explique o conceito de anel.", null);
 
         when(topicRepository.findByIdAndUserId(1L, 2L)).thenReturn(Optional.empty());
 
@@ -124,15 +106,10 @@ class ContentAiServiceTest {
         topic.setId(1L);
         topic.setName("Teoria dos Anéis");
 
-        ContentGenerationRequest request = new ContentGenerationRequest(
-                1L,
-                "Explique o conceito de anel.",
-                null
-        );
+        ContentGenerationRequest request = new ContentGenerationRequest(1L, "Explique o conceito de anel.", null);
 
         when(topicRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(topic));
-        when(generativeService.generate(anyString(), anyString()))
-                .thenReturn("Resposta fora do formato esperado.");
+        when(generativeService.generate(anyString(), anyString())).thenReturn("Resposta fora do formato esperado.");
 
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class, () -> contentAiService.generateContent(1L, request)

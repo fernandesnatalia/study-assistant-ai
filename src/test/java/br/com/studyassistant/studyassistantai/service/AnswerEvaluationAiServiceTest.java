@@ -53,8 +53,7 @@ class AnswerEvaluationAiServiceTest {
         when(generativeService.generate(anyString(), anyString())).thenReturn("A resposta está correta.");
 
         ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
-                () -> answerEvaluationAiService.evaluate(
+                ResponseStatusException.class, () -> answerEvaluationAiService.evaluate(
                         "O que é um algoritmo?",
                         "É uma sequência finita de instruções para resolver um problema.",
                         "É uma sequência de passos para resolver um problema."

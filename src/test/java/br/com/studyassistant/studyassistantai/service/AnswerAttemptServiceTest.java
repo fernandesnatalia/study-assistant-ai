@@ -164,8 +164,7 @@ class AnswerAttemptServiceTest {
         when(flashcardRepository.findByIdAndDeckUserId(10L, 1L)).thenReturn(Optional.of(flashcard));
 
         ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
-                () -> service.answer(1L, 10L, "Minha resposta")
+                ResponseStatusException.class, () -> service.answer(1L, 10L, "Minha resposta")
         );
 
         assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
