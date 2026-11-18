@@ -26,19 +26,22 @@ public class DocumentService {
     private final ContentRepository contentRepository;
     private final TopicRepository topicRepository;
     private final UserRepository userRepository;
+    private final ContentVectorService contentVectorService;
 
     public DocumentService(
             DocumentExtractionService documentExtractionService,
             DocumentRepository documentRepository,
             ContentRepository contentRepository,
             TopicRepository topicRepository,
-            UserRepository userRepository
+            UserRepository userRepository,
+            ContentVectorService contentVectorService
     ) {
         this.documentExtractionService = documentExtractionService;
         this.documentRepository = documentRepository;
         this.contentRepository = contentRepository;
         this.topicRepository = topicRepository;
         this.userRepository = userRepository;
+        this.contentVectorService = contentVectorService;
     }
 
     @Transactional
@@ -93,7 +96,10 @@ public class DocumentService {
         content.setOrigin(ContentOrigin.DOCUMENT);
         content.setDocument(savedDocument);
 
-        return contentRepository.save(content);
+        Content savedContent = contentRepository.save(content);
+        contentVectorService.indexContent(savedContent);
+
+        return savedContent;
     }
 
     @Transactional
@@ -102,6 +108,10 @@ public class DocumentService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Document not found"));
 
         List<Content> contents = contentRepository.findByDocumentIdAndUserId(documentId, userId);
+
+        for (Content content : contents) {
+            contentVectorService.deleteContentVectors(content.getId(), userId);
+        }
 
         contentRepository.deleteAll(contents);
         contentRepository.flush();

@@ -44,6 +44,9 @@ class DocumentServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private ContentVectorService contentVectorService;
+
     @InjectMocks
     private DocumentService documentService;
 

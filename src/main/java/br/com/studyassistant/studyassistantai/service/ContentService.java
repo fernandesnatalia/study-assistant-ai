@@ -22,23 +22,28 @@ public class ContentService {
     private final TopicRepository topicRepository;
     private final UserRepository userRepository;
     private final DocumentRepository documentRepository;
+    private final ContentVectorService contentVectorService;
 
     public ContentService(
             ContentRepository contentRepository,
             TopicRepository topicRepository,
             UserRepository userRepository,
-            DocumentRepository documentRepository
+            DocumentRepository documentRepository,
+            ContentVectorService contentVectorService
     ) {
         this.contentRepository = contentRepository;
         this.topicRepository = topicRepository;
         this.userRepository = userRepository;
         this.documentRepository = documentRepository;
+        this.contentVectorService = contentVectorService;
     }
 
+    @Transactional
     public Content createContent(Long userId, Content content) {
         return saveContent(userId, content, ContentOrigin.MANUAL);
     }
 
+    @Transactional
     public Content approveGeneratedContent(Long userId, Content content) {
         return saveContent(userId, content, ContentOrigin.AI_GENERATED);
     }
@@ -64,7 +69,11 @@ public class ContentService {
         content.setOrigin(origin);
         content.setDocument(document);
 
-        return contentRepository.save(content);
+        Content savedContent = contentRepository.save(content);
+
+        contentVectorService.indexContent(savedContent);
+
+        return savedContent;
     }
 
     public List<Content> getAllContents(Long userId) {
@@ -79,6 +88,7 @@ public class ContentService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Content not found"));
     }
 
+    @Transactional
     public Content updateContent(Long id, Long userId, Content updatedContent) {
         Content content = getContentById(id, userId);
 
@@ -89,10 +99,18 @@ public class ContentService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Title and body are required");
         }
 
+        boolean bodyChanged = !content.getBody().equals(updatedContent.getBody());
+
         content.setTitle(updatedContent.getTitle());
         content.setBody(updatedContent.getBody());
 
-        return contentRepository.save(content);
+        Content savedContent = contentRepository.save(content);
+
+        if (bodyChanged) {
+            contentVectorService.indexContent(savedContent);
+        }
+
+        return savedContent;
     }
 
     @Transactional
@@ -101,6 +119,7 @@ public class ContentService {
 
         Document document = content.getDocument();
 
+        contentVectorService.deleteContentVectors(id, userId);
         contentRepository.delete(content);
         contentRepository.flush();
 

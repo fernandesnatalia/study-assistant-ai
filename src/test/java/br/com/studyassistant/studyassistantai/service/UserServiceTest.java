@@ -53,6 +53,9 @@ class UserServiceTest {
     @Mock
     private SubjectRepository subjectRepository;
 
+    @Mock
+    private ContentVectorService contentVectorService;
+
     @InjectMocks
     private UserService userService;
 
@@ -175,6 +178,7 @@ class UserServiceTest {
         verify(noteRepository).deleteByUserId(1L);
         verify(flashcardRepository).deleteByDeckUserId(1L);
         verify(deckRepository).deleteByUserId(1L);
+        verify(contentVectorService).deleteUserVectors(1L);
         verify(contentRepository).deleteByUserId(1L);
         verify(documentRepository).deleteByUserId(1L);
         verify(topicRepository).deleteByUserId(1L);

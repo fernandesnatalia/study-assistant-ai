@@ -30,6 +30,7 @@ public class UserService {
     private final SubjectRepository subjectRepository;
     private final DocumentRepository documentRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ContentVectorService contentVectorService;
 
     public UserService(
             UserRepository userRepository,
@@ -40,7 +41,8 @@ public class UserService {
             ContentRepository contentRepository,
             TopicRepository topicRepository,
             SubjectRepository subjectRepository, DocumentRepository documentRepository,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            ContentVectorService contentVectorService
     ) {
         this.userRepository = userRepository;
         this.answerAttemptRepository = answerAttemptRepository;
@@ -52,6 +54,7 @@ public class UserService {
         this.subjectRepository = subjectRepository;
         this.documentRepository = documentRepository;
         this.passwordEncoder = passwordEncoder;
+        this.contentVectorService = contentVectorService;
     }
 
     public User createUser(User user) {
@@ -96,6 +99,7 @@ public class UserService {
         noteRepository.deleteByUserId(id);
         flashcardRepository.deleteByDeckUserId(id);
         deckRepository.deleteByUserId(id);
+        contentVectorService.deleteUserVectors(id);
         contentRepository.deleteByUserId(id);
         documentRepository.deleteByUserId(id);
         topicRepository.deleteByUserId(id);

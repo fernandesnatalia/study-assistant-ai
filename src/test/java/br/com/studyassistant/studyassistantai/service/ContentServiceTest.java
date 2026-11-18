@@ -46,6 +46,9 @@ class ContentServiceTest {
     @Mock
     private DocumentRepository documentRepository;
 
+    @Mock
+    private ContentVectorService contentVectorService;
+
     @InjectMocks
     private ContentService contentService;
 
@@ -289,6 +292,28 @@ class ContentServiceTest {
         assertEquals(ContentOrigin.AI_GENERATED, result.getOrigin());
 
         verify(contentRepository).save(existingContent);
+        verify(contentVectorService).indexContent(existingContent);
+    }
+
+    @Test
+    void shouldNotReindexContentWhenOnlyTitleChanges() {
+        Content existingContent = createContent(createTopic());
+        String originalBody = existingContent.getBody();
+
+        Content updatedContent = new Content();
+        updatedContent.setTitle("Novo título");
+        updatedContent.setBody(originalBody);
+
+        when(contentRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(existingContent));
+        when(contentRepository.save(existingContent)).thenReturn(existingContent);
+
+        Content result = contentService.updateContent(1L, 1L, updatedContent);
+
+        assertEquals("Novo título", result.getTitle());
+        assertEquals(originalBody, result.getBody());
+
+        verify(contentRepository).save(existingContent);
+        verify(contentVectorService, never()).indexContent(any());
     }
 
     @Test
@@ -307,6 +332,7 @@ class ContentServiceTest {
 
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
         verify(contentRepository, never()).save(any());
+        verifyNoInteractions(contentVectorService);
     }
 
     @Test
@@ -325,6 +351,7 @@ class ContentServiceTest {
 
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
         verify(contentRepository, never()).save(any());
+        verifyNoInteractions(contentVectorService);
     }
 
     @Test
