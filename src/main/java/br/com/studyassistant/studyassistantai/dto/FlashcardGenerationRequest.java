@@ -11,6 +11,7 @@ public record FlashcardGenerationRequest(
         Integer quantity,
         Long contentId,
         Long topicId,
-        String context
+        String context,
+        SemanticSearchRequest semanticSearch
 ) {
 }

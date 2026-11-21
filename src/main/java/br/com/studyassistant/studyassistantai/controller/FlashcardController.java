@@ -1,6 +1,7 @@
 package br.com.studyassistant.studyassistantai.controller;
 
 import br.com.studyassistant.studyassistantai.dto.FlashcardGenerationRequest;
+import br.com.studyassistant.studyassistantai.dto.GeneratedFlashcardsResponse;
 import br.com.studyassistant.studyassistantai.model.Flashcard;
 import br.com.studyassistant.studyassistantai.service.AuthenticatedUserService;
 import br.com.studyassistant.studyassistantai.service.FlashcardService;
@@ -47,7 +48,7 @@ public class FlashcardController {
 
     @PostMapping("/generate")
     @ResponseStatus(HttpStatus.CREATED)
-    public List<Flashcard> generateFlashcards(
+    public GeneratedFlashcardsResponse generateFlashcards(
             @RequestParam Long deckId,
             @Valid @RequestBody FlashcardGenerationRequest request,
             Authentication authentication
@@ -60,7 +61,8 @@ public class FlashcardController {
                 request.quantity(),
                 request.contentId(),
                 request.topicId(),
-                request.context()
+                request.context(),
+                request.semanticSearch()
         );
     }
 

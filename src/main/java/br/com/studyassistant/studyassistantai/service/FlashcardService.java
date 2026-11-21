@@ -1,6 +1,9 @@
 package br.com.studyassistant.studyassistantai.service;
 
 import br.com.studyassistant.studyassistantai.dto.GeneratedFlashcard;
+import br.com.studyassistant.studyassistantai.dto.RagContext;
+import br.com.studyassistant.studyassistantai.dto.SemanticSearchRequest;
+import br.com.studyassistant.studyassistantai.dto.GeneratedFlashcardsResponse;
 import br.com.studyassistant.studyassistantai.model.Content;
 import br.com.studyassistant.studyassistantai.model.Deck;
 import br.com.studyassistant.studyassistantai.model.Flashcard;
@@ -24,19 +27,22 @@ public class FlashcardService {
     private final ContentRepository contentRepository;
     private final TopicRepository topicRepository;
     private final FlashcardAiService flashcardAiService;
+    private final RagContextService ragContextService;
 
     public FlashcardService(
             FlashcardRepository flashcardRepository,
             DeckRepository deckRepository,
             ContentRepository contentRepository,
             TopicRepository topicRepository,
-            FlashcardAiService flashcardAiService
+            FlashcardAiService flashcardAiService,
+            RagContextService ragContextService
     ) {
         this.flashcardRepository = flashcardRepository;
         this.deckRepository = deckRepository;
         this.contentRepository = contentRepository;
         this.topicRepository = topicRepository;
         this.flashcardAiService = flashcardAiService;
+        this.ragContextService = ragContextService;
     }
 
     public Flashcard createFlashcard(
@@ -56,29 +62,30 @@ public class FlashcardService {
     }
 
     @Transactional
-    public List<Flashcard> generateFlashcards(
+    public GeneratedFlashcardsResponse generateFlashcards(
             Long userId,
             Long deckId,
             int quantity,
             Long contentId,
             Long topicId,
-            String context
+            String context,
+            SemanticSearchRequest semanticSearch
     ) {
         Deck deck = deckRepository.findByIdAndUserId(deckId, userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Deck not found"));
 
-        String generationContext = buildGenerationContext(
-                userId,
-                contentId,
-                topicId,
-                context
-        );
+        String generationContext = buildGenerationContext(userId, contentId, topicId, context);
 
-        List<GeneratedFlashcard> generatedFlashcards = flashcardAiService.generateFlashcards(
-                deck.getTheme(),
-                quantity,
-                generationContext
-        );
+        RagContext ragContext = semanticSearch == null ? null : ragContextService.build(userId, semanticSearch);
+
+        List<GeneratedFlashcard> generatedFlashcards =
+                flashcardAiService.generateFlashcards(
+                        deck.getTheme(),
+                        quantity,
+                        generationContext,
+                        ragContext,
+                        semanticSearch == null ? null : semanticSearch.selectionMode()
+                );
 
         List<Flashcard> flashcards = generatedFlashcards.stream()
                 .map(generatedFlashcard -> {
@@ -90,7 +97,9 @@ public class FlashcardService {
                 })
                 .toList();
 
-        return flashcardRepository.saveAll(flashcards);
+        List<Flashcard> savedFlashcards = flashcardRepository.saveAll(flashcards);
+
+        return new GeneratedFlashcardsResponse(savedFlashcards, ragContext == null ? List.of() : ragContext.sources());
     }
 
     public List<Flashcard> getAllFlashcards(Long userId) {

@@ -1,12 +1,9 @@
 # =============================================================================
 # STUDY ASSISTANT AI — FLUXOS DE TESTE
 # =============================================================================
-# Após os logins, copie os tokens retornados e substitua <ADA_TOKEN> e <EMMY_TOKEN>.
-# =============================================================================
-
+# Após os logins, copie os tokens retornados e substitua adaToken e emmyToken
 # =============================================================================
 # FLUXO 1 — CADASTRO E ORGANIZAÇÃO DOS ESTUDOS
-# Ada Lovelace e Emmy Noether criam suas contas, matérias, tópicos e conteúdos.
 # =============================================================================
 
 ### Usuário - Cadastrar Ada Lovelace (201)
@@ -14,9 +11,9 @@ POST http://localhost:8080/api/users
 Content-Type: application/json
 
 {
-  "name": "Augusta Ada Byron King",
-  "email": "ada@example.com",
-  "password": "ada123"
+  "name": "Ada Lovelace",
+  "email": "ada.lovelace@example.com",
+  "password": "AdaEstudos123!"
 }
 
 ### Usuário - Cadastrar Emmy Noether (201)
@@ -25,8 +22,8 @@ Content-Type: application/json
 
 {
   "name": "Emmy Noether",
-  "email": "emmy@example.com",
-  "password": "emmy123"
+  "email": "emmy.noether@example.com",
+  "password": "EmmyEstudos123!@"
 }
 
 ### Autenticação - Login de Ada Lovelace (200)
@@ -34,288 +31,342 @@ POST http://localhost:8080/api/auth/login
 Content-Type: application/json
 
 {
-  "email": "ada@example.com",
-  "password": "ada123"
+  "email": "ada.lovelace@example.com",
+  "password": "AdaEstudos123!"
 }
+
+> {% client.global.set("adaToken", response.body.token); %}
 
 ### Autenticação - Login de Emmy Noether (200)
 POST http://localhost:8080/api/auth/login
 Content-Type: application/json
 
 {
-  "email": "emmy@example.com",
-  "password": "emmy123"
+  "email": "emmy.noether@example.com",
+  "password": "EmmyEstudos123!@"
 }
 
-### Matéria - Ada cria Matemática (201)
+> {% client.global.set("emmyToken", response.body.token); %}
+
+### Matéria - Ada organiza Fundamentos da Computação (201)
 POST http://localhost:8080/api/subjects
-Authorization: Bearer <ADA_TOKEN>
-Content-Type: application/json
-
-{
-  "name": "Matemática"
-}
-
-### Matéria - Emmy cria Álgebra Abstrata (201)
-POST http://localhost:8080/api/subjects
-Authorization: Bearer <EMMY_TOKEN>
-Content-Type: application/json
-
-{
-  "name": "Álgebra Abstrata"
-}
-
-### Matéria - Ada cria Lógica (201)
-POST http://localhost:8080/api/subjects
-Authorization: Bearer <ADA_TOKEN>
-Content-Type: application/json
-
-{
-  "name": "Lógica"
-}
-
-### Matéria - Ada cria Fundamentos da Computação (201)
-POST http://localhost:8080/api/subjects
-Authorization: Bearer <ADA_TOKEN>
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
   "name": "Fundamentos da Computação"
 }
 
-### Tópico - Ada cria Algoritmos em Matemática (201)
-POST http://localhost:8080/api/topics?subjectId=1
-Authorization: Bearer <ADA_TOKEN>
+> {% client.global.set("adaComputacao", response.body.id); %}
+
+### Matéria - Emmy organiza Álgebra Abstrata (201)
+POST http://localhost:8080/api/subjects
+Authorization: Bearer {{emmyToken}}
+Content-Type: application/json
+
+{
+  "name": "Álgebra Abstrata"
+}
+
+> {% client.global.set("emmyAlgebra", response.body.id); %}
+
+### Matéria - Ada organiza Matemática (201)
+POST http://localhost:8080/api/subjects
+Authorization: Bearer {{adaToken}}
+Content-Type: application/json
+
+{
+  "name": "Matemática"
+}
+
+> {% client.global.set("adaMatematica", response.body.id); %}
+
+### Matéria - Emmy organiza Teoria dos Números (201)
+POST http://localhost:8080/api/subjects
+Authorization: Bearer {{emmyToken}}
+Content-Type: application/json
+
+{
+  "name": "Teoria dos Números"
+}
+
+> {% client.global.set("emmyNumeros", response.body.id); %}
+
+### Tópico - Ada insere Algoritmos na matéria Fundamentos da Computação (201)
+POST http://localhost:8080/api/topics?subjectId={{adaComputacao}}
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
   "name": "Algoritmos"
 }
 
-### Tópico - Emmy cria Teoria dos Anéis em Álgebra Abstrata (201)
-POST http://localhost:8080/api/topics?subjectId=2
-Authorization: Bearer <EMMY_TOKEN>
+> {% client.global.set("adaAlgoritmos", response.body.id); %}
+
+### Tópico - Emmy insere Teoria dos Anéis na matéria Álgebra Abstrata (201)
+POST http://localhost:8080/api/topics?subjectId={{emmyAlgebra}}
+Authorization: Bearer {{emmyToken}}
 Content-Type: application/json
 
 {
   "name": "Teoria dos Anéis"
 }
 
-### Tópico - Ada cria Sequências Numéricas em Matemática (201)
-POST http://localhost:8080/api/topics?subjectId=1
-Authorization: Bearer <ADA_TOKEN>
-Content-Type: application/json
+> {% client.global.set("emmyAneis", response.body.id); %}
 
-{
-  "name": "Sequências Numéricas"
-}
-
-### Tópico - Ada cria Máquina Analítica em Fundamentos da Computação (201)
-POST http://localhost:8080/api/topics?subjectId=4
-Authorization: Bearer <ADA_TOKEN>
+### Tópico - Ada insere Máquina Analítica na matéria Fundamentos da Computação (201)
+POST http://localhost:8080/api/topics?subjectId={{adaComputacao}}
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
   "name": "Máquina Analítica"
 }
 
-### Conteúdo - Ada cria Algoritmos e Máquinas Analíticas em Algoritmos (201)
-POST http://localhost:8080/api/contents
-Authorization: Bearer <ADA_TOKEN>
+> {% client.global.set("adaMaquina", response.body.id); %}
+
+### Tópico - Emmy insere Ideais de Anéis na matéria Álgebra Abstrata (201)
+POST http://localhost:8080/api/topics?subjectId={{emmyAlgebra}}
+Authorization: Bearer {{emmyToken}}
 Content-Type: application/json
 
 {
-  "title": "Algoritmos e Máquinas Analíticas",
-  "body": "Um algoritmo descreve uma sequência finita de instruções para resolver um problema. Ada Lovelace descreveu procedimentos destinados à Máquina Analítica, incluindo um algoritmo para o cálculo dos números de Bernoulli.",
-  "topic": {
-    "id": 1
-  }
+  "name": "Ideais de Anéis"
 }
 
-### Conteúdo - Emmy cria Introdução à Teoria dos Anéis (201)
-POST http://localhost:8080/api/contents
-Authorization: Bearer <EMMY_TOKEN>
+> {% client.global.set("emmyIdeais", response.body.id); %}
+
+### Tópico - Ada insere Sequências Numéricas na matéria Matemática (201)
+POST http://localhost:8080/api/topics?subjectId={{adaMatematica}}
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
-  "title": "Introdução à Teoria dos Anéis",
-  "body": "Um anel é uma estrutura algébrica formada por um conjunto com duas operações, adição e multiplicação, que satisfazem propriedades específicas. A teoria dos anéis estuda essas estruturas e suas relações.",
-  "topic": {
-    "id": 2
-  }
+  "name": "Sequências Numéricas"
 }
 
-### Conteúdo - Ada cria Fundamentos da Máquina Analítica (201)
+> {% client.global.set("adaSequencias", response.body.id); %}
+
+### Conteúdo - Ada insere o conteúdo Introdução aos Algoritmos no tópico Algoritmos (201)
 POST http://localhost:8080/api/contents
-Authorization: Bearer <ADA_TOKEN>
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
-  "title": "Fundamentos da Máquina Analítica",
-  "body": "A Máquina Analítica, concebida por Charles Babbage, foi projetada para executar operações matemáticas por meio de instruções e mecanismos de armazenamento e processamento.",
+  "title": "Introdução aos Algoritmos",
+  "body": "Um algoritmo é uma sequência finita e não ambígua de instruções para solucionar uma classe de problemas. Pode ser descrito por pseudocódigo, fluxogramas ou linguagens de programação. Sua correção depende de produzir os resultados especificados para entradas válidas, enquanto sua eficiência pode ser analisada em termos de tempo e memória.",
   "topic": {
-    "id": 4
+    "id": {{adaAlgoritmos}}
   }
 }
 
-### Conteúdo com IA - Ada gera proposta sobre Sequências Numéricas (200)
+> {% client.global.set("adaConteudoAlgoritmos", response.body.id); %}
+
+### Conteúdo - Emmy insere o conteúdo Estruturas de Anéis no tópico Teoria dos Anéis (201)
+POST http://localhost:8080/api/contents
+Authorization: Bearer {{emmyToken}}
+Content-Type: application/json
+
+{
+  "title": "Estruturas de Anéis",
+  "body": "Um anel é um conjunto equipado com adição e multiplicação. A adição forma um grupo abeliano; a multiplicação é associativa e distributiva em relação à adição. A multiplicação não precisa ser comutativa. Os inteiros, com as operações usuais, formam um anel comutativo.",
+  "topic": {
+    "id": {{emmyAneis}}
+  }
+}
+
+> {% client.global.set("emmyConteudoAneis", response.body.id); %}
+
+### Conteúdo - Ada insere o conteúdo Arquitetura da Máquina Analítica no tópico Máquina Analítica (201)
+POST http://localhost:8080/api/contents
+Authorization: Bearer {{adaToken}}
+Content-Type: application/json
+
+{
+  "title": "Arquitetura da Máquina Analítica",
+  "body": "A Máquina Analítica, concebida por Charles Babbage, previa uma unidade de processamento, uma memória e instruções representadas por cartões perfurados. Ada Lovelace descreveu um procedimento para o cálculo de números de Bernoulli, frequentemente reconhecido como um marco histórico da programação.",
+  "topic": {
+    "id": {{adaMaquina}}
+  }
+}
+
+> {% client.global.set("adaConteudoMaquina", response.body.id); %}
+
+### Conteúdo - Emmy insere o conteúdo Ideais e Anéis Quocientes no tópico Ideais de Anéis (201)
+POST http://localhost:8080/api/contents
+Authorization: Bearer {{emmyToken}}
+Content-Type: application/json
+
+{
+  "title": "Ideais e Anéis Quocientes",
+  "body": "Um ideal bilateral de um anel é um subgrupo aditivo estável sob multiplicação à esquerda e à direita por elementos do anel. Os ideais permitem construir anéis quocientes e estudar homomorfismos por meio de seus núcleos.",
+  "topic": {
+    "id": {{emmyIdeais}}
+  }
+}
+
+> {% client.global.set("emmyConteudoIdeais", response.body.id); %}
+
+### Conteúdo com IA - Ada solicita material didático sobre sequências numéricas (200)
 POST http://localhost:8080/api/contents/generate
-Authorization: Bearer <ADA_TOKEN>
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
-  "topicId": 3,
-  "request": "Explique o conceito de sequência numérica e como seus termos podem ser determinados.",
-  "context": "O conteúdo será utilizado como material introdutório de estudo."
+  "topicId": {{adaSequencias}},
+  "request": "Elabore um material didático sobre sequências numéricas, incluindo definição formal, termo geral, progressões aritméticas e geométricas, exemplos resolvidos e aplicações.",
+  "context": "Público de graduação introdutória em Matemática. Organize a explicação em parágrafos coesos, com precisão conceitual e exemplos progressivos."
 }
 
-### Conteúdo com IA - Confirmar que proposta não foi persistida antes da aprovação (200)
-GET http://localhost:8080/api/contents
-Authorization: Bearer <ADA_TOKEN>
-
-### Conteúdo com IA - Ada aprova conteúdo revisado sobre Sequências Numéricas (201)
+### Conteúdo com IA - Ada aprova a versão revisada do material sobre sequências numéricas (201)
 POST http://localhost:8080/api/contents/approve
-Authorization: Bearer <ADA_TOKEN>
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
-  "topicId": 3,
-  "title": "Sequências Numéricas",
-  "body": "Uma sequência numérica é uma lista ordenada de números cujos termos seguem uma regra de formação ou uma relação definida. Cada termo ocupa uma posição identificada por um índice. Por exemplo, na sequência dos números pares 2, 4, 6 e 8, cada termo após o primeiro pode ser obtido adicionando 2 ao termo anterior."
+  "topicId": {{adaSequencias}},
+  "title": "Sequências Numéricas: Conceitos e Exemplos",
+  "body": "Uma sequência numérica é uma função definida em um subconjunto dos números naturais, cujos valores são chamados termos. O termo geral aₙ permite determinar o valor correspondente à posição n. Em uma progressão aritmética, a diferença entre termos consecutivos é constante: aₙ = a₁ + (n − 1)r. Por exemplo, 3, 7, 11, 15 tem razão 4. Em uma progressão geométrica, a razão entre termos consecutivos não nulos é constante: aₙ = a₁qⁿ⁻¹. Por exemplo, 2, 6, 18, 54 tem razão 3. Sequências são utilizadas na modelagem de crescimento, em séries e na análise de algoritmos."
 }
 
-### Conteúdo com IA - Confirmar persistência do conteúdo aprovado (200)
-GET http://localhost:8080/api/contents
-Authorization: Bearer <ADA_TOKEN>
+> {% client.global.set("adaConteudoSequencias", response.body.id); %}
 
-### Documento - Ada pré-visualiza arquivo TXT (200)
+### Documento - Ada pré-visualiza material complementar de algoritmos em TXT (200)
 POST http://localhost:8080/api/documents/preview
-Authorization: Bearer <ADA_TOKEN>
+Authorization: Bearer {{adaToken}}
 Content-Type: multipart/form-data; boundary=StudyBoundary
 
 --StudyBoundary
-Content-Disposition: form-data; name="file"; filename="algoritmos.txt"
+Content-Disposition: form-data; name="file"; filename="notas-algoritmos.txt"
 Content-Type: text/plain
 
-Algoritmos são sequências finitas de instruções para resolver problemas.
+Um algoritmo deve especificar entradas, operações e saídas. Sua correção pode ser demonstrada por invariantes de laço e condições de término. A análise de complexidade estima recursos computacionais consumidos em função do tamanho da entrada.
 --StudyBoundary--
 
-### Documento - Ada confirma arquivo TXT no tópico Algoritmos (201)
+### Documento - Ada importa material complementar para o tópico Algoritmos (201)
 POST http://localhost:8080/api/documents/confirm
-Authorization: Bearer <ADA_TOKEN>
+Authorization: Bearer {{adaToken}}
 Content-Type: multipart/form-data; boundary=StudyBoundary
 
 --StudyBoundary
-Content-Disposition: form-data; name="file"; filename="algoritmos.txt"
+Content-Disposition: form-data; name="file"; filename="notas-algoritmos.txt"
 Content-Type: text/plain
 
-Algoritmos são sequências finitas de instruções para resolver problemas.
+Um algoritmo deve especificar entradas, operações e saídas. Sua correção pode ser demonstrada por invariantes de laço e condições de término. A análise de complexidade estima recursos computacionais consumidos em função do tamanho da entrada.
 --StudyBoundary
 Content-Disposition: form-data; name="topicId"
 
-1
+{{adaAlgoritmos}}
 --StudyBoundary
 Content-Disposition: form-data; name="title"
 
-Algoritmos - Material Importado
+Algoritmos: Correção e Complexidade
 --StudyBoundary
 Content-Disposition: form-data; name="body"
 
-Algoritmos são sequências finitas de instruções para resolver problemas.
+Um algoritmo deve especificar entradas, operações e saídas. Sua correção pode ser demonstrada por invariantes de laço e condições de término. A análise de complexidade estima recursos computacionais consumidos em função do tamanho da entrada.
 --StudyBoundary--
 
-### Documento - Confirmar persistência do conteúdo importado (200)
-GET http://localhost:8080/api/contents
-Authorization: Bearer <ADA_TOKEN>
+> {% client.global.set("adaDocumento", response.body.id); %}
 
-### Anotação - Ada cria anotação para Matemática (201)
+### Anotação - Ada registra anotações gerais na matéria Fundamentos da Computação (201)
 POST http://localhost:8080/api/notes
-Authorization: Bearer <ADA_TOKEN>
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
-  "title": "Anotações de Matemática",
-  "body": "Pontos gerais sobre os estudos de Matemática.",
+  "title": "Plano de estudo de Computação",
+  "body": "Revisar representação de algoritmos, análise de complexidade e fundamentos de arquitetura de computadores.",
   "subject": {
-    "id": 1
+    "id": {{adaComputacao}}
   }
 }
 
-### Anotação - Emmy cria anotação para Álgebra Abstrata (201)
+> {% client.global.set("adaNotaMateria", response.body.id); %}
+
+### Anotação - Emmy registra anotações gerais na matéria Álgebra Abstrata (201)
 POST http://localhost:8080/api/notes
-Authorization: Bearer <EMMY_TOKEN>
+Authorization: Bearer {{emmyToken}}
 Content-Type: application/json
 
 {
-  "title": "Anotações de Álgebra Abstrata",
-  "body": "Pontos gerais sobre os estudos de Álgebra Abstrata.",
+  "title": "Plano de estudo de Álgebra",
+  "body": "Revisar axiomas de anéis, homomorfismos, ideais e anéis quocientes.",
   "subject": {
-    "id": 2
+    "id": {{emmyAlgebra}}
   }
 }
 
-### Anotação - Ada cria anotação para Algoritmos (201)
+> {% client.global.set("emmyNotaMateria", response.body.id); %}
+
+### Anotação - Ada registra anotação no tópico Algoritmos (201)
 POST http://localhost:8080/api/notes
-Authorization: Bearer <ADA_TOKEN>
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
-  "title": "Anotações de Algoritmos",
-  "body": "Pontos importantes sobre algoritmos matemáticos.",
+  "title": "Correção de Algoritmos",
+  "body": "Distinguir correção parcial, término e complexidade assintótica.",
   "topic": {
-    "id": 1
+    "id": {{adaAlgoritmos}}
   }
 }
 
-### Anotação - Emmy cria anotação para Teoria dos Anéis (201)
+> {% client.global.set("adaNotaTopico", response.body.id); %}
+
+### Anotação - Emmy registra anotação no tópico Teoria dos Anéis (201)
 POST http://localhost:8080/api/notes
-Authorization: Bearer <EMMY_TOKEN>
+Authorization: Bearer {{emmyToken}}
 Content-Type: application/json
 
 {
-  "title": "Anotações de Teoria dos Anéis",
-  "body": "Pontos importantes sobre estruturas algébricas e anéis.",
+  "title": "Propriedades de Anéis",
+  "body": "Revisar distributividade, elementos neutros e comutatividade.",
   "topic": {
-    "id": 2
+    "id": {{emmyAneis}}
   }
 }
 
-### Anotação - Ada cria anotação para conteúdo de Algoritmos e Máquinas Analíticas (201)
+> {% client.global.set("emmyNotaTopico", response.body.id); %}
+
+### Anotação - Ada registra anotação no conteúdo Introdução aos Algoritmos (201)
 POST http://localhost:8080/api/notes
-Authorization: Bearer <ADA_TOKEN>
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
-  "title": "Anotações sobre algoritmos e a Máquina Analítica",
-  "body": "Revisar a relação entre procedimentos matemáticos, números de Bernoulli e a Máquina Analítica.",
+  "title": "Exercícios de Algoritmos",
+  "body": "Demonstrar a correção de um algoritmo de busca e comparar custos assintóticos.",
   "content": {
-    "id": 1
+    "id": {{adaConteudoAlgoritmos}}
   }
 }
 
-### Anotação - Emmy cria anotação para conteúdo de Teoria dos Anéis (201)
+> {% client.global.set("adaNotaConteudo", response.body.id); %}
+
+### Anotação - Emmy registra anotação no conteúdo Estruturas de Anéis (201)
 POST http://localhost:8080/api/notes
-Authorization: Bearer <EMMY_TOKEN>
+Authorization: Bearer {{emmyToken}}
 Content-Type: application/json
 
 {
-  "title": "Anotações sobre Teoria dos Anéis",
-  "body": "Revisar as propriedades fundamentais dos anéis.",
+  "title": "Exemplos de Anéis",
+  "body": "Comparar os anéis dos inteiros, matrizes quadradas e polinômios.",
   "content": {
-    "id": 2
+    "id": {{emmyConteudoAneis}}
   }
 }
+
+> {% client.global.set("emmyNotaConteudo", response.body.id); %}
 
 ###
+# ============================================================================
+# FLUXO 2 — Baralhos de estudo, geração de flashcards e preparação dos treinos
+# ============================================================================
 
-# =============================================================================
-# FLUXO 2 — CRIAÇÃO ALTERNADA DE BARALHOS E FLASHCARDS
-# Ada e Emmy criam baralhos e flashcards de forma intercalada.
-# =============================================================================
-
-### Baralho - Ada cria baralho de Algoritmos com primeiro flashcard sem resposta (201)
+### Baralho - Ada cadastra baralho de estudo sobre Algoritmos (201)
 POST http://localhost:8080/api/decks
-Authorization: Bearer <ADA_TOKEN>
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
@@ -324,100 +375,126 @@ Content-Type: application/json
   "question": "O que é um algoritmo?"
 }
 
-### Baralho - Emmy cria baralho de Teoria dos Anéis com primeiro flashcard (201)
+> {% client.global.set("adaBaralhoAlgoritmos", response.body.id); %}
+
+### Baralho - Emmy cadastra baralho de estudo sobre Teoria dos Anéis (201)
 POST http://localhost:8080/api/decks
-Authorization: Bearer <EMMY_TOKEN>
+Authorization: Bearer {{emmyToken}}
 Content-Type: application/json
 
 {
   "theme": "Teoria dos Anéis",
   "mode": "STUDY",
-  "question": "O que é um anel na Álgebra Abstrata?",
-  "answer": "É um conjunto com duas operações, adição e multiplicação, cuja adição forma um grupo abeliano e cuja multiplicação é associativa e distributiva em relação à adição."
+  "question": "Quais são as propriedades que definem um anel?",
+  "answer": "A adição forma um grupo abeliano; a multiplicação é associativa e distributiva em relação à adição."
 }
 
-### Flashcard - Ada gera resposta do primeiro flashcard com IA (200)
-POST http://localhost:8080/api/flashcards/1/generate-answer
-Authorization: Bearer <ADA_TOKEN>
+> {% client.global.set("emmyBaralhoAneis", response.body.id); %}
 
-### Flashcard - Ada cria segundo flashcard no baralho de Algoritmos (201)
-POST http://localhost:8080/api/flashcards?deckId=1
-Authorization: Bearer <ADA_TOKEN>
+### Flashcard - Ada consulta o flashcard inicial do baralho Algoritmos (200)
+GET http://localhost:8080/api/flashcards/deck/{{adaBaralhoAlgoritmos}}
+Authorization: Bearer {{adaToken}}
+
+> {% client.global.set("adaFlashcardInicial", response.body[0].id); %}
+
+### Flashcard com IA - Ada gera a resposta para a pergunta inicial sobre algoritmos (200)
+POST http://localhost:8080/api/flashcards/{{adaFlashcardInicial}}/generate-answer
+Authorization: Bearer {{adaToken}}
+
+### Flashcard - Emmy consulta o flashcard inicial do baralho Teoria dos Anéis (200)
+GET http://localhost:8080/api/flashcards/deck/{{emmyBaralhoAneis}}
+Authorization: Bearer {{emmyToken}}
+
+> {% client.global.set("emmyFlashcardInicial", response.body[0].id); %}
+
+### Flashcard - Ada insere flashcard sobre correção de algoritmos (201)
+POST http://localhost:8080/api/flashcards?deckId={{adaBaralhoAlgoritmos}}
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
-  "question": "O que caracteriza uma sequência numérica?",
-  "answer": "É uma lista ordenada de números cujos termos são determinados por uma regra de formação."
+  "question": "O que significa dizer que um algoritmo é correto?",
+  "answer": "Significa que ele produz o resultado especificado para todas as entradas válidas e termina quando o problema exige término."
 }
 
-### Flashcard - Emmy cria segundo flashcard no baralho de Teoria dos Anéis (201)
-POST http://localhost:8080/api/flashcards?deckId=2
-Authorization: Bearer <EMMY_TOKEN>
+> {% client.global.set("adaFlashcardCorrecao", response.body.id); %}
+
+### Flashcard - Emmy insere flashcard sobre ideais de anéis (201)
+POST http://localhost:8080/api/flashcards?deckId={{emmyBaralhoAneis}}
+Authorization: Bearer {{emmyToken}}
 Content-Type: application/json
 
 {
-  "question": "O que é um ideal de um anel?",
-  "answer": "É um subgrupo aditivo fechado sob multiplicação por elementos do anel, nas condições correspondentes a um ideal à esquerda, à direita ou bilateral."
+  "question": "O que é um ideal bilateral de um anel?",
+  "answer": "É um subgrupo aditivo fechado sob multiplicação à esquerda e à direita por elementos do anel."
 }
 
-### Baralho - Ada cria baralho de Máquina Analítica com primeiro flashcard (201)
+> {% client.global.set("emmyFlashcardIdeal", response.body.id); %}
+
+### Baralho - Ada cadastra baralho de estudo sobre Máquina Analítica (201)
 POST http://localhost:8080/api/decks
-Authorization: Bearer <ADA_TOKEN>
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
   "theme": "Máquina Analítica",
   "mode": "STUDY",
   "question": "Qual era a finalidade da Máquina Analítica?",
-  "answer": "Executar cálculos matemáticos programáveis por meio de instruções, utilizando mecanismos de processamento e armazenamento."
+  "answer": "Executar cálculos programáveis a partir de instruções, com mecanismos de processamento e armazenamento."
 }
 
-### Flashcard com IA - Ada gera dois flashcards para o baralho de Algoritmos (201)
-POST http://localhost:8080/api/flashcards/generate?deckId=1
-Authorization: Bearer <ADA_TOKEN>
+> {% client.global.set("adaBaralhoMaquina", response.body.id); %}
+
+### Flashcard com IA - Ada gera dois flashcards sobre Algoritmos (201)
+POST http://localhost:8080/api/flashcards/generate?deckId={{adaBaralhoAlgoritmos}}
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
   "quantity": 2
 }
 
-### Flashcard com IA - Ada gera flashcard com contexto do tópico de Algoritmos (201)
-POST http://localhost:8080/api/flashcards/generate?deckId=1
-Authorization: Bearer <ADA_TOKEN>
+> {% client.global.set("adaFlashcardIa1", response.body.flashcards[0].id); client.global.set("adaFlashcardIa2", response.body.flashcards[1].id); %}
+
+### Flashcard com IA - Ada gera flashcard fundamentado no tópico Algoritmos (201)
+POST http://localhost:8080/api/flashcards/generate?deckId={{adaBaralhoAlgoritmos}}
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
   "quantity": 1,
-  "topicId": 1
+  "topicId": {{adaAlgoritmos}}
 }
 
-### Flashcard com IA - Ada gera flashcard com contexto de estudo informado (201)
-POST http://localhost:8080/api/flashcards/generate?deckId=1
-Authorization: Bearer <ADA_TOKEN>
+> {% client.global.set("adaFlashcardIaTopico", response.body.flashcards[0].id); %}
+
+### Flashcard com IA - Ada gera flashcard a partir de orientação pedagógica (201)
+POST http://localhost:8080/api/flashcards/generate?deckId={{adaBaralhoAlgoritmos}}
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
   "quantity": 1,
-  "context": "Priorize a relação entre algoritmos, sequências matemáticas e a Máquina Analítica."
+  "context": "Crie uma pergunta conceitual que exija distinguir correção de eficiência algorítmica. Forneça uma resposta tecnicamente precisa e autossuficiente."
 }
 
-### Flashcard com IA - Confirmar flashcards gerados no baralho de Algoritmos (200)
-GET http://localhost:8080/api/flashcards/deck/1
-Authorization: Bearer <ADA_TOKEN>
+> {% client.global.set("adaFlashcardIaContexto", response.body.flashcards[0].id); %}
 
-### Flashcard com IA - Ada gera flashcard com contexto do conteúdo de Algoritmos (201)
-POST http://localhost:8080/api/flashcards/generate?deckId=1
-Authorization: Bearer <ADA_TOKEN>
+### Flashcard com IA - Ada gera flashcard a partir do conteúdo Introdução aos Algoritmos (201)
+POST http://localhost:8080/api/flashcards/generate?deckId={{adaBaralhoAlgoritmos}}
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
   "quantity": 1,
-  "contentId": 1
+  "contentId": {{adaConteudoAlgoritmos}}
 }
 
-### Baralho com IA - Ada cria baralho de Sequências Numéricas para treino (201)
+> {% client.global.set("adaFlashcardIaConteudo", response.body.flashcards[0].id); %}
+
+### Baralho com IA - Ada gera baralho de treino sobre Sequências Numéricas (201)
 POST http://localhost:8080/api/decks/generate
-Authorization: Bearer <ADA_TOKEN>
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
@@ -426,13 +503,11 @@ Content-Type: application/json
   "quantity": 2
 }
 
-### Baralho com IA - Confirmar flashcards gerados no novo baralho (200)
-GET http://localhost:8080/api/flashcards/deck/4
-Authorization: Bearer <ADA_TOKEN>
+> {% client.global.set("adaBaralhoTreino", response.body.id); %}
 
-### Baralho com IA - Emmy cria baralho de Teoria dos Anéis para treino (201)
+### Baralho com IA - Emmy gera baralho de treino sobre Teoria dos Anéis (201)
 POST http://localhost:8080/api/decks/generate
-Authorization: Bearer <EMMY_TOKEN>
+Authorization: Bearer {{emmyToken}}
 Content-Type: application/json
 
 {
@@ -441,189 +516,185 @@ Content-Type: application/json
   "quantity": 2
 }
 
-### Baralho com IA - Consultar flashcards do treino de Emmy (200)
-GET http://localhost:8080/api/flashcards/deck/5
-Authorization: Bearer <EMMY_TOKEN>
+> {% client.global.set("emmyBaralhoTreino", response.body.id); %}
 
-# =============================================================================
-# FLUXO 3 — MANUTENÇÃO DOS ESTUDOS
-# Atualização de dados existentes e confirmação das alterações.
-# =============================================================================
+### Treino - Ada consulta os flashcards gerados para Sequências Numéricas (200)
+GET http://localhost:8080/api/flashcards/deck/{{adaBaralhoTreino}}
+Authorization: Bearer {{adaToken}}
 
-### Usuário - Atualizar nome de Ada Lovelace (200)
+> {% client.global.set("adaTreinoFlashcard1", response.body[0].id); client.global.set("adaTreinoFlashcard2", response.body[1].id); %}
+
+### Treino - Emmy consulta os flashcards gerados para Teoria dos Anéis (200)
+GET http://localhost:8080/api/flashcards/deck/{{emmyBaralhoTreino}}
+Authorization: Bearer {{emmyToken}}
+
+> {% client.global.set("emmyTreinoFlashcard1", response.body[0].id); client.global.set("emmyTreinoFlashcard2", response.body[1].id); %}
+
+###
+# ============================================================================
+# FLUXO 3 — Manutenção de dados existentes
+# ============================================================================
+
+### Usuário - Ada atualiza seu nome de exibição (200)
 PUT http://localhost:8080/api/users/me
-Authorization: Bearer <ADA_TOKEN>
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
-  "name": "Ada Lovelace",
-  "email": "ada@example.com",
-  "password": "ada123"
+  "name": "Augusta Ada Lovelace",
+  "email": "ada.lovelace@example.com",
+  "password": "AdaEstudos123!"
 }
 
-### Tópico - Atualizar Algoritmos para Algoritmos Matemáticos (200)
-PUT http://localhost:8080/api/topics/1
-Authorization: Bearer <ADA_TOKEN>
+### Tópico - Ada renomeia Algoritmos para Fundamentos de Algoritmos (200)
+PUT http://localhost:8080/api/topics/{{adaAlgoritmos}}
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
-  "name": "Algoritmos Matemáticos"
+  "name": "Fundamentos de Algoritmos"
 }
 
-### Conteúdo - Atualizar título e corpo de Algoritmos e Máquinas Analíticas (200)
-PUT http://localhost:8080/api/contents/1
-Authorization: Bearer <ADA_TOKEN>
+### Conteúdo - Ada revisa o material Introdução aos Algoritmos (200)
+PUT http://localhost:8080/api/contents/{{adaConteudoAlgoritmos}}
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
-  "title": "Algoritmos Matemáticos e Números de Bernoulli",
-  "body": "Os números de Bernoulli formam uma sequência de números racionais que aparece em diversas fórmulas matemáticas. Ada Lovelace descreveu um procedimento para calculá-los utilizando a Máquina Analítica."
+  "title": "Algoritmos: Definição, Correção e Eficiência",
+  "body": "Um algoritmo é uma sequência finita de instruções não ambíguas para solucionar um problema. A correção exige que os resultados satisfaçam a especificação para entradas válidas. A análise de eficiência avalia recursos como tempo de execução e memória em função do tamanho da entrada. A notação O descreve limites assintóticos superiores e permite comparar estratégias de solução."
 }
 
-### Conteúdo - Confirmar atualização e preservação do tópico associado (200)
-GET http://localhost:8080/api/contents/1
-Authorization: Bearer <ADA_TOKEN>
-
-### Anotação - Atualizar anotação de Matemática de Ada (200)
-PUT http://localhost:8080/api/notes/1
-Authorization: Bearer <ADA_TOKEN>
+### Anotação - Ada atualiza seu plano de estudos de Computação (200)
+PUT http://localhost:8080/api/notes/{{adaNotaMateria}}
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
-  "title": "Anotações de Matemática",
-  "body": "Revisar os principais conceitos estudados em Matemática."
+  "title": "Plano de estudo de Computação",
+  "body": "Priorizar correção de algoritmos, complexidade assintótica e a arquitetura histórica da Máquina Analítica."
 }
 
-### Flashcard - Atualizar pergunta e resposta do primeiro flashcard de Ada (200)
-PUT http://localhost:8080/api/flashcards/1
-Authorization: Bearer <ADA_TOKEN>
+### Flashcard - Ada revisa a pergunta e a resposta do flashcard inicial (200)
+PUT http://localhost:8080/api/flashcards/{{adaFlashcardInicial}}
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
-  "question": "Qual é a relação entre algoritmos e a Máquina Analítica?",
-  "answer": "A Máquina Analítica foi concebida para executar sequências de operações definidas por instruções, permitindo representar procedimentos matemáticos de forma programável."
+  "question": "Como se define um algoritmo e quais propriedades são esperadas de sua execução?",
+  "answer": "Um algoritmo é uma sequência finita e não ambígua de instruções que transforma entradas em saídas. Para entradas válidas, deve satisfazer a especificação do problema e terminar quando aplicável."
 }
 
-### Baralho - Atualizar tema do baralho de Algoritmos de Ada (200)
-PUT http://localhost:8080/api/decks/1
-Authorization: Bearer <ADA_TOKEN>
+### Baralho - Ada atualiza o tema do baralho de estudo para Fundamentos de Algoritmos (200)
+PUT http://localhost:8080/api/decks/{{adaBaralhoAlgoritmos}}
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
-  "theme": "Algoritmos Matemáticos"
+  "theme": "Fundamentos de Algoritmos"
 }
 
 ###
-# =============================================================================
-# FLUXO 4 — VALIDAÇÕES
-# Validação de dados, permissões e preservação dos registros.
-# =============================================================================
+# ============================================================================
+# FLUXO 4 — Regras de negócio, autorização, tentativas de resposta e desempenho
+# ============================================================================
 
-### Autenticação - Rejeitar senha incorreta de Ada Lovelace (401)
+### Autenticação - Rejeitar senha incorreta de Ada (401)
 POST http://localhost:8080/api/auth/login
 Content-Type: application/json
 
 {
-  "email": "ada@example.com",
+  "email": "ada.lovelace@example.com",
   "password": "senha-incorreta"
 }
 
-### Usuário - Rejeitar criação com e-mail inválido (400)
+### Usuário - Rejeitar cadastro com e-mail inválido (400)
 POST http://localhost:8080/api/users
 Content-Type: application/json
 
 {
-  "name": "Ada Lovelace",
+  "name": "Usuário Inválido",
   "email": "email-invalido",
-  "password": "teste123"
+  "password": "Teste123!"
 }
 
-### Usuário - Rejeitar criação com e-mail duplicado de Ada (409)
+### Usuário - Rejeitar cadastro com e-mail já utilizado por Ada (409)
 POST http://localhost:8080/api/users
 Content-Type: application/json
 
 {
-  "name": "Augusta Ada Byron King",
-  "email": "ada@example.com",
-  "password": "ada123"
+  "name": "Outro Usuário",
+  "email": "ada.lovelace@example.com",
+  "password": "Teste123!"
 }
 
-### Matéria - Rejeitar criação com nome vazio para Ada (400)
+### Matéria - Rejeitar matéria sem nome (400)
 POST http://localhost:8080/api/subjects
-Authorization: Bearer <ADA_TOKEN>
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
   "name": ""
 }
 
-### Matéria - Rejeitar criação sem autenticação (403)
-POST http://localhost:8080/api/subjects
+### Matéria - Impedir que Emmy consulte matéria de Ada (404)
+GET http://localhost:8080/api/subjects/{{adaComputacao}}
+Authorization: Bearer {{emmyToken}}
+
+### Assistente de estudos - Ada solicita explicação sobre análise de algoritmos (200)
+POST http://localhost:8080/api/study-assistant/ask
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
-  "name": "Teoria dos Grupos"
+  "request": "Explique a diferença entre correção e eficiência de um algoritmo, incluindo um exemplo de cada conceito.",
+  "context": "Estou revisando fundamentos de algoritmos e análise de complexidade para uma avaliação de graduação."
 }
 
-### Matéria - Emmy tenta consultar matéria de Ada (404)
-GET http://localhost:8080/api/subjects/1
-Authorization: Bearer <EMMY_TOKEN>
-
-### Assistente de estudos - Ada solicita explicação com contexto (200)
+### Assistente de estudos - Emmy solicita explicação sobre anéis comutativos (200)
 POST http://localhost:8080/api/study-assistant/ask
-Authorization: Bearer <ADA_TOKEN>
+Authorization: Bearer {{emmyToken}}
 Content-Type: application/json
 
 {
-  "request": "Explique como um algoritmo pode ser utilizado para calcular uma sequência numérica.",
-  "context": "Estou estudando algoritmos e sequências numéricas no contexto dos trabalhos de Ada Lovelace."
+  "request": "Explique o que caracteriza um anel comutativo e apresente um exemplo de anel comutativo e outro não comutativo."
 }
 
-### Assistente de estudos - Emmy solicita explicação sem contexto adicional (200)
+### Assistente de estudos - Rejeitar solicitação vazia (400)
 POST http://localhost:8080/api/study-assistant/ask
-Authorization: Bearer <EMMY_TOKEN>
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
-  "request": "Explique o que caracteriza um anel comutativo."
-}
-
-### Assistente de estudos - Rejeitar solicitação vazia de Ada (400)
-POST http://localhost:8080/api/study-assistant/ask
-Authorization: Bearer <ADA_TOKEN>
-Content-Type: application/json
-
-{
-  "request": "",
-  "context": "Estou estudando estruturas algébricas."
+  "request": ""
 }
 
 ### Conteúdo - Rejeitar atualização com título vazio (400)
-PUT http://localhost:8080/api/contents/1
-Authorization: Bearer <ADA_TOKEN>
+PUT http://localhost:8080/api/contents/{{adaConteudoAlgoritmos}}
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
   "title": "",
-  "body": "Conteúdo sobre algoritmos matemáticos e números de Bernoulli."
+  "body": "Texto válido para testar a obrigatoriedade do título."
 }
 
-### Conteúdo - Bloquear criação de Ada com tópico de Emmy (404)
+### Conteúdo - Impedir que Ada associe conteúdo ao tópico de Emmy (404)
 POST http://localhost:8080/api/contents
-Authorization: Bearer <ADA_TOKEN>
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
-  "title": "Introdução à Teoria dos Anéis",
-  "body": "Estudo das propriedades algébricas dos anéis.",
+  "title": "Material indevido",
+  "body": "Tentativa de associar material a tópico pertencente a outra usuária.",
   "topic": {
-    "id": 2
+    "id": {{emmyAneis}}
   }
 }
 
-### Documento - Rejeitar arquivo com extensão não permitida (400)
+### Documento - Rejeitar importação de arquivo CSV (400)
 POST http://localhost:8080/api/documents/preview
-Authorization: Bearer <ADA_TOKEN>
+Authorization: Bearer {{adaToken}}
 Content-Type: multipart/form-data; boundary=StudyBoundary
 
 --StudyBoundary
@@ -631,485 +702,515 @@ Content-Disposition: form-data; name="file"; filename="material.csv"
 Content-Type: text/csv
 
 titulo,conteudo
-Algoritmos,Introducao
+Teste,Arquivo nao permitido
 --StudyBoundary--
 
-### Documento - Bloquear confirmação de Ada em tópico de Emmy (404)
-POST http://localhost:8080/api/documents/confirm
-Authorization: Bearer <ADA_TOKEN>
-Content-Type: multipart/form-data; boundary=StudyBoundary
+### Documento - Impedir que Emmy exclua documento de Ada (404)
+DELETE http://localhost:8080/api/documents/{{adaDocumento}}
+Authorization: Bearer {{emmyToken}}
 
---StudyBoundary
-Content-Disposition: form-data; name="file"; filename="material.txt"
-Content-Type: text/plain
-
-Material de estudo sobre estruturas algebricas.
---StudyBoundary
-Content-Disposition: form-data; name="topicId"
-
-2
---StudyBoundary
-Content-Disposition: form-data; name="title"
-
-Material de Algebra
---StudyBoundary
-Content-Disposition: form-data; name="body"
-
-Material de estudo sobre estruturas algebricas.
---StudyBoundary--
-
-### Documento - Bloquear exclusão por outro usuário (404)
-DELETE http://localhost:8080/api/documents/1
-Authorization: Bearer <EMMY_TOKEN>
-
-### Flashcard com IA - Bloquear geração de Ada com tópico de Emmy como contexto (404)
-POST http://localhost:8080/api/flashcards/generate?deckId=1
-Authorization: Bearer <ADA_TOKEN>
+### Flashcard com IA - Impedir que Ada utilize tópico de Emmy como contexto (404)
+POST http://localhost:8080/api/flashcards/generate?deckId={{adaBaralhoAlgoritmos}}
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
   "quantity": 1,
-  "topicId": 2
+  "topicId": {{emmyAneis}}
 }
 
-### Flashcard com IA - Bloquear geração de Ada com conteúdo de Emmy como contexto (404)
-POST http://localhost:8080/api/flashcards/generate?deckId=1
-Authorization: Bearer <ADA_TOKEN>
+### Flashcard com IA - Impedir que Ada utilize conteúdo de Emmy como contexto (404)
+POST http://localhost:8080/api/flashcards/generate?deckId={{adaBaralhoAlgoritmos}}
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
   "quantity": 1,
-  "contentId": 2
+  "contentId": {{emmyConteudoAneis}}
 }
 
-### Anotação - Bloquear segunda anotação de Ada para Matemática (409)
+### Anotação - Rejeitar segunda anotação na mesma matéria de Ada (409)
 POST http://localhost:8080/api/notes
-Authorization: Bearer <ADA_TOKEN>
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
-  "title": "Segunda anotação de Matemática",
-  "body": "Esta anotação não deve ser criada.",
+  "title": "Anotação duplicada",
+  "body": "Tentativa de duplicação.",
   "subject": {
-    "id": 1
+    "id": {{adaComputacao}}
   }
 }
 
-### Anotação - Rejeitar criação sem contexto (400)
+### Anotação - Rejeitar anotação sem vínculo de estudo (400)
 POST http://localhost:8080/api/notes
-Authorization: Bearer <ADA_TOKEN>
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
-  "title": "Anotação sem contexto",
-  "body": "Esta anotação não deve ser criada."
+  "title": "Anotação sem vínculo",
+  "body": "Anotação sem matéria, tópico ou conteúdo."
 }
 
-### Anotação - Rejeitar criação com matéria e tópico simultaneamente (400)
+### Anotação - Rejeitar anotação vinculada simultaneamente à matéria e ao tópico (400)
 POST http://localhost:8080/api/notes
-Authorization: Bearer <ADA_TOKEN>
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
-  "title": "Anotação com múltiplos contextos",
-  "body": "Esta anotação não deve ser criada.",
+  "title": "Anotação ambígua",
+  "body": "Vínculos incompatíveis.",
   "subject": {
-    "id": 1
+    "id": {{adaComputacao}}
   },
   "topic": {
-    "id": 1
+    "id": {{adaAlgoritmos}}
   }
 }
 
-### Anotação - Bloquear criação de Ada para matéria de Emmy (404)
+### Anotação - Impedir que Ada registre anotação na matéria de Emmy (404)
 POST http://localhost:8080/api/notes
-Authorization: Bearer <ADA_TOKEN>
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
-  "title": "Anotação de Álgebra Abstrata",
-  "body": "Esta anotação não deve ser criada.",
+  "title": "Anotação indevida",
+  "body": "Não deve ser persistida.",
   "subject": {
-    "id": 2
+    "id": {{emmyAlgebra}}
   }
 }
 
-### Flashcard - Ada cria flashcard temporário sobre números de Bernoulli (201)
-POST http://localhost:8080/api/flashcards?deckId=1
-Authorization: Bearer <ADA_TOKEN>
+### Flashcard - Ada cadastra flashcard complementar sobre notação assintótica (201)
+POST http://localhost:8080/api/flashcards?deckId={{adaBaralhoAlgoritmos}}
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
-  "question": "O que são os números de Bernoulli?",
-  "answer": "São números racionais definidos por uma sequência matemática, utilizados em fórmulas de somatórios, séries e outras aplicações."
+  "question": "O que expressa a notação O na análise de algoritmos?",
+  "answer": "Descreve um limite superior assintótico para o crescimento de uma função de custo."
 }
 
-### Flashcard - Ada atualiza flashcard temporário (200)
-PUT http://localhost:8080/api/flashcards/13
-Authorization: Bearer <ADA_TOKEN>
+> {% client.global.set("adaFlashcardComplementar", response.body.id); %}
+
+### Flashcard - Ada atualiza o flashcard complementar (200)
+PUT http://localhost:8080/api/flashcards/{{adaFlashcardComplementar}}
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
-  "question": "Em quais aplicações matemáticas aparecem os números de Bernoulli?",
-  "answer": "Aparecem em fórmulas para somas de potências de números inteiros, séries e expansões matemáticas."
+  "question": "Qual é a interpretação da notação O grande?",
+  "answer": "A notação O grande estabelece um limite superior assintótico para o crescimento de uma função, desconsiderando constantes multiplicativas e termos de ordem inferior."
 }
 
-### Flashcard - Ada exclui flashcard temporário (204)
-DELETE http://localhost:8080/api/flashcards/13
-Authorization: Bearer <ADA_TOKEN>
-
-### Flashcard - Rejeitar criação com pergunta vazia (400)
-POST http://localhost:8080/api/flashcards?deckId=1
-Authorization: Bearer <ADA_TOKEN>
+### Flashcard - Rejeitar cadastro sem pergunta (400)
+POST http://localhost:8080/api/flashcards?deckId={{adaBaralhoAlgoritmos}}
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
   "question": ""
 }
 
-### Baralho - Rejeitar criação manual em TRAINING (409)
+### Baralho - Rejeitar cadastro manual de baralho TRAINING (409)
 POST http://localhost:8080/api/decks
-Authorization: Bearer <ADA_TOKEN>
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
-  "theme": "Baralho inválido",
+  "theme": "Treino manual não permitido",
   "mode": "TRAINING",
-  "question": "O que é um algoritmo?",
-  "answer": "Uma sequência de instruções."
+  "question": "Pergunta de teste",
+  "answer": "Resposta de teste"
 }
 
-### Flashcard com IA - Permitir geração de flashcard durante treino (201)
-POST http://localhost:8080/api/flashcards/generate?deckId=4
-Authorization: Bearer <ADA_TOKEN>
+### Flashcard com IA - Ada acrescenta flashcard ao treino de Sequências Numéricas (201)
+POST http://localhost:8080/api/flashcards/generate?deckId={{adaBaralhoTreino}}
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
   "quantity": 1
 }
 
-### Flashcard com IA - Confirmar flashcard gerado durante treino (200)
-GET http://localhost:8080/api/flashcards/deck/4
-Authorization: Bearer <ADA_TOKEN>
+> {% client.global.set("adaTreinoFlashcardExtra", response.body.flashcards[0].id); %}
 
-### Flashcard com IA - Permitir geração de flashcard durante treino (201)
-POST http://localhost:8080/api/flashcards/generate?deckId=1
-Authorization: Bearer <ADA_TOKEN>
+### Treino - Ada responde a um flashcard sobre sequências numéricas (201)
+POST http://localhost:8080/api/answer-attempts?flashcardId={{adaTreinoFlashcard1}}
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
-  "quantity": 1
+  "answer": "Uma sequência numérica é uma função que associa índices naturais a números, organizando os termos em uma ordem definida."
 }
 
-### Flashcard com IA - Confirmar flashcard gerado durante treino (200)
-GET http://localhost:8080/api/flashcards/deck/1
-Authorization: Bearer <ADA_TOKEN>
-
-### Tentativa de resposta com IA - Ada responde corretamente durante treino (201)
-POST http://localhost:8080/api/answer-attempts?flashcardId=1
-Authorization: Bearer <ADA_TOKEN>
+### Treino - Ada fornece uma resposta incorreta ao mesmo flashcard (201)
+POST http://localhost:8080/api/answer-attempts?flashcardId={{adaTreinoFlashcard1}}
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
-  "answer": "Um algoritmo é uma sequência ordenada e bem definida de instruções para realizar uma tarefa ou resolver um problema."
+  "answer": "Uma sequência numérica é um conjunto sem ordem e sem índices."
 }
 
-### Tentativa de resposta com IA - Ada responde incorretamente durante treino (201)
-POST http://localhost:8080/api/answer-attempts?flashcardId=1
-Authorization: Bearer <ADA_TOKEN>
+### Treino - Emmy responde a um flashcard sobre teoria dos anéis (201)
+POST http://localhost:8080/api/answer-attempts?flashcardId={{emmyTreinoFlashcard1}}
+Authorization: Bearer {{emmyToken}}
 Content-Type: application/json
 
 {
-  "answer": "Um algoritmo é um tipo de número primo."
+  "answer": "Um anel é uma estrutura algébrica com adição formando grupo abeliano e multiplicação associativa e distributiva em relação à adição."
 }
 
-### Tentativa de resposta com IA - Emmy responde corretamente durante treino (201)
-POST http://localhost:8080/api/answer-attempts?flashcardId=2
-Authorization: Bearer <EMMY_TOKEN>
-Content-Type: application/json
+### Treino - Impedir que Emmy desista de flashcard de Ada (404)
+POST http://localhost:8080/api/answer-attempts/give-up?flashcardId={{adaTreinoFlashcard1}}
+Authorization: Bearer {{emmyToken}}
 
-{
-  "answer": "É uma estrutura com duas operações em que a adição forma um grupo abeliano e a multiplicação é associativa e distributiva em relação à adição."
-}
+### Treino - Ada desiste de um flashcard do próprio treino (201)
+POST http://localhost:8080/api/answer-attempts/give-up?flashcardId={{adaTreinoFlashcard2}}
+Authorization: Bearer {{adaToken}}
 
-### Tentativa de resposta - Bloquear desistência de Emmy em flashcard de Ada (404)
-POST http://localhost:8080/api/answer-attempts/give-up?flashcardId=1
-Authorization: Bearer <EMMY_TOKEN>
+### Treino - Emmy desiste de um flashcard do próprio treino (201)
+POST http://localhost:8080/api/answer-attempts/give-up?flashcardId={{emmyTreinoFlashcard2}}
+Authorization: Bearer {{emmyToken}}
 
-### Tentativa de resposta - Bloquear consulta de Emmy ao histórico de flashcard de Ada (404)
-GET http://localhost:8080/api/answer-attempts/flashcards/1
-Authorization: Bearer <EMMY_TOKEN>
+### Desempenho - Ada consulta o resultado do treino de Sequências Numéricas (200)
+GET http://localhost:8080/api/performance/decks/{{adaBaralhoTreino}}
+Authorization: Bearer {{adaToken}}
 
-### Tentativa de resposta - Ada desiste do primeiro flashcard durante treino (201)
-POST http://localhost:8080/api/answer-attempts/give-up?flashcardId=1
-Authorization: Bearer <ADA_TOKEN>
+### Desempenho - Emmy consulta o resultado do treino de Teoria dos Anéis (200)
+GET http://localhost:8080/api/performance/decks/{{emmyBaralhoTreino}}
+Authorization: Bearer {{emmyToken}}
 
-### Tentativa de resposta - Emmy desiste do primeiro flashcard durante treino (201)
-POST http://localhost:8080/api/answer-attempts/give-up?flashcardId=2
-Authorization: Bearer <EMMY_TOKEN>
+### Desempenho - Impedir que Emmy consulte o treino de Ada (404)
+GET http://localhost:8080/api/performance/decks/{{adaBaralhoTreino}}
+Authorization: Bearer {{emmyToken}}
 
-### Tentativa de resposta - Consultar histórico de Ada no primeiro flashcard durante treino (200)
-GET http://localhost:8080/api/answer-attempts/flashcards/1
-Authorization: Bearer <ADA_TOKEN>
-
-### Desempenho - Consultar desempenho de Ada no baralho de Algoritmos (200)
-GET http://localhost:8080/api/performance/decks/1
-Authorization: Bearer <ADA_TOKEN>
-
-### Desempenho - Consultar desempenho de Emmy no baralho de Teoria dos Anéis (200)
-GET http://localhost:8080/api/performance/decks/2
-Authorization: Bearer <EMMY_TOKEN>
-
-### Desempenho - Bloquear consulta de Emmy ao desempenho do baralho de Ada (404)
-GET http://localhost:8080/api/performance/decks/1
-Authorization: Bearer <EMMY_TOKEN>
-
-### Revisão - Consultar flashcards pendentes de revisão de Ada (200)
+### Revisão - Ada consulta flashcards pendentes após o treino (200)
 GET http://localhost:8080/api/reviews/pending
-Authorization: Bearer <ADA_TOKEN>
+Authorization: Bearer {{adaToken}}
 
-### Revisão - Consultar flashcards pendentes de revisão de Emmy (200)
+### Revisão - Emmy consulta flashcards pendentes após o treino (200)
 GET http://localhost:8080/api/reviews/pending
-Authorization: Bearer <EMMY_TOKEN>
+Authorization: Bearer {{emmyToken}}
 
-### Tentativa de resposta com IA - Ada corrige resposta pendente de revisão (201)
-POST http://localhost:8080/api/answer-attempts?flashcardId=1
-Authorization: Bearer <ADA_TOKEN>
+### Treino - Ada revisa um flashcard com resposta conceitualmente correta (201)
+POST http://localhost:8080/api/answer-attempts?flashcardId={{adaTreinoFlashcard1}}
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
-  "answer": "A Máquina Analítica foi concebida para executar sequências de operações definidas por instruções, permitindo representar procedimentos matemáticos de forma programável."
+  "answer": "Uma sequência numérica é uma função cujo domínio é um subconjunto dos naturais e cujos valores são os termos da sequência."
 }
 
-### Revisão - Confirmar remoção do flashcard corrigido das pendências de Ada (200)
+### Revisão - Ada verifica o estado das pendências após nova tentativa (200)
 GET http://localhost:8080/api/reviews/pending
-Authorization: Bearer <ADA_TOKEN>
+Authorization: Bearer {{adaToken}}
 
-### Baralho - Ada converte baralho de treino para estudo (200)
-POST http://localhost:8080/api/decks/4/convert-to-study
-Authorization: Bearer <ADA_TOKEN>
+### Baralho - Ada converte o treino de Sequências Numéricas em baralho de estudo (200)
+POST http://localhost:8080/api/decks/{{adaBaralhoTreino}}/convert-to-study
+Authorization: Bearer {{adaToken}}
 
-### Histórico de desempenho - Ada lista seus históricos após conversão (200)
+> {% client.global.set("adaBaralhoConvertido", response.body.id); %}
+
+### Histórico de desempenho - Ada consulta históricos consolidados após conversão (200)
 GET http://localhost:8080/api/performance/history
-Authorization: Bearer <ADA_TOKEN>
+Authorization: Bearer {{adaToken}}
 
-### Histórico de desempenho - Ada consulta histórico do baralho convertido (200)
-GET http://localhost:8080/api/performance/history/1
-Authorization: Bearer <ADA_TOKEN>
+> {% client.global.set("adaHistorico", response.body[0].id); %}
 
-### Histórico de desempenho - Bloquear consulta de Emmy ao histórico de Ada (404)
-GET http://localhost:8080/api/performance/history/1
-Authorization: Bearer <EMMY_TOKEN>
+### Histórico de desempenho - Impedir que Emmy consulte histórico de Ada (404)
+GET http://localhost:8080/api/performance/history/{{adaHistorico}}
+Authorization: Bearer {{emmyToken}}
 
-### Baralho - Bloquear conversão repetida para estudo (409)
-POST http://localhost:8080/api/decks/4/convert-to-study
-Authorization: Bearer <ADA_TOKEN>
+### Baralho - Rejeitar segunda conversão do baralho de Ada (409)
+POST http://localhost:8080/api/decks/{{adaBaralhoTreino}}/convert-to-study
+Authorization: Bearer {{adaToken}}
 
-### Baralho - Bloquear conversão de baralho de outro usuário (404)
-POST http://localhost:8080/api/decks/4/convert-to-study
-Authorization: Bearer <EMMY_TOKEN>
+### Baralho - Impedir que Emmy converta baralho de Ada (404)
+POST http://localhost:8080/api/decks/{{adaBaralhoTreino}}/convert-to-study
+Authorization: Bearer {{emmyToken}}
 
-### Tentativa de resposta - Bloquear desistência fora do treino (409)
-POST http://localhost:8080/api/answer-attempts/give-up?flashcardId=1
-Authorization: Bearer <ADA_TOKEN>
-
-### Tentativa de resposta com IA - Bloquear resposta fora do treino (409)
-POST http://localhost:8080/api/answer-attempts?flashcardId=1
-Authorization: Bearer <ADA_TOKEN>
+### Treino - Rejeitar resposta em flashcard de baralho convertido para STUDY (409)
+POST http://localhost:8080/api/answer-attempts?flashcardId={{adaTreinoFlashcard1}}
+Authorization: Bearer {{adaToken}}
 Content-Type: application/json
 
 {
-  "answer": "A Máquina Analítica executa sequências programadas de operações."
+  "answer": "Uma sequência numérica é uma função indexada por números naturais."
 }
 
 ###
+# ============================================================================
+# FLUXO RAG — Recuperação semântica e seleção de fontes de estudo
+# ============================================================================
 
-# =============================================================================
-# FLUXO 5 — EXCLUSÕES
-# Remoção de associações, registros e confirmação dos resultados.
-# Executar somente após concluir todos os fluxos anteriores.
-# =============================================================================
+### RAG - Ada gera proposta de conteúdo aprofundado a partir do material sobre algoritmos (200)
+POST http://localhost:8080/api/contents/generate
+Authorization: Bearer {{adaToken}}
+Content-Type: application/json
 
-### Anotação - Excluir anotação do conteúdo de Emmy (204)
-DELETE http://localhost:8080/api/notes/6
-Authorization: Bearer <EMMY_TOKEN>
+{
+  "topicId": {{adaAlgoritmos}},
+  "request": "Produza uma explicação didática sobre correção de algoritmos, invariantes de laço e análise de complexidade, com definições, exemplos e distinções entre os conceitos.",
+  "context": "Material para estudantes de graduação. Desenvolva os conceitos em parágrafos articulados e use terminologia técnica correta.",
+  "semanticSearch": {
+    "query": "correção de algoritmos invariantes de laço complexidade",
+    "contentsIds": [
+      {{adaConteudoAlgoritmos}}
+    ],
+    "selectionMode": "PREFERRED",
+    "topK": 3,
+    "similarityThreshold": 0.0
+  }
+}
 
-### Anotação - Excluir anotação do tópico de Emmy (204)
-DELETE http://localhost:8080/api/notes/4
-Authorization: Bearer <EMMY_TOKEN>
+### RAG - Ada gera flashcard fundamentado no conteúdo sobre algoritmos (201)
+POST http://localhost:8080/api/flashcards/generate?deckId={{adaBaralhoAlgoritmos}}
+Authorization: Bearer {{adaToken}}
+Content-Type: application/json
 
-### Anotação - Excluir anotação da matéria de Emmy (204)
-DELETE http://localhost:8080/api/notes/2
-Authorization: Bearer <EMMY_TOKEN>
+{
+  "quantity": 1,
+  "context": "Elabore uma pergunta objetiva sobre correção de algoritmos e uma resposta de referência precisa, sem transformar o flashcard em um texto didático extenso.",
+  "semanticSearch": {
+    "query": "correção de algoritmos complexidade assintótica",
+    "contentsIds": [
+      {{adaConteudoAlgoritmos}}
+    ],
+    "selectionMode": "PREFERRED",
+    "topK": 3,
+    "similarityThreshold": 0.0
+  }
+}
 
-### Flashcard - Excluir primeiro flashcard de Ada (204)
-DELETE http://localhost:8080/api/flashcards/1
-Authorization: Bearer <ADA_TOKEN>
+> {% client.global.set("adaFlashcardRag", response.body.flashcards[0].id); %}
 
-### Flashcard - Excluir primeiro flashcard de Emmy (204)
-DELETE http://localhost:8080/api/flashcards/2
-Authorization: Bearer <EMMY_TOKEN>
+### RAG - Ada consulta o assistente com recuperação automática de fontes (200)
+POST http://localhost:8080/api/study-assistant/ask
+Authorization: Bearer {{adaToken}}
+Content-Type: application/json
 
-### Flashcard - Excluir segundo flashcard de Ada (204)
-DELETE http://localhost:8080/api/flashcards/3
-Authorization: Bearer <ADA_TOKEN>
+{
+  "request": "Explique como invariantes de laço podem ajudar a demonstrar a correção de um algoritmo e diferencie essa demonstração da análise de complexidade."
+}
 
-### Flashcard - Excluir segundo flashcard de Emmy (204)
-DELETE http://localhost:8080/api/flashcards/4
-Authorization: Bearer <EMMY_TOKEN>
+### RAG - Ada consulta o assistente priorizando conteúdo específico (200)
+POST http://localhost:8080/api/study-assistant/ask
+Authorization: Bearer {{adaToken}}
+Content-Type: application/json
 
-### Flashcard - Excluir terceiro flashcard de Ada (204)
-DELETE http://localhost:8080/api/flashcards/5
-Authorization: Bearer <ADA_TOKEN>
+{
+  "request": "Explique a diferença entre correção e eficiência de algoritmos com base no meu material de estudo.",
+  "contentsIds": [
+    {{adaConteudoAlgoritmos}}
+  ],
+  "selectionMode": "PREFERRED",
+  "topK": 3,
+  "similarityThreshold": 0.0
+}
 
-### Flashcard - Excluir primeiro flashcard gerado com IA de Ada (204)
-DELETE http://localhost:8080/api/flashcards/6
-Authorization: Bearer <ADA_TOKEN>
+### RAG - Rejeitar seleção exclusiva de conteúdo pertencente a Emmy (400)
+POST http://localhost:8080/api/study-assistant/ask
+Authorization: Bearer {{adaToken}}
+Content-Type: application/json
 
-### Flashcard - Excluir segundo flashcard gerado com IA de Ada (204)
-DELETE http://localhost:8080/api/flashcards/7
-Authorization: Bearer <ADA_TOKEN>
+{
+  "request": "Explique os axiomas que definem um anel.",
+  "contentsIds": [
+    {{emmyConteudoAneis}}
+  ],
+  "selectionMode": "EXCLUSIVE"
+}
 
-### Flashcard - Excluir flashcard gerado com contexto de tópico de Ada (204)
-DELETE http://localhost:8080/api/flashcards/8
-Authorization: Bearer <ADA_TOKEN>
+### RAG - Informar ausência de fontes na seleção exclusiva da matéria Teoria dos Números (422)
+POST http://localhost:8080/api/study-assistant/ask
+Authorization: Bearer {{emmyToken}}
+Content-Type: application/json
 
-### Flashcard - Excluir flashcard gerado com contexto de estudo de Ada (204)
-DELETE http://localhost:8080/api/flashcards/9
-Authorization: Bearer <ADA_TOKEN>
+{
+  "request": "Explique a distribuição dos números primos utilizando exclusivamente os materiais da matéria selecionada.",
+  "subjectsIds": [
+    {{emmyNumeros}}
+  ],
+  "selectionMode": "EXCLUSIVE"
+}
 
-### Flashcard - Excluir flashcard gerado com contexto de conteúdo de Ada (204)
-DELETE http://localhost:8080/api/flashcards/10
-Authorization: Bearer <ADA_TOKEN>
+###
+# ============================================================================
+# FLUXO 5 — Exclusão de registros, cascatas e preservação dos históricos
+# ============================================================================
 
-### Flashcard - Excluir flashcard gerado com IA durante treino de Ada (204)
-DELETE http://localhost:8080/api/flashcards/14
-Authorization: Bearer <ADA_TOKEN>
+### Anotação - Emmy exclui anotação do conteúdo Estruturas de Anéis (204)
+DELETE http://localhost:8080/api/notes/{{emmyNotaConteudo}}
+Authorization: Bearer {{emmyToken}}
 
-### Baralho - Confirmar exclusão do baralho de Algoritmos de Ada após exclusão do último flashcard (404)
-GET http://localhost:8080/api/decks/1
-Authorization: Bearer <ADA_TOKEN>
+### Anotação - Emmy exclui anotação do tópico Teoria dos Anéis (204)
+DELETE http://localhost:8080/api/notes/{{emmyNotaTopico}}
+Authorization: Bearer {{emmyToken}}
 
-### Baralho - Confirmar exclusão do baralho de Teoria dos Anéis de Emmy após exclusão do último flashcard (404)
-GET http://localhost:8080/api/decks/2
-Authorization: Bearer <EMMY_TOKEN>
+### Anotação - Emmy exclui anotação da matéria Álgebra Abstrata (204)
+DELETE http://localhost:8080/api/notes/{{emmyNotaMateria}}
+Authorization: Bearer {{emmyToken}}
 
-### Baralho com IA - Ada exclui baralho de Sequências Numéricas (204)
-DELETE http://localhost:8080/api/decks/4
-Authorization: Bearer <ADA_TOKEN>
+### Flashcard - Ada exclui flashcard inicial de Algoritmos (204)
+DELETE http://localhost:8080/api/flashcards/{{adaFlashcardInicial}}
+Authorization: Bearer {{adaToken}}
 
-### Histórico de desempenho - Confirmar preservação após excluir baralho convertido (200)
-GET http://localhost:8080/api/performance/history/1
-Authorization: Bearer <ADA_TOKEN>
+### Flashcard - Ada exclui flashcard sobre correção de algoritmos (204)
+DELETE http://localhost:8080/api/flashcards/{{adaFlashcardCorrecao}}
+Authorization: Bearer {{adaToken}}
 
-### Histórico de desempenho - Bloquear exclusão por Emmy (404)
-DELETE http://localhost:8080/api/performance/history/1
-Authorization: Bearer <EMMY_TOKEN>
+### Flashcard - Ada exclui flashcard complementar sobre notação assintótica (204)
+DELETE http://localhost:8080/api/flashcards/{{adaFlashcardComplementar}}
+Authorization: Bearer {{adaToken}}
 
-### Histórico de desempenho - Ada exclui histórico consolidado (204)
-DELETE http://localhost:8080/api/performance/history/1
-Authorization: Bearer <ADA_TOKEN>
+### Flashcard - Ada exclui primeiro flashcard gerado com IA (204)
+DELETE http://localhost:8080/api/flashcards/{{adaFlashcardIa1}}
+Authorization: Bearer {{adaToken}}
 
-### Histórico de desempenho - Confirmar exclusão do histórico de Ada (404)
-GET http://localhost:8080/api/performance/history/1
-Authorization: Bearer <ADA_TOKEN>
+### Flashcard - Ada exclui segundo flashcard gerado com IA (204)
+DELETE http://localhost:8080/api/flashcards/{{adaFlashcardIa2}}
+Authorization: Bearer {{adaToken}}
 
-### Baralho TRAINING - Emmy exclui baralho sem conversão (204)
-DELETE http://localhost:8080/api/decks/5
-Authorization: Bearer <EMMY_TOKEN>
+### Flashcard - Ada exclui flashcard gerado a partir do tópico (204)
+DELETE http://localhost:8080/api/flashcards/{{adaFlashcardIaTopico}}
+Authorization: Bearer {{adaToken}}
 
-### Histórico de desempenho - Emmy lista históricos após exclusão direta (200)
+### Flashcard - Ada exclui flashcard gerado com orientação pedagógica (204)
+DELETE http://localhost:8080/api/flashcards/{{adaFlashcardIaContexto}}
+Authorization: Bearer {{adaToken}}
+
+### Flashcard - Ada exclui flashcard gerado a partir do conteúdo (204)
+DELETE http://localhost:8080/api/flashcards/{{adaFlashcardIaConteudo}}
+Authorization: Bearer {{adaToken}}
+
+### Flashcard - Ada exclui flashcard gerado com RAG (204)
+DELETE http://localhost:8080/api/flashcards/{{adaFlashcardRag}}
+Authorization: Bearer {{adaToken}}
+
+### Flashcard - Emmy exclui flashcard inicial de Teoria dos Anéis (204)
+DELETE http://localhost:8080/api/flashcards/{{emmyFlashcardInicial}}
+Authorization: Bearer {{emmyToken}}
+
+### Flashcard - Emmy exclui flashcard sobre ideais de anéis (204)
+DELETE http://localhost:8080/api/flashcards/{{emmyFlashcardIdeal}}
+Authorization: Bearer {{emmyToken}}
+
+### Baralho - Confirmar exclusão automática do baralho vazio de Algoritmos de Ada (404)
+GET http://localhost:8080/api/decks/{{adaBaralhoAlgoritmos}}
+Authorization: Bearer {{adaToken}}
+
+### Baralho - Confirmar exclusão automática do baralho vazio de Teoria dos Anéis de Emmy (404)
+GET http://localhost:8080/api/decks/{{emmyBaralhoAneis}}
+Authorization: Bearer {{emmyToken}}
+
+### Baralho - Ada exclui o baralho de estudo Máquina Analítica (204)
+DELETE http://localhost:8080/api/decks/{{adaBaralhoMaquina}}
+Authorization: Bearer {{adaToken}}
+
+### Baralho - Ada exclui o baralho convertido de Sequências Numéricas (204)
+DELETE http://localhost:8080/api/decks/{{adaBaralhoTreino}}
+Authorization: Bearer {{adaToken}}
+
+### Histórico de desempenho - Ada confirma preservação do histórico após exclusão do baralho (200)
+GET http://localhost:8080/api/performance/history/{{adaHistorico}}
+Authorization: Bearer {{adaToken}}
+
+### Histórico de desempenho - Ada exclui o histórico consolidado de Sequências Numéricas (204)
+DELETE http://localhost:8080/api/performance/history/{{adaHistorico}}
+Authorization: Bearer {{adaToken}}
+
+### Baralho - Emmy exclui diretamente o baralho de treino de Teoria dos Anéis (204)
+DELETE http://localhost:8080/api/decks/{{emmyBaralhoTreino}}
+Authorization: Bearer {{emmyToken}}
+
+### Histórico de desempenho - Emmy consulta o histórico preservado após exclusão direta (200)
 GET http://localhost:8080/api/performance/history
-Authorization: Bearer <EMMY_TOKEN>
+Authorization: Bearer {{emmyToken}}
 
-### Histórico de desempenho - Emmy consulta histórico preservado (200)
-GET http://localhost:8080/api/performance/history/2
-Authorization: Bearer <EMMY_TOKEN>
+> {% client.global.set("emmyHistorico", response.body[0].id); %}
 
-### Histórico de desempenho - Emmy exclui histórico consolidado (204)
-DELETE http://localhost:8080/api/performance/history/2
-Authorization: Bearer <EMMY_TOKEN>
+### Histórico de desempenho - Emmy exclui o histórico consolidado do treino (204)
+DELETE http://localhost:8080/api/performance/history/{{emmyHistorico}}
+Authorization: Bearer {{emmyToken}}
 
-### Histórico de desempenho - Confirmar exclusão do histórico de Emmy (404)
-GET http://localhost:8080/api/performance/history/2
-Authorization: Bearer <EMMY_TOKEN>
+### Conteúdo - Ada exclui o material Algoritmos: Definição, Correção e Eficiência (204)
+DELETE http://localhost:8080/api/contents/{{adaConteudoAlgoritmos}}
+Authorization: Bearer {{adaToken}}
 
-### Conteúdo - Excluir Algoritmos Matemáticos e Números de Bernoulli de Ada (204)
-DELETE http://localhost:8080/api/contents/1
-Authorization: Bearer <ADA_TOKEN>
+### Anotação - Confirmar exclusão em cascata da anotação associada ao conteúdo de Ada (404)
+GET http://localhost:8080/api/notes/{{adaNotaConteudo}}
+Authorization: Bearer {{adaToken}}
 
-### Documento - Ada exclui documento importado e conteúdo associado (204)
-DELETE http://localhost:8080/api/documents/1
-Authorization: Bearer <ADA_TOKEN>
+### Documento - Ada exclui o documento importado sobre algoritmos (204)
+DELETE http://localhost:8080/api/documents/{{adaDocumento}}
+Authorization: Bearer {{adaToken}}
 
-### Documento - Confirmar exclusão do conteúdo associado (404)
-GET http://localhost:8080/api/contents/1
-Authorization: Bearer <ADA_TOKEN>
+### Conteúdo - Emmy exclui o material Estruturas de Anéis (204)
+DELETE http://localhost:8080/api/contents/{{emmyConteudoAneis}}
+Authorization: Bearer {{emmyToken}}
 
-### Anotação - Confirmar exclusão em cascata da anotação do conteúdo de Ada (404)
-GET http://localhost:8080/api/notes/5
-Authorization: Bearer <ADA_TOKEN>
-
-### Conteúdo - Excluir Introdução à Teoria dos Anéis de Emmy (204)
-DELETE http://localhost:8080/api/contents/2
-Authorization: Bearer <EMMY_TOKEN>
-
-### Tópico - Excluir Algoritmos Matemáticos (204)
-DELETE http://localhost:8080/api/topics/1
-Authorization: Bearer <ADA_TOKEN>
+### Tópico - Ada exclui Fundamentos de Algoritmos (204)
+DELETE http://localhost:8080/api/topics/{{adaAlgoritmos}}
+Authorization: Bearer {{adaToken}}
 
 ### Anotação - Confirmar exclusão em cascata da anotação do tópico de Ada (404)
-GET http://localhost:8080/api/notes/3
-Authorization: Bearer <ADA_TOKEN>
+GET http://localhost:8080/api/notes/{{adaNotaTopico}}
+Authorization: Bearer {{adaToken}}
 
-### Tópico - Excluir Teoria dos Anéis (204)
-DELETE http://localhost:8080/api/topics/2
-Authorization: Bearer <EMMY_TOKEN>
+### Tópico - Emmy exclui Teoria dos Anéis (204)
+DELETE http://localhost:8080/api/topics/{{emmyAneis}}
+Authorization: Bearer {{emmyToken}}
 
-### Tópico - Excluir Sequências Numéricas (204)
-DELETE http://localhost:8080/api/topics/3
-Authorization: Bearer <ADA_TOKEN>
+### Tópico - Emmy exclui Ideais de Anéis (204)
+DELETE http://localhost:8080/api/topics/{{emmyIdeais}}
+Authorization: Bearer {{emmyToken}}
 
-### Tópico - Excluir Máquina Analítica (204)
-DELETE http://localhost:8080/api/topics/4
-Authorization: Bearer <ADA_TOKEN>
+### Tópico - Ada exclui Máquina Analítica (204)
+DELETE http://localhost:8080/api/topics/{{adaMaquina}}
+Authorization: Bearer {{adaToken}}
 
-### Conteúdo - Confirmar exclusão em cascata de Fundamentos da Máquina Analítica (404)
-GET http://localhost:8080/api/contents/3
-Authorization: Bearer <ADA_TOKEN>
+### Tópico - Ada exclui Sequências Numéricas (204)
+DELETE http://localhost:8080/api/topics/{{adaSequencias}}
+Authorization: Bearer {{adaToken}}
 
-### Matéria - Excluir Matemática de Ada (204)
-DELETE http://localhost:8080/api/subjects/1
-Authorization: Bearer <ADA_TOKEN>
+### Conteúdo - Confirmar exclusão em cascata do material sobre Máquina Analítica (404)
+GET http://localhost:8080/api/contents/{{adaConteudoMaquina}}
+Authorization: Bearer {{adaToken}}
 
-### Anotação - Confirmar exclusão em cascata da anotação da matéria de Ada (404)
-GET http://localhost:8080/api/notes/1
-Authorization: Bearer <ADA_TOKEN>
+### Matéria - Ada exclui Fundamentos da Computação (204)
+DELETE http://localhost:8080/api/subjects/{{adaComputacao}}
+Authorization: Bearer {{adaToken}}
 
-### Matéria - Excluir Álgebra Abstrata de Emmy (204)
-DELETE http://localhost:8080/api/subjects/2
-Authorization: Bearer <EMMY_TOKEN>
+### Matéria - Emmy exclui Álgebra Abstrata (204)
+DELETE http://localhost:8080/api/subjects/{{emmyAlgebra}}
+Authorization: Bearer {{emmyToken}}
 
-### Matéria - Excluir Lógica de Ada (204)
-DELETE http://localhost:8080/api/subjects/3
-Authorization: Bearer <ADA_TOKEN>
+### Matéria - Ada exclui Matemática (204)
+DELETE http://localhost:8080/api/subjects/{{adaMatematica}}
+Authorization: Bearer {{adaToken}}
 
-### Matéria - Excluir Fundamentos da Computação de Ada (204)
-DELETE http://localhost:8080/api/subjects/4
-Authorization: Bearer <ADA_TOKEN>
+### Matéria - Emmy exclui Teoria dos Números (204)
+DELETE http://localhost:8080/api/subjects/{{emmyNumeros}}
+Authorization: Bearer {{emmyToken}}
 
-### Usuário - Excluir Ada Lovelace (204)
+### Anotação - Confirmar exclusão em cascata da anotação de Fundamentos da Computação (404)
+GET http://localhost:8080/api/notes/{{adaNotaMateria}}
+Authorization: Bearer {{adaToken}}
+
+### Usuário - Ada exclui sua conta (204)
 DELETE http://localhost:8080/api/users/me
-Authorization: Bearer <ADA_TOKEN>
+Authorization: Bearer {{adaToken}}
 
-### Usuário - Confirmar exclusão de Ada Lovelace (401)
+### Autenticação - Confirmar que a conta excluída de Ada não é mais acessível (401)
 GET http://localhost:8080/api/users/me
-Authorization: Bearer <ADA_TOKEN>
+Authorization: Bearer {{adaToken}}
 
-### Usuário - Excluir Emmy Noether (204)
+### Usuário - Emmy exclui sua conta (204)
 DELETE http://localhost:8080/api/users/me
-Authorization: Bearer <EMMY_TOKEN>
+Authorization: Bearer {{emmyToken}}
 
-### Usuário - Confirmar exclusão de Emmy Noether (401)
+### Autenticação - Confirmar que a conta excluída de Emmy não é mais acessível (401)
 GET http://localhost:8080/api/users/me
-Authorization: Bearer <EMMY_TOKEN>
+Authorization: Bearer {{emmyToken}}

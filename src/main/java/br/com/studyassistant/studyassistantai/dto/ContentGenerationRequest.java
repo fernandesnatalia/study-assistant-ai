@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 public record ContentGenerationRequest(
         @NotNull Long topicId,
         @NotBlank String request,
-        String context
+        String context,
+        SemanticSearchRequest semanticSearch
 ) {
 }

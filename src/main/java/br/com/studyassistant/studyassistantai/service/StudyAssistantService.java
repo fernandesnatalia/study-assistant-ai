@@ -1,19 +1,32 @@
 package br.com.studyassistant.studyassistantai.service;
 
+import br.com.studyassistant.studyassistantai.dto.RagContext;
+import br.com.studyassistant.studyassistantai.dto.SemanticSearchRequest;
 import br.com.studyassistant.studyassistantai.dto.StudyAssistantRequest;
 import br.com.studyassistant.studyassistantai.dto.StudyAssistantResponse;
+import br.com.studyassistant.studyassistantai.enums.PromptPurpose;
+import br.com.studyassistant.studyassistantai.model.SourceSelectionMode;
+import br.com.studyassistant.studyassistantai.prompt.RagPromptBuilder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class StudyAssistantService {
 
     private final GenerativeService generativeService;
+    private final RagContextService ragContextService;
+    private final RagPromptBuilder ragPromptBuilder;
 
-    public StudyAssistantService(GenerativeService generativeService) {
+    public StudyAssistantService(
+            GenerativeService generativeService,
+            RagContextService ragContextService,
+            RagPromptBuilder ragPromptBuilder
+    ) {
         this.generativeService = generativeService;
+        this.ragContextService = ragContextService;
+        this.ragPromptBuilder = ragPromptBuilder;
     }
 
-    public StudyAssistantResponse ask(StudyAssistantRequest request) {
+    public StudyAssistantResponse ask(Long userId, StudyAssistantRequest request) {
         String systemPrompt = """
                 Você é um assistente de estudos multidisciplinar.
                 Regras:
@@ -30,19 +43,32 @@ public class StudyAssistantService {
                 ? "Nenhum contexto adicional fornecido."
                 : request.context();
 
-        String userPrompt = """
-                Solicitação:
-                %s
+        SourceSelectionMode mode = ragPromptBuilder.resolveMode(request.selectionMode());
 
-                Contexto fornecido pelo usuário:
-                %s
-                """.formatted(
+        SemanticSearchRequest semanticSearch = new SemanticSearchRequest(
                 request.request(),
-                context
+                request.subjectsIds(),
+                request.topicsIds(),
+                request.contentsIds(),
+                mode,
+                request.topK(),
+                request.similarityThreshold()
         );
 
-        String response = generativeService.generate(systemPrompt, userPrompt); // v1
+        RagContext ragContext = ragContextService.build(userId, semanticSearch);
 
-        return new StudyAssistantResponse(response);
+        String userPrompt = """
+        Solicitação:
+        %s
+
+        Contexto fornecido pelo usuário:
+        %s
+        """.formatted(request.request(), context);
+
+        userPrompt += ragPromptBuilder.build(ragContext, mode, PromptPurpose.STUDY_ASSISTANT);
+
+        String response = generativeService.generate(systemPrompt, userPrompt);
+
+        return new StudyAssistantResponse(response, ragContext.sources());
     }
 }

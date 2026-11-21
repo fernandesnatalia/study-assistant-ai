@@ -3,6 +3,7 @@ package br.com.studyassistant.studyassistantai.service;
 import br.com.studyassistant.studyassistantai.dto.DeckAiCreateRequest;
 import br.com.studyassistant.studyassistantai.dto.DeckCreateRequest;
 import br.com.studyassistant.studyassistantai.dto.GeneratedFlashcard;
+import br.com.studyassistant.studyassistantai.model.SourceSelectionMode;
 import br.com.studyassistant.studyassistantai.model.Deck;
 import br.com.studyassistant.studyassistantai.model.Flashcard;
 import br.com.studyassistant.studyassistantai.model.User;
@@ -21,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -127,7 +129,15 @@ class DeckServiceTest {
 
     @Test
     void shouldCreateDeckWithGeneratedFlashcards() {
-        DeckAiCreateRequest request = new DeckAiCreateRequest("Sequências Numéricas", DeckMode.STUDY, 2);
+        DeckAiCreateRequest request = new DeckAiCreateRequest(
+                "Sequências Numéricas",
+                DeckMode.STUDY,
+                2,
+                Set.of(),
+                Set.of(),
+                Set.of(),
+                SourceSelectionMode.PREFERRED
+        );
 
         List<GeneratedFlashcard> generatedFlashcards = List.of(
                 new GeneratedFlashcard(
@@ -192,13 +202,18 @@ class DeckServiceTest {
 
     @Test
     void shouldCreateTrainingDeckWithAi() {
-        DeckAiCreateRequest request = new DeckAiCreateRequest("Algoritmos", DeckMode.TRAINING, 1);
+        DeckAiCreateRequest request = new DeckAiCreateRequest(
+                "Algoritmos",
+                DeckMode.TRAINING,
+                1,
+                Set.of(),
+                Set.of(),
+                Set.of(),
+                SourceSelectionMode.PREFERRED
+        );
 
         List<GeneratedFlashcard> generatedFlashcards = List.of(
-                new GeneratedFlashcard(
-                        "O que é um algoritmo?",
-                        "Uma sequência finita de instruções."
-                )
+                new GeneratedFlashcard("O que é um algoritmo?", "Uma sequência finita de instruções.")
         );
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
@@ -217,9 +232,12 @@ class DeckServiceTest {
 
     @Test
     void shouldNotCreateDeckWhenAiGenerationFails() {
-        DeckAiCreateRequest request = new DeckAiCreateRequest("Sequências Numéricas", DeckMode.STUDY, 2);
+        DeckAiCreateRequest request = new DeckAiCreateRequest(
+                "Sequências Numéricas", DeckMode.STUDY, 2, Set.of(), Set.of(), Set.of(), SourceSelectionMode.PREFERRED
+        );
 
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userRepository.findById(1L))
+                .thenReturn(Optional.of(user));
         when(flashcardAiService.generateFlashcards("Sequências Numéricas", 2, ""))
                 .thenThrow(new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI returned an invalid flashcard format"));
 

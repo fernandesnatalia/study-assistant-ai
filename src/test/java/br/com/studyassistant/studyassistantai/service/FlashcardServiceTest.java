@@ -1,12 +1,10 @@
 package br.com.studyassistant.studyassistantai.service;
 
 import br.com.studyassistant.studyassistantai.dto.GeneratedFlashcard;
-import br.com.studyassistant.studyassistantai.model.Content;
-import br.com.studyassistant.studyassistantai.model.Deck;
-import br.com.studyassistant.studyassistantai.model.Flashcard;
-import br.com.studyassistant.studyassistantai.model.Topic;
-import br.com.studyassistant.studyassistantai.model.DeckMode;
-import br.com.studyassistant.studyassistantai.model.User;
+import br.com.studyassistant.studyassistantai.dto.GeneratedFlashcardsResponse;
+import br.com.studyassistant.studyassistantai.dto.RagContext;
+import br.com.studyassistant.studyassistantai.dto.SemanticSearchRequest;
+import br.com.studyassistant.studyassistantai.model.*;
 import br.com.studyassistant.studyassistantai.repository.ContentRepository;
 import br.com.studyassistant.studyassistantai.repository.DeckRepository;
 import br.com.studyassistant.studyassistantai.repository.FlashcardRepository;
@@ -47,6 +45,9 @@ class FlashcardServiceTest {
 
     @Mock
     private FlashcardAiService flashcardAiService;
+
+    @Mock
+    private RagContextService ragContextService;
 
     @InjectMocks
     private FlashcardService flashcardService;
@@ -169,21 +170,24 @@ class FlashcardServiceTest {
         savedFlashcard.setAnswer(generatedFlashcard.answer());
         savedFlashcard.setDeck(deck);
 
-        when(deckRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(deck));
-        when(flashcardAiService.generateFlashcards("Algoritmos", 1, ""))
+        when(deckRepository.findByIdAndUserId(1L, 1L))
+                .thenReturn(Optional.of(deck));
+        when(flashcardAiService.generateFlashcards("Algoritmos", 1, "", null, null))
                 .thenReturn(List.of(generatedFlashcard));
-        when(flashcardRepository.saveAll(any())).thenReturn(List.of(savedFlashcard));
+        when(flashcardRepository.saveAll(any()))
+                .thenReturn(List.of(savedFlashcard));
 
-        List<Flashcard> result = flashcardService.generateFlashcards(
-                1L, 1L, 1, null, null, null
-        );
+        GeneratedFlashcardsResponse response = flashcardService.generateFlashcards(1L, 1L, 1, null, null, null, null);
+
+        List<Flashcard> result = response.flashcards();
 
         assertEquals(1, result.size());
         assertEquals(generatedFlashcard.question(), result.get(0).getQuestion());
         assertEquals(generatedFlashcard.answer(), result.get(0).getAnswer());
+        assertEquals(List.of(), response.sources());
         assertSame(deck, result.get(0).getDeck());
 
-        verify(flashcardAiService).generateFlashcards("Algoritmos", 1, "");
+        verify(flashcardAiService).generateFlashcards("Algoritmos", 1, "", null, null);
         verify(flashcardRepository).saveAll(any());
     }
 
@@ -205,18 +209,19 @@ class FlashcardServiceTest {
                 "É uma sequência finita de instruções para resolver um problema."
         );
 
-        when(deckRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(deck));
-        when(contentRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(content));
-        when(flashcardAiService.generateFlashcards("Algoritmos", 1, expectedContext))
+        when(deckRepository.findByIdAndUserId(1L, 1L))
+                .thenReturn(Optional.of(deck));
+        when(contentRepository.findByIdAndUserId(1L, 1L))
+                .thenReturn(Optional.of(content));
+        when(flashcardAiService.generateFlashcards("Algoritmos", 1, expectedContext, null, null))
                 .thenReturn(List.of(generatedFlashcard));
-        when(flashcardRepository.saveAll(any())).thenReturn(List.of(flashcard));
+        when(flashcardRepository.saveAll(any()))
+                .thenReturn(List.of(flashcard));
 
-        flashcardService.generateFlashcards(
-                1L, 1L, 1, 1L, null, null
-        );
+        flashcardService.generateFlashcards(1L, 1L, 1, 1L, null, null, null);
 
         verify(contentRepository).findByIdAndUserId(1L, 1L);
-        verify(flashcardAiService).generateFlashcards("Algoritmos", 1, expectedContext);
+        verify(flashcardAiService).generateFlashcards("Algoritmos", 1, expectedContext, null, null);
         verify(flashcardRepository).saveAll(any());
     }
 
@@ -236,18 +241,19 @@ class FlashcardServiceTest {
                 "É uma sequência finita de instruções para resolver um problema."
         );
 
-        when(deckRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(deck));
-        when(topicRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(topic));
-        when(flashcardAiService.generateFlashcards("Algoritmos", 1, expectedContext))
+        when(deckRepository.findByIdAndUserId(1L, 1L))
+                .thenReturn(Optional.of(deck));
+        when(topicRepository.findByIdAndUserId(1L, 1L))
+                .thenReturn(Optional.of(topic));
+        when(flashcardAiService.generateFlashcards("Algoritmos", 1, expectedContext, null, null))
                 .thenReturn(List.of(generatedFlashcard));
-        when(flashcardRepository.saveAll(any())).thenReturn(List.of(flashcard));
+        when(flashcardRepository.saveAll(any()))
+                .thenReturn(List.of(flashcard));
 
-        flashcardService.generateFlashcards(
-                1L, 1L, 1, null, 1L, null
-        );
+        flashcardService.generateFlashcards(1L, 1L, 1, null, 1L, null, null);
 
         verify(topicRepository).findByIdAndUserId(1L, 1L);
-        verify(flashcardAiService).generateFlashcards("Algoritmos", 1, expectedContext);
+        verify(flashcardAiService).generateFlashcards("Algoritmos", 1, expectedContext, null, null);
         verify(flashcardRepository).saveAll(any());
     }
 
@@ -265,16 +271,55 @@ class FlashcardServiceTest {
                 "Por meio de sequências definidas de instruções e operações."
         );
 
-        when(deckRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(deck));
-        when(flashcardAiService.generateFlashcards("Algoritmos", 1, expectedContext))
+        when(deckRepository.findByIdAndUserId(1L, 1L))
+                .thenReturn(Optional.of(deck));
+        when(flashcardAiService.generateFlashcards("Algoritmos", 1, expectedContext, null, null))
                 .thenReturn(List.of(generatedFlashcard));
-        when(flashcardRepository.saveAll(any())).thenReturn(List.of(flashcard));
+        when(flashcardRepository.saveAll(any()))
+                .thenReturn(List.of(flashcard));
 
-        flashcardService.generateFlashcards(
-                1L, 1L, 1, null, null, context
+        flashcardService.generateFlashcards(1L, 1L, 1, null, null, context, null);
+
+        verify(flashcardAiService).generateFlashcards("Algoritmos", 1, expectedContext, null, null);
+        verify(flashcardRepository).saveAll(any());
+    }
+
+    @Test
+    void shouldGenerateFlashcardsWithRagContext() {
+        SemanticSearchRequest search = new SemanticSearchRequest(
+                "Algoritmos", null, null, null, SourceSelectionMode.PREFERRED, 5, 0.7
         );
 
-        verify(flashcardAiService).generateFlashcards("Algoritmos", 1, expectedContext);
+        RagContext ragContext = new RagContext(
+                "Fonte 1\nUm algoritmo é uma sequência finita de instruções.", List.of()
+        );
+
+        GeneratedFlashcard generatedFlashcard = new GeneratedFlashcard(
+                "O que é um algoritmo?",
+                "Uma sequência finita de instruções."
+        );
+
+        when(deckRepository.findByIdAndUserId(1L, 1L))
+                .thenReturn(Optional.of(deck));
+        when(ragContextService.build(1L, search))
+                .thenReturn(ragContext);
+        when(flashcardAiService.generateFlashcards("Algoritmos", 1, "", ragContext, SourceSelectionMode.PREFERRED))
+                .thenReturn(List.of(generatedFlashcard));
+        when(flashcardRepository.saveAll(any()))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        GeneratedFlashcardsResponse response = flashcardService.generateFlashcards(1L, 1L, 1, null, null, null, search);
+
+        List<Flashcard> result = response.flashcards();
+
+        assertEquals(1, result.size());
+        assertEquals(generatedFlashcard.question(), result.get(0).getQuestion());
+        assertEquals(generatedFlashcard.answer(), result.get(0).getAnswer());
+        assertEquals(ragContext.sources(), response.sources());
+        assertSame(deck, result.get(0).getDeck());
+
+        verify(ragContextService).build(1L, search);
+        verify(flashcardAiService).generateFlashcards("Algoritmos", 1, "", ragContext, SourceSelectionMode.PREFERRED);
         verify(flashcardRepository).saveAll(any());
     }
 
@@ -285,9 +330,7 @@ class FlashcardServiceTest {
 
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class,
-                () -> flashcardService.generateFlashcards(
-                        1L, 1L, 1, 2L, null, null
-                )
+                () -> flashcardService.generateFlashcards(1L, 1L, 1, 2L, null, null, null)
         );
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
@@ -304,14 +347,37 @@ class FlashcardServiceTest {
 
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class,
-                () -> flashcardService.generateFlashcards(
-                        1L, 1L, 1, null, 2L, null
-                )
+                () -> flashcardService.generateFlashcards(1L, 1L, 1, null, 2L, null, null)
         );
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
 
         verify(topicRepository).findByIdAndUserId(2L, 1L);
+        verifyNoInteractions(flashcardAiService);
+        verify(flashcardRepository, never()).saveAll(any());
+    }
+
+    @Test
+    void shouldNotGenerateFlashcardsWithoutExclusiveSources() {
+        SemanticSearchRequest search = new SemanticSearchRequest(
+                "Algoritmos", null, null, null, SourceSelectionMode.EXCLUSIVE, 5, 0.7
+        );
+
+        when(deckRepository.findByIdAndUserId(1L, 1L))
+                .thenReturn(Optional.of(deck));
+        when(ragContextService.build(1L, search))
+                .thenThrow(new ResponseStatusException(
+                        HttpStatus.UNPROCESSABLE_CONTENT, "Insufficient sources for exclusive generation")
+                );
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> flashcardService.generateFlashcards(1L, 1L, 1, null, null, null, search)
+        );
+
+        assertEquals(HttpStatus.UNPROCESSABLE_CONTENT, exception.getStatusCode());
+
+        verify(ragContextService).build(1L, search);
         verifyNoInteractions(flashcardAiService);
         verify(flashcardRepository, never()).saveAll(any());
     }
@@ -365,9 +431,7 @@ class FlashcardServiceTest {
     void shouldUpdateOwnedFlashcard() {
         Flashcard updatedFlashcard = new Flashcard();
         updatedFlashcard.setQuestion("O que caracteriza uma sequência numérica?");
-        updatedFlashcard.setAnswer(
-                "É uma lista ordenada de números cujos termos são determinados por uma regra de formação."
-        );
+        updatedFlashcard.setAnswer("É uma lista ordenada de números cujos termos são determinados por uma regra de formação.");
 
         when(flashcardRepository.findByIdAndDeckUserId(1L, 1L)).thenReturn(Optional.of(flashcard));
         when(flashcardRepository.save(flashcard)).thenReturn(flashcard);

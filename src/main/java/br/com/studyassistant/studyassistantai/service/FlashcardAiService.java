@@ -1,19 +1,30 @@
 package br.com.studyassistant.studyassistantai.service;
 
 import br.com.studyassistant.studyassistantai.dto.GeneratedFlashcard;
+import br.com.studyassistant.studyassistantai.dto.RagContext;
+import br.com.studyassistant.studyassistantai.enums.PromptPurpose;
+import br.com.studyassistant.studyassistantai.model.SourceSelectionMode;
+import br.com.studyassistant.studyassistantai.prompt.RagPromptBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class FlashcardAiService {
 
     private final GenerativeService generativeService;
+    private final RagPromptBuilder ragPromptBuilder;
 
-    public FlashcardAiService(GenerativeService generativeService) {
+    public FlashcardAiService(
+            GenerativeService generativeService,
+            RagPromptBuilder ragPromptBuilder
+    ) {
         this.generativeService = generativeService;
+        this.ragPromptBuilder = ragPromptBuilder;
     }
 
     public String generateAnswer(String question, String theme) {
@@ -45,26 +56,36 @@ public class FlashcardAiService {
             int quantity,
             String generationContext
     ) {
-        String systemPrompt = """
-                Você é um assistente de estudos multidisciplinar que gera flashcards.
-                Regras:
-                1. Gere exatamente a quantidade solicitada de flashcards.
-                2. Todos os flashcards devem pertencer ao tema informado.
-                3. O tema do baralho define o escopo conceitual principal da geração.
-                4. Quando houver contexto adicional, utilize-o para orientar ou delimitar a geração\s
-                sem substituir o tema do baralho.
-                5. Cada flashcard deve conter uma pergunta clara e uma resposta conceitualmente correta.
-                6. As perguntas devem abordar conhecimentos relevantes para estudo e revisão.
-                7. As respostas devem ser curtas, objetivas e suficientes para responder à pergunta.
-                8. Não repita perguntas.
-                9. Responda em português brasileiro.
-                10. Não inclua introduções, explicações adicionais ou blocos Markdown.
-                11. Retorne cada flashcard exatamente no formato:
+        return generateFlashcards(theme, quantity, generationContext, null, null);
+    }
 
-                PERGUNTA: <pergunta>
-                RESPOSTA: <resposta>
-                ---
-               \s""";
+    public List<GeneratedFlashcard> generateFlashcards(
+            String theme,
+            int quantity,
+            String generationContext,
+            RagContext ragContext,
+            SourceSelectionMode selectionMode
+    ) {
+        String systemPrompt = """
+            Você é um assistente de estudos multidisciplinar que gera flashcards.
+            Regras:
+            1. Gere exatamente a quantidade solicitada de flashcards.
+            2. Todos os flashcards devem pertencer ao tema informado.
+            3. O tema do baralho define o escopo conceitual principal da geração.
+            4. Quando houver contexto adicional, utilize-o para orientar ou delimitar a geração
+            sem substituir o tema do baralho.
+            5. Cada flashcard deve conter uma pergunta clara e uma resposta conceitualmente correta.
+            6. As perguntas devem abordar conhecimentos relevantes para estudo e revisão.
+            7. As respostas devem ser curtas, objetivas e suficientes para responder à pergunta.
+            8. Não repita perguntas.
+            9. Responda em português brasileiro.
+            10. Não inclua introduções, explicações adicionais ou blocos Markdown.
+            11. Retorne cada flashcard exatamente no formato:
+
+            PERGUNTA: <pergunta>
+            RESPOSTA: <resposta>
+            ---
+            """;
 
         String context = generationContext == null || generationContext.isBlank()
                 ? "Nenhum contexto adicional fornecido."
@@ -79,11 +100,11 @@ public class FlashcardAiService {
 
                 Contexto adicional:
                 %s
-                """.formatted(
-                theme,
-                quantity,
-                context
-        );
+                """.formatted(theme, quantity, context);
+
+        if (ragContext != null) {
+            userPrompt += ragPromptBuilder.build(ragContext, selectionMode, PromptPurpose.FLASHCARD);
+        }
 
         String generatedContent = generativeService.generate(systemPrompt, userPrompt);
 
@@ -94,30 +115,26 @@ public class FlashcardAiService {
             String generatedContent,
             int expectedQuantity
     ) {
-        String[] blocks = generatedContent.split("---");
+        if (generatedContent == null || generatedContent.isBlank()) {
+            throw invalidAiResponse();
+        }
+
+        String normalizedContent = generatedContent
+                .replace("\r\n", "\n")
+                .replace('\r', '\n');
+
+        Pattern pattern = Pattern.compile(
+                "(?m)^\\s*PERGUNTA:\\s*(.*?)\\s*\\n" +
+                        "\\s*RESPOSTA:\\s*([\\s\\S]*?)" +
+                        "(?=^\\s*(?:---|PERGUNTA:)|\\z)"
+        );
+
+        Matcher matcher = pattern.matcher(normalizedContent);
         List<GeneratedFlashcard> flashcards = new ArrayList<>();
 
-        for (String block : blocks) {
-            String trimmedBlock = block.trim();
-
-            if (trimmedBlock.isBlank()) {
-                continue;
-            }
-
-            int questionIndex = trimmedBlock.indexOf("PERGUNTA:");
-            int answerIndex = trimmedBlock.indexOf("RESPOSTA:");
-
-            if (questionIndex == -1 || answerIndex == -1 || answerIndex <= questionIndex) {
-                throw invalidAiResponse();
-            }
-
-            String question = trimmedBlock
-                    .substring(questionIndex + "PERGUNTA:".length(), answerIndex)
-                    .trim();
-
-            String answer = trimmedBlock
-                    .substring(answerIndex + "RESPOSTA:".length())
-                    .trim();
+        while (matcher.find()) {
+            String question = matcher.group(1).trim();
+            String answer = matcher.group(2).trim();
 
             if (question.isBlank() || answer.isBlank()) {
                 throw invalidAiResponse();
