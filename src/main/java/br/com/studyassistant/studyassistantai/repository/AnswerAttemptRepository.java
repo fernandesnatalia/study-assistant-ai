@@ -1,7 +1,7 @@
 package br.com.studyassistant.studyassistantai.repository;
 
 import br.com.studyassistant.studyassistantai.model.AnswerAttempt;
-import br.com.studyassistant.studyassistantai.model.DeckMode;
+import br.com.studyassistant.studyassistantai.enums.DeckMode;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 

@@ -1,6 +1,6 @@
 package br.com.studyassistant.studyassistantai.dto;
 
-import br.com.studyassistant.studyassistantai.model.AnswerAttemptResult;
+import br.com.studyassistant.studyassistantai.enums.AnswerAttemptResult;
 import java.time.LocalDateTime;
 
 public record AnswerAttemptResponse(

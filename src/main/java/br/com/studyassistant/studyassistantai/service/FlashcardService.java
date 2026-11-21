@@ -8,7 +8,7 @@ import br.com.studyassistant.studyassistantai.model.Content;
 import br.com.studyassistant.studyassistantai.model.Deck;
 import br.com.studyassistant.studyassistantai.model.Flashcard;
 import br.com.studyassistant.studyassistantai.model.Topic;
-import br.com.studyassistant.studyassistantai.model.DeckMode;
+import br.com.studyassistant.studyassistantai.enums.DeckMode;
 import br.com.studyassistant.studyassistantai.repository.ContentRepository;
 import br.com.studyassistant.studyassistantai.repository.DeckRepository;
 import br.com.studyassistant.studyassistantai.repository.FlashcardRepository;

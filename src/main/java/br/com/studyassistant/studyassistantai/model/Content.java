@@ -1,5 +1,6 @@
 package br.com.studyassistant.studyassistantai.model;
 
+import br.com.studyassistant.studyassistantai.enums.ContentOrigin;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;

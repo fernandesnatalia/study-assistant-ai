@@ -5,7 +5,7 @@ import br.com.studyassistant.studyassistantai.dto.GeneratedContentResponse;
 import br.com.studyassistant.studyassistantai.dto.RagContext;
 import br.com.studyassistant.studyassistantai.dto.RetrievedSource;
 import br.com.studyassistant.studyassistantai.dto.SemanticSearchRequest;
-import br.com.studyassistant.studyassistantai.model.SourceSelectionMode;
+import br.com.studyassistant.studyassistantai.enums.SourceSelectionMode;
 import br.com.studyassistant.studyassistantai.model.Topic;
 import br.com.studyassistant.studyassistantai.prompt.RagPromptBuilder;
 import br.com.studyassistant.studyassistantai.repository.TopicRepository;

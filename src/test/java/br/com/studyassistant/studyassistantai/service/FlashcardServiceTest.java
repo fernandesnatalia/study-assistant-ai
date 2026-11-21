@@ -4,6 +4,8 @@ import br.com.studyassistant.studyassistantai.dto.GeneratedFlashcard;
 import br.com.studyassistant.studyassistantai.dto.GeneratedFlashcardsResponse;
 import br.com.studyassistant.studyassistantai.dto.RagContext;
 import br.com.studyassistant.studyassistantai.dto.SemanticSearchRequest;
+import br.com.studyassistant.studyassistantai.enums.DeckMode;
+import br.com.studyassistant.studyassistantai.enums.SourceSelectionMode;
 import br.com.studyassistant.studyassistantai.model.*;
 import br.com.studyassistant.studyassistantai.repository.ContentRepository;
 import br.com.studyassistant.studyassistantai.repository.DeckRepository;

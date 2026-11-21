@@ -1,6 +1,6 @@
 package br.com.studyassistant.studyassistantai.service;
 
-import br.com.studyassistant.studyassistantai.model.AnswerAttemptResult;
+import br.com.studyassistant.studyassistantai.enums.AnswerAttemptResult;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;

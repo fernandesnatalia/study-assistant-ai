@@ -1,6 +1,6 @@
 package br.com.studyassistant.studyassistantai.dto;
 
-import br.com.studyassistant.studyassistantai.model.SourceSelectionMode;
+import br.com.studyassistant.studyassistantai.enums.SourceSelectionMode;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import java.util.Set;

@@ -1,7 +1,7 @@
 package br.com.studyassistant.studyassistantai.service;
 
 import br.com.studyassistant.studyassistantai.dto.DeckPerformanceHistoryResponse;
-import br.com.studyassistant.studyassistantai.model.DeckMode;
+import br.com.studyassistant.studyassistantai.enums.DeckMode;
 import br.com.studyassistant.studyassistantai.model.DeckPerformanceHistory;
 import br.com.studyassistant.studyassistantai.repository.DeckPerformanceHistoryRepository;
 import br.com.studyassistant.studyassistantai.repository.DeckRepository;

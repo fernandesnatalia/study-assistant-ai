@@ -1,5 +1,6 @@
 package br.com.studyassistant.studyassistantai.model;
 
+import br.com.studyassistant.studyassistantai.enums.DeckMode;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;

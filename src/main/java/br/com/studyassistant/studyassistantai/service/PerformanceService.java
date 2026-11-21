@@ -2,9 +2,9 @@ package br.com.studyassistant.studyassistantai.service;
 
 import br.com.studyassistant.studyassistantai.dto.DeckPerformanceResponse;
 import br.com.studyassistant.studyassistantai.model.AnswerAttempt;
-import br.com.studyassistant.studyassistantai.model.AnswerAttemptResult;
+import br.com.studyassistant.studyassistantai.enums.AnswerAttemptResult;
 import br.com.studyassistant.studyassistantai.model.Deck;
-import br.com.studyassistant.studyassistantai.model.DeckMode;
+import br.com.studyassistant.studyassistantai.enums.DeckMode;
 import br.com.studyassistant.studyassistantai.model.DeckPerformanceHistory;
 import br.com.studyassistant.studyassistantai.repository.AnswerAttemptRepository;
 import br.com.studyassistant.studyassistantai.repository.DeckPerformanceHistoryRepository;

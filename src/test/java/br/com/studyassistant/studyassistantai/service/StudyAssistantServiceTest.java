@@ -4,7 +4,7 @@ import br.com.studyassistant.studyassistantai.dto.RagContext;
 import br.com.studyassistant.studyassistantai.dto.SemanticSearchRequest;
 import br.com.studyassistant.studyassistantai.dto.StudyAssistantRequest;
 import br.com.studyassistant.studyassistantai.dto.StudyAssistantResponse;
-import br.com.studyassistant.studyassistantai.model.SourceSelectionMode;
+import br.com.studyassistant.studyassistantai.enums.SourceSelectionMode;
 import br.com.studyassistant.studyassistantai.prompt.RagPromptBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

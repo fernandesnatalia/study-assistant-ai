@@ -2,7 +2,7 @@ package br.com.studyassistant.studyassistantai.prompt;
 
 import br.com.studyassistant.studyassistantai.dto.RagContext;
 import br.com.studyassistant.studyassistantai.enums.PromptPurpose;
-import br.com.studyassistant.studyassistantai.model.SourceSelectionMode;
+import br.com.studyassistant.studyassistantai.enums.SourceSelectionMode;
 import org.springframework.stereotype.Service;
 
 @Service

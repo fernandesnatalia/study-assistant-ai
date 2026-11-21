@@ -1,7 +1,7 @@
 package br.com.studyassistant.studyassistantai.service;
 
 import br.com.studyassistant.studyassistantai.model.Content;
-import br.com.studyassistant.studyassistantai.model.ContentOrigin;
+import br.com.studyassistant.studyassistantai.enums.ContentOrigin;
 import br.com.studyassistant.studyassistantai.model.Document;
 import br.com.studyassistant.studyassistantai.model.Topic;
 import br.com.studyassistant.studyassistantai.model.User;

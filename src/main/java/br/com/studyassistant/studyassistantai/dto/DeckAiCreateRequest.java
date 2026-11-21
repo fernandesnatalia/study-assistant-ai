@@ -1,7 +1,7 @@
 package br.com.studyassistant.studyassistantai.dto;
 
-import br.com.studyassistant.studyassistantai.model.DeckMode;
-import br.com.studyassistant.studyassistantai.model.SourceSelectionMode;
+import br.com.studyassistant.studyassistantai.enums.DeckMode;
+import br.com.studyassistant.studyassistantai.enums.SourceSelectionMode;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;

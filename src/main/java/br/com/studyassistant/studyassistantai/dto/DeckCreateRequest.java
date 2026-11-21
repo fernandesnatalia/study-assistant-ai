@@ -1,6 +1,6 @@
 package br.com.studyassistant.studyassistantai.dto;
 
-import br.com.studyassistant.studyassistantai.model.DeckMode;
+import br.com.studyassistant.studyassistantai.enums.DeckMode;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 

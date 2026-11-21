@@ -3,7 +3,7 @@ package br.com.studyassistant.studyassistantai.service;
 import br.com.studyassistant.studyassistantai.dto.GeneratedFlashcard;
 import br.com.studyassistant.studyassistantai.dto.RagContext;
 import br.com.studyassistant.studyassistantai.enums.PromptPurpose;
-import br.com.studyassistant.studyassistantai.model.SourceSelectionMode;
+import br.com.studyassistant.studyassistantai.enums.SourceSelectionMode;
 import br.com.studyassistant.studyassistantai.prompt.RagPromptBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;

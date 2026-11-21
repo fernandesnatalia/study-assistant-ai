@@ -1,6 +1,6 @@
 package br.com.studyassistant.studyassistantai.service;
 
-import br.com.studyassistant.studyassistantai.model.AnswerAttemptResult;
+import br.com.studyassistant.studyassistantai.enums.AnswerAttemptResult;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

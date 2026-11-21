@@ -1,5 +1,6 @@
 package br.com.studyassistant.studyassistantai.model;
 
+import br.com.studyassistant.studyassistantai.enums.AnswerAttemptResult;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

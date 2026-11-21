@@ -4,7 +4,7 @@ import br.com.studyassistant.studyassistantai.dto.DeckAiCreateRequest;
 import br.com.studyassistant.studyassistantai.dto.DeckCreateRequest;
 import br.com.studyassistant.studyassistantai.dto.GeneratedFlashcard;
 import br.com.studyassistant.studyassistantai.model.Deck;
-import br.com.studyassistant.studyassistantai.model.DeckMode;
+import br.com.studyassistant.studyassistantai.enums.DeckMode;
 import br.com.studyassistant.studyassistantai.model.Flashcard;
 import br.com.studyassistant.studyassistantai.model.User;
 import br.com.studyassistant.studyassistantai.repository.DeckRepository;
