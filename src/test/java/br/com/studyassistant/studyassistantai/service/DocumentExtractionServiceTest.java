@@ -6,18 +6,24 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import java.nio.charset.StandardCharsets;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mock;
 import java.io.IOException;
 import java.io.InputStream;
 
 class DocumentExtractionServiceTest {
 
     private final DocumentExtractionService documentExtractionService = new DocumentExtractionService();
+    private static final String FILENAME_TXT = "material.txt";
+    private static final String CONTENT_TYPE = "text/plain";
 
     @Test
     void shouldExtractTextFromTxtFile() {
-        MockMultipartFile file = createFile("material.txt", "text/plain", "Conteúdo de estudo sobre álgebra.");
+        MockMultipartFile file = createFile(FILENAME_TXT, CONTENT_TYPE, "Conteúdo de estudo sobre álgebra.");
 
         String result = documentExtractionService.extractText(file);
 
@@ -27,7 +33,7 @@ class DocumentExtractionServiceTest {
     @Test
     void shouldNormalizeExtractedText() {
         MockMultipartFile file = createFile(
-                "material.txt", "text/plain", "  Primeiro   parágrafo.\r\n\r\n\r\nSegundo\t parágrafo.  "
+                FILENAME_TXT, CONTENT_TYPE, "  Primeiro   parágrafo.\r\n\r\n\r\nSegundo\t parágrafo.  "
         );
 
         String result = documentExtractionService.extractText(file);
@@ -56,7 +62,7 @@ class DocumentExtractionServiceTest {
     void shouldRejectTextExceedingExtractionLimit() {
         String content = "A".repeat(500_001);
 
-        MockMultipartFile file = createFile("material.txt", "text/plain", content);
+        MockMultipartFile file = createFile(FILENAME_TXT, CONTENT_TYPE, content);
 
         assertBadRequest(file);
     }
@@ -72,7 +78,7 @@ class DocumentExtractionServiceTest {
 
     @Test
     void shouldRejectEmptyFile() {
-        MockMultipartFile file = createFile("material.txt", "text/plain", "");
+        MockMultipartFile file = createFile(FILENAME_TXT, CONTENT_TYPE, "");
 
         assertBadRequest(file);
     }
@@ -90,7 +96,7 @@ class DocumentExtractionServiceTest {
 
     @Test
     void shouldRejectMissingFilename() {
-        MockMultipartFile file = createFile("", "text/plain", "Conteúdo de estudo");
+        MockMultipartFile file = createFile("", CONTENT_TYPE, "Conteúdo de estudo");
 
         assertBadRequest(file);
     }
@@ -116,7 +122,7 @@ class DocumentExtractionServiceTest {
 
     @Test
     void shouldRejectTextWithoutExtractableContent() {
-        MockMultipartFile file = createFile("material.txt", "text/plain", "   \n\t   ");
+        MockMultipartFile file = createFile(FILENAME_TXT, CONTENT_TYPE, "   \n\t   ");
 
         assertBadRequest(file);
     }

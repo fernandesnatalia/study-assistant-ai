@@ -157,5 +157,4 @@ class PerformanceServiceTest {
         verify(deckPerformanceHistoryRepository).save(any(DeckPerformanceHistory.class));
         verify(answerAttemptRepository).deleteByFlashcardDeckId(1L);
     }
-
 }

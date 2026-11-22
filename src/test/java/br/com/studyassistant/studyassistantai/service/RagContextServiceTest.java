@@ -11,19 +11,22 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Set;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 class RagContextServiceTest {
 
     private SemanticRetrievalService semanticRetrievalService;
     private RagContextService ragService;
-    private RagPromptBuilder ragPromptBuilder;
 
     @BeforeEach
     void setUp() {
         semanticRetrievalService = mock(SemanticRetrievalService.class);
-        ragPromptBuilder = new RagPromptBuilder();
+        RagPromptBuilder ragPromptBuilder = new RagPromptBuilder();
         ragService = new RagContextService(semanticRetrievalService, ragPromptBuilder);
     }
 

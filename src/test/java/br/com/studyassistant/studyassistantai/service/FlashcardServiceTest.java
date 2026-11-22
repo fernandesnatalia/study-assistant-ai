@@ -21,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Optional;
+import static br.com.studyassistant.studyassistantai.constants.ErrorMessages.INSUFFICIENT_SOURCES;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -368,9 +369,7 @@ class FlashcardServiceTest {
         when(deckRepository.findByIdAndUserId(1L, 1L))
                 .thenReturn(Optional.of(deck));
         when(ragContextService.build(1L, search))
-                .thenThrow(new ResponseStatusException(
-                        HttpStatus.UNPROCESSABLE_CONTENT, "Insufficient sources for exclusive generation")
-                );
+                .thenThrow(new ResponseStatusException(HttpStatus.UNPROCESSABLE_CONTENT, INSUFFICIENT_SOURCES));
 
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class,

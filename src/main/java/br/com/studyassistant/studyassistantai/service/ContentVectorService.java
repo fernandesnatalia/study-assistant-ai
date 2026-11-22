@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import static br.com.studyassistant.studyassistantai.constants.ErrorMessages.CONTENT_NOT_PERSISTED;
+import static br.com.studyassistant.studyassistantai.constants.SqlQueries.*;
 
 @Service
 public class ContentVectorService {
@@ -31,7 +33,7 @@ public class ContentVectorService {
     @Transactional
     public void indexContent(Content content){
         if(content.getId() == null) {
-            throw new IllegalArgumentException("Content must be persisted before indexing");
+            throw new IllegalArgumentException(CONTENT_NOT_PERSISTED);
         }
 
         List<String> chunks = chunkingService.split(content.getBody());
@@ -56,12 +58,7 @@ public class ContentVectorService {
         }
 
         List<String> previousIds = jdbcTemplate.queryForList(
-                """
-                SELECT id::text
-                FROM vector_store
-                WHERE metadata ->> 'contentId' = ?
-                AND metadata ->> 'userId' = ?
-                """,
+                FIND_CONTENT_VECTORS,
                 String.class,
                 content.getId().toString(),
                 content.getUser().getId().toString()
@@ -76,25 +73,11 @@ public class ContentVectorService {
 
     @Transactional
     public void deleteUserVectors(Long userId) {
-        jdbcTemplate.update(
-                """
-                DELETE FROM vector_store
-                WHERE metadata ->> 'userId' = ?
-                """,
-                userId.toString()
-        );
+        jdbcTemplate.update(DELETE_USER_VECTORS, userId.toString());
     }
 
     @Transactional
     public void deleteContentVectors(Long contentId, Long userId) {
-        jdbcTemplate.update(
-                """
-                DELETE FROM vector_store
-                WHERE metadata ->> 'contentId' = ?
-                AND metadata ->> 'userId' = ?
-                """,
-                contentId.toString(),
-                userId.toString()
-        );
+        jdbcTemplate.update(DELETE_CONTENT_VECTORS, contentId.toString(), userId.toString());
     }
 }

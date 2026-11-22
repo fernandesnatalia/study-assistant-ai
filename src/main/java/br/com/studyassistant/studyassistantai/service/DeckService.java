@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
+import static br.com.studyassistant.studyassistantai.constants.ErrorMessages.*;
 
 @Service
 public class DeckService {
@@ -41,8 +42,7 @@ public class DeckService {
     @Transactional
     public Deck create(DeckCreateRequest request, Long userId) {
         if (request.getMode() != DeckMode.STUDY) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT, "Manually created decks must use STUDY mode");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, MANUAL_DECK_STUDY);
         }
 
         User user = getExistingUser(userId);
@@ -75,7 +75,7 @@ public class DeckService {
         );
 
         if (generatedFlashcards.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "AI did not generate any flashcards");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, NO_FLASHCARDS_GENERATED);
         }
 
         Deck deck = new Deck();
@@ -105,7 +105,7 @@ public class DeckService {
         Deck deck = getExistingDeck(id, userId);
 
         if (deck.getMode() != DeckMode.TRAINING) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Only TRAINING decks can be converted to STUDY");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, DECK_CONVERSION_FORBIDDEN);
         }
 
         performanceService.consolidateDeckPerformance(userId, id);
@@ -146,11 +146,11 @@ public class DeckService {
 
     private User getExistingUser(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
     }
 
     private Deck getExistingDeck(Long id, Long userId) {
         return deckRepository.findByIdAndUserId(id, userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Deck not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, DECK_NOT_FOUND));
     }
 }

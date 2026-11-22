@@ -1,4 +1,4 @@
-package br.com.studyassistant.studyassistantai.service;
+package br.com.studyassistant.studyassistantai.service.integration;
 
 import br.com.studyassistant.studyassistantai.model.Content;
 import br.com.studyassistant.studyassistantai.model.Subject;
@@ -8,6 +8,7 @@ import br.com.studyassistant.studyassistantai.repository.ContentRepository;
 import br.com.studyassistant.studyassistantai.repository.SubjectRepository;
 import br.com.studyassistant.studyassistantai.repository.TopicRepository;
 import br.com.studyassistant.studyassistantai.repository.UserRepository;
+import br.com.studyassistant.studyassistantai.service.ContentService;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.support.TransactionTemplate;
 import java.util.UUID;
+import static br.com.studyassistant.studyassistantai.constants.SqlQueries.DELETE_CONTENT_VECTORS;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doThrow;
@@ -49,6 +51,9 @@ class ContentVectorIntegrationTest {
 
     @MockitoBean
     private VectorStore vectorStore;
+
+    private static final String ORIGINAL_BODY = "Texto original para validar o rollback.";
+    private static final String INDEXING_ERROR = "Vector indexing failed";
 
     @Test
     void shouldRollbackContentWhenVectorIndexingFails() {
@@ -88,7 +93,7 @@ class ContentVectorIntegrationTest {
             topic.setId(topicId);
             content.setTopic(topic);
 
-            doThrow(new RuntimeException("Vector indexing failed")).when(vectorStore).add(anyList());
+            doThrow(new RuntimeException(INDEXING_ERROR)).when(vectorStore).add(anyList());
 
             assertThrows(RuntimeException.class, () -> contentService.createContent(userId, content));
 
@@ -142,7 +147,7 @@ class ContentVectorIntegrationTest {
 
             Content content = new Content();
             content.setTitle("Conteúdo original");
-            content.setBody("Texto original para validar o rollback.");
+            content.setBody(ORIGINAL_BODY);
             content.setUser(user);
             content.setTopic(topic);
             content = contentRepository.saveAndFlush(content);
@@ -168,7 +173,7 @@ class ContentVectorIntegrationTest {
                     VALUES (?, ?, ?::jsonb, ?::vector)
                     """,
                     vectorId,
-                    "Texto original para validar o rollback.",
+                    ORIGINAL_BODY,
                     "{\"contentId\": %d, \"userId\": %d, \"chunkIndex\": 0}".formatted(contentId, userId),
                     embedding
             );
@@ -177,14 +182,14 @@ class ContentVectorIntegrationTest {
             updatedContent.setTitle("Conteúdo atualizado");
             updatedContent.setBody("Novo texto que não deve ser persistido.");
 
-            doThrow(new RuntimeException("Vector indexing failed")).when(vectorStore).add(anyList());
+            doThrow(new RuntimeException(INDEXING_ERROR)).when(vectorStore).add(anyList());
 
             assertThrows(RuntimeException.class, () -> contentService.updateContent(contentId, userId, updatedContent));
 
             Content persistedContent = contentRepository.findByIdAndUserId(contentId, userId).orElseThrow();
 
             assertEquals("Conteúdo original", persistedContent.getTitle());
-            assertEquals("Texto original para validar o rollback.", persistedContent.getBody());
+            assertEquals(ORIGINAL_BODY, persistedContent.getBody());
 
             List<UUID> vectorIds = jdbcTemplate.queryForList(
                     """ 
@@ -204,15 +209,7 @@ class ContentVectorIntegrationTest {
 
         } finally {
             transactionTemplate.executeWithoutResult(status -> {
-                jdbcTemplate.update(
-                        """
-                        DELETE FROM vector_store
-                        WHERE metadata ->> 'contentId' = ?
-                        AND metadata ->> 'userId' = ?
-                        """,
-                        contentId.toString(),
-                        userId.toString()
-                );
+                jdbcTemplate.update(DELETE_CONTENT_VECTORS, contentId.toString(), userId.toString());
 
                 contentRepository.deleteById(contentId);
                 contentRepository.flush();

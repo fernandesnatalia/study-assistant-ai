@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
+import static br.com.studyassistant.studyassistantai.constants.ErrorMessages.PERFORMANCE_DELETE_FORBIDDEN;
+import static br.com.studyassistant.studyassistantai.constants.ErrorMessages.PERFORMANCE_NOT_FOUND;
 
 @Service
 public class DeckPerformanceHistoryService {
@@ -47,9 +49,7 @@ public class DeckPerformanceHistoryService {
                 userId
         ).ifPresent(deck -> {
             if (deck.getMode() == DeckMode.TRAINING) {
-                throw new ResponseStatusException(
-                        HttpStatus.CONFLICT, "Cannot delete performance history of an active TRAINING deck"
-                );
+                throw new ResponseStatusException(HttpStatus.CONFLICT, PERFORMANCE_DELETE_FORBIDDEN);
             }
         });
 
@@ -59,7 +59,7 @@ public class DeckPerformanceHistoryService {
     private DeckPerformanceHistory getExistingHistory(Long id, Long userId
     ) {
         return historyRepository.findByIdAndUserId(id, userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Performance history not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, PERFORMANCE_NOT_FOUND));
     }
 
     private DeckPerformanceHistoryResponse toResponse(DeckPerformanceHistory history) {

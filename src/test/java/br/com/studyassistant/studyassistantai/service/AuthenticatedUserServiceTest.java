@@ -11,8 +11,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.Optional;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AuthenticatedUserServiceTest {
@@ -26,15 +28,17 @@ class AuthenticatedUserServiceTest {
     @InjectMocks
     private AuthenticatedUserService authenticatedUserService;
 
+    private static final String EMAIL = "ada@example.com";
+
     @Test
     void shouldGetAuthenticatedUser() {
         User user = new User();
         user.setId(1L);
         user.setName("Ada Lovelace");
-        user.setEmail("ada@example.com");
+        user.setEmail(EMAIL);
 
-        when(authentication.getName()).thenReturn("ada@example.com");
-        when(userRepository.findByEmail("ada@example.com")).thenReturn(Optional.of(user));
+        when(authentication.getName()).thenReturn(EMAIL);
+        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
 
         User result = authenticatedUserService.getAuthenticatedUser(authentication);
 
@@ -45,10 +49,10 @@ class AuthenticatedUserServiceTest {
     void shouldGetAuthenticatedUserId() {
         User user = new User();
         user.setId(1L);
-        user.setEmail("ada@example.com");
+        user.setEmail(EMAIL);
 
-        when(authentication.getName()).thenReturn("ada@example.com");
-        when(userRepository.findByEmail("ada@example.com")).thenReturn(Optional.of(user));
+        when(authentication.getName()).thenReturn(EMAIL);
+        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
 
         Long result = authenticatedUserService.getAuthenticatedUserId(authentication);
 
@@ -57,8 +61,8 @@ class AuthenticatedUserServiceTest {
 
     @Test
     void shouldRejectAuthenticatedUserNotFound() {
-        when(authentication.getName()).thenReturn("ada@example.com");
-        when(userRepository.findByEmail("ada@example.com")).thenReturn(Optional.empty());
+        when(authentication.getName()).thenReturn(EMAIL);
+        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.empty());
 
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class, () -> authenticatedUserService.getAuthenticatedUser(authentication)

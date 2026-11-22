@@ -3,6 +3,7 @@ package br.com.studyassistant.studyassistantai.service;
 import br.com.studyassistant.studyassistantai.dto.GeneratedFlashcard;
 import br.com.studyassistant.studyassistantai.dto.RagContext;
 import br.com.studyassistant.studyassistantai.enums.SourceSelectionMode;
+import br.com.studyassistant.studyassistantai.prompt.AiPromptBuilder;
 import br.com.studyassistant.studyassistantai.prompt.RagPromptBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,7 +15,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -31,31 +35,23 @@ class FlashcardAiServiceTest {
     @Spy
     private RagPromptBuilder ragPromptBuilder = new RagPromptBuilder();
 
+    @Spy
+    private AiPromptBuilder aiPromptBuilder = new AiPromptBuilder();
+
+    private static final String GENERATIVE_CONTENT = """
+                    PERGUNTA: O que é um algoritmo?
+                    RESPOSTA: É uma sequência finita de instruções.
+                    ---
+                    """;
+
     @Test
     void shouldGenerateAnswerUsingQuestionAndDeckTheme() {
         String question = "O que é um algoritmo?";
         String theme = "Algoritmos";
         String expectedAnswer = "É uma sequência finita de instruções para resolver um problema.";
 
-        String systemPrompt = """
-                Você é um assistente de estudos multidisciplinar que gera respostas de perguntas para flashcards.
-                Regras:
-                1. Responda diretamente à pergunta apresentada.
-                2. Utilize o tema do baralho somente como contexto quando for relevante para a pergunta.
-                3. Não confunda o tema do baralho com o assunto da pergunta.
-                4. Produza respostas curtas e objetivas.
-                5. Evite introduções, repetições, conclusões e explicações desnecessárias ou extensas demais.
-                6. Se a pergunta não puder ser respondida com segurança, informe isso.
-                7. Responda em português brasileiro, com precisão conceitual.
-                """;
-
-        String userPrompt = """
-                Pergunta:
-                %s
-
-                Tema do baralho:
-                %s
-                """.formatted(question, theme);
+        String systemPrompt = aiPromptBuilder.flashcardAnswerSystemPrompt();
+        String userPrompt = aiPromptBuilder.flashcardAnswerUserPrompt(question, theme);
 
         when(generativeService.generate(systemPrompt, userPrompt)).thenReturn(expectedAnswer);
 
@@ -92,6 +88,8 @@ class FlashcardAiServiceTest {
     void shouldIncludeAdditionalContextInFlashcardGenerationPrompt() {
         String theme = "Algoritmos";
         int quantity = 1;
+
+        String systemPrompt = aiPromptBuilder.flashcardGenerationSystemPrompt();
         String generationContext = """
                 Conteúdo de estudo selecionado:
                 Título: Algoritmos e Máquinas Analíticas
@@ -104,37 +102,7 @@ class FlashcardAiServiceTest {
                 ---
                 """;
 
-        String systemPrompt = """
-                Você é um assistente de estudos multidisciplinar que gera flashcards.
-                Regras:
-                1. Gere exatamente a quantidade solicitada de flashcards.
-                2. Todos os flashcards devem pertencer ao tema informado.
-                3. O tema do baralho define o escopo conceitual principal da geração.
-                4. Quando houver contexto adicional, utilize-o para orientar ou delimitar a geração
-                sem substituir o tema do baralho.
-                5. Cada flashcard deve conter uma pergunta clara e uma resposta conceitualmente correta.
-                6. As perguntas devem abordar conhecimentos relevantes para estudo e revisão.
-                7. As respostas devem ser curtas, objetivas e suficientes para responder à pergunta.
-                8. Não repita perguntas.
-                9. Responda em português brasileiro.
-                10. Não inclua introduções, explicações adicionais ou blocos Markdown.
-                11. Retorne cada flashcard exatamente no formato:
-
-                PERGUNTA: <pergunta>
-                RESPOSTA: <resposta>
-                ---
-                """;
-
-        String userPrompt = """
-                Tema do baralho:
-                %s
-
-                Quantidade de flashcards:
-                %d
-
-                Contexto adicional:
-                %s
-                """.formatted(theme, quantity, generationContext);
+        String userPrompt = aiPromptBuilder.flashcardGenerationUserPrompt(theme, quantity, generationContext);
 
         when(generativeService.generate(systemPrompt, userPrompt)).thenReturn(generatedContent);
 
@@ -152,15 +120,10 @@ class FlashcardAiServiceTest {
         RagContext ragContext = new RagContext("Fonte 1\nTrecho sobre algoritmos.", List.of());
 
         when(generativeService.generate(anyString(), anyString()))
-                .thenReturn("""
-                    PERGUNTA: O que é um algoritmo?
-                    RESPOSTA: É uma sequência finita de instruções.
-                    ---
-                    """);
+                .thenReturn(GENERATIVE_CONTENT);
 
-        List<GeneratedFlashcard> result = flashcardAiService.generateFlashcards(
-                "Algoritmos", 1, "", ragContext, SourceSelectionMode.PREFERRED
-        );
+        List<GeneratedFlashcard> result = flashcardAiService
+                .generateFlashcards("Algoritmos", 1, "", ragContext, SourceSelectionMode.PREFERRED);
 
         assertEquals(1, result.size());
         assertEquals("O que é um algoritmo?", result.get(0).question());
@@ -177,12 +140,7 @@ class FlashcardAiServiceTest {
     void shouldUseExclusiveSourcesForFlashcardGeneration() {
         RagContext ragContext = new RagContext("Fonte 1\nTrecho sobre algoritmos.", List.of());
 
-        when(generativeService.generate(anyString(), anyString()))
-                .thenReturn("""
-                    PERGUNTA: O que é um algoritmo?
-                    RESPOSTA: É uma sequência finita de instruções.
-                    ---
-                    """);
+        when(generativeService.generate(anyString(), anyString())).thenReturn(GENERATIVE_CONTENT);
 
         flashcardAiService.generateFlashcards("Algoritmos", 1, "", ragContext, SourceSelectionMode.EXCLUSIVE);
 
@@ -196,11 +154,7 @@ class FlashcardAiServiceTest {
     @Test
     void shouldGenerateFlashcardsWithoutRagInstructions() {
         when(generativeService.generate(anyString(), anyString()))
-                .thenReturn("""
-                    PERGUNTA: O que é um algoritmo?
-                    RESPOSTA: É uma sequência finita de instruções.
-                    ---
-                    """);
+                .thenReturn(GENERATIVE_CONTENT);
 
         List<GeneratedFlashcard> result = flashcardAiService.generateFlashcards("Algoritmos", 1, "");
 

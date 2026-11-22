@@ -1,10 +1,12 @@
 package br.com.studyassistant.studyassistantai.service;
 
 import br.com.studyassistant.studyassistantai.enums.AnswerAttemptResult;
+import br.com.studyassistant.studyassistantai.prompt.AiPromptBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -22,15 +24,19 @@ class AnswerEvaluationAiServiceTest {
     @InjectMocks
     private AnswerEvaluationAiService answerEvaluationAiService;
 
+    @Spy
+    private AiPromptBuilder aiPromptBuilder = new AiPromptBuilder();
+
+    private static final String EXPECTED_ANSWER = "É uma sequência finita de instruções para resolver um problema.";
+    private static final String USER_ANSWER = "É uma sequência de passos para resolver um problema.";
+    private static final String INCORRECT_ANSWER = "É um tipo de banco de dados.";
+
     @Test
     void shouldReturnCorrectWhenAiEvaluatesAnswerAsCorrect() {
         when(generativeService.generate(anyString(), anyString())).thenReturn("CORRECT");
 
-        AnswerAttemptResult result = answerEvaluationAiService.evaluate(
-                "O que é um algoritmo?",
-                "É uma sequência finita de instruções para resolver um problema.",
-                "É uma sequência de passos para resolver um problema."
-        );
+        AnswerAttemptResult result = answerEvaluationAiService
+                .evaluate("O que é um algoritmo?", EXPECTED_ANSWER, USER_ANSWER);
 
         assertEquals(AnswerAttemptResult.CORRECT, result);
     }
@@ -39,11 +45,8 @@ class AnswerEvaluationAiServiceTest {
     void shouldReturnIncorrectWhenAiEvaluatesAnswerAsIncorrect() {
         when(generativeService.generate(anyString(), anyString())).thenReturn("INCORRECT");
 
-        AnswerAttemptResult result = answerEvaluationAiService.evaluate(
-                "O que é um algoritmo?",
-                "É uma sequência finita de instruções para resolver um problema.",
-                "É um tipo de banco de dados."
-        );
+        AnswerAttemptResult result = answerEvaluationAiService
+                .evaluate("O que é um algoritmo?", EXPECTED_ANSWER, INCORRECT_ANSWER);
 
         assertEquals(AnswerAttemptResult.INCORRECT, result);
     }
@@ -53,11 +56,8 @@ class AnswerEvaluationAiServiceTest {
         when(generativeService.generate(anyString(), anyString())).thenReturn("A resposta está correta.");
 
         ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class, () -> answerEvaluationAiService.evaluate(
-                        "O que é um algoritmo?",
-                        "É uma sequência finita de instruções para resolver um problema.",
-                        "É uma sequência de passos para resolver um problema."
-                )
+                ResponseStatusException.class, () -> answerEvaluationAiService
+                        .evaluate("O que é um algoritmo?", EXPECTED_ANSWER, USER_ANSWER)
         );
 
         assertEquals(HttpStatus.BAD_GATEWAY, exception.getStatusCode());

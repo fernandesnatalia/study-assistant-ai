@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.StringJoiner;
+import static br.com.studyassistant.studyassistantai.constants.ErrorMessages.*;
+import static br.com.studyassistant.studyassistantai.constants.SqlQueries.*;
 
 @Service
 public class SemanticRetrievalService {
@@ -43,60 +45,33 @@ public class SemanticRetrievalService {
             SemanticSearchRequest request
     ) {
         if(request == null){
-            throw new IllegalArgumentException("Search request is required");
+            throw new IllegalArgumentException(SEARCH_REQUEST_REQUIRED);
         }
 
         if(userId == null){
-            throw new IllegalArgumentException("User ID is required");
+            throw new IllegalArgumentException(USER_ID_REQUIRED);
         }
 
         if(request.query() == null || request.query().isBlank()){
-            throw new IllegalArgumentException("Query is required");
+            throw new IllegalArgumentException(QUERY_REQUIRED);
         }
 
         int topK = request.topK() == null ? DEFAULT_TOP_K : request.topK();
         double threshold = request.similarityThreshold() == null ? DEFAULT_THRESHOLD : request.similarityThreshold();
 
         if(topK <= 0){
-            throw new IllegalArgumentException("Top K must be positive");
+            throw new IllegalArgumentException(INVALID_TOPK);
         }
 
         if(!(threshold >= 0 && threshold <= 1)){
-            throw new IllegalArgumentException("Similarity thresold must be between 0 and 1");
+            throw new IllegalArgumentException(INVALID_THRESHOLD);
         }
 
         sourceSelectionService.validate(userId, request.subjectsIds(), request.topicsIds(), request.contentsIds());
 
         String vector = toVectorLiteral(embeddingModel.embed(request.query()));
 
-        StringBuilder sql = new StringBuilder("""
-        SELECT
-            v.id,
-            v.content,
-            v.metadata,
-            1 - (v.embedding <=> CAST(? AS vector)) AS similarity,
-            c.id AS content_id,
-            c.title AS content_title,
-            t.id AS topic_id,
-            t.name AS topic_name,
-            s.id AS subject_id,
-            s.name AS subject_name,
-            d.id AS document_id,
-            d.original_filename AS document_filename
-        FROM vector_store v
-        JOIN content c
-            ON c.id = (v.metadata ->> 'contentId')::bigint
-        JOIN topic t
-            ON t.id = c.topic_id
-        JOIN subject s
-            ON s.id = t.subject_id
-        LEFT JOIN documents d
-            ON d.id = c.document_id
-        WHERE c.user_id = ?
-        AND t.user_id = ?
-        AND s.user_id = ?
-        AND (v.metadata ->> 'userId')::bigint = ?
-        """);
+        StringBuilder sql = new StringBuilder(SEMANTIC_SEARCH_BASE);
 
         List<Object> parameters = new ArrayList<>(List.of(vector, userId, userId, userId, userId));
 
@@ -104,11 +79,7 @@ public class SemanticRetrievalService {
         appendFilter(sql, parameters, "t.id", request.topicsIds());
         appendFilter(sql, parameters, "c.id", request.contentsIds());
 
-        sql.append("""
-                AND 1 - (v.embedding <=> CAST(? AS vector)) >= ?
-                ORDER BY similarity DESC, v.id
-                LIMIT ?
-                """);
+        sql.append(SEMANTIC_SEARCH_SUFFIX);
 
         parameters.add(vector);
         parameters.add(threshold);
@@ -157,14 +128,14 @@ public class SemanticRetrievalService {
                         rs.getString("document_filename")
                 );
             } catch(JsonProcessingException e) {
-                throw new IllegalStateException("Invalid vector metadata", e);
+                throw new IllegalStateException(INVALID_METADATA, e);
             }
         };
     }
 
     private String toVectorLiteral(float[] embedding){
         if(embedding == null || embedding.length == 0){
-            throw new IllegalArgumentException("Embedding is empty");
+            throw new IllegalArgumentException(EMPTY_EMBEDDING);
         }
 
         StringJoiner joiner = new StringJoiner(",","[","]");

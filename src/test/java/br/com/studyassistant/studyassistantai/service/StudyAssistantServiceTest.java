@@ -5,6 +5,7 @@ import br.com.studyassistant.studyassistantai.dto.SemanticSearchRequest;
 import br.com.studyassistant.studyassistantai.dto.StudyAssistantRequest;
 import br.com.studyassistant.studyassistantai.dto.StudyAssistantResponse;
 import br.com.studyassistant.studyassistantai.enums.SourceSelectionMode;
+import br.com.studyassistant.studyassistantai.prompt.AiPromptBuilder;
 import br.com.studyassistant.studyassistantai.prompt.RagPromptBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,10 +18,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Set;
-import static org.junit.jupiter.api.Assertions.*;
+import static br.com.studyassistant.studyassistantai.constants.ErrorMessages.INSUFFICIENT_SOURCES;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 @ExtendWith(MockitoExtension.class)
 class StudyAssistantServiceTest {
@@ -36,6 +44,9 @@ class StudyAssistantServiceTest {
 
     @Spy
     private RagPromptBuilder ragPromptBuilder = new RagPromptBuilder();
+
+    @Spy
+    private AiPromptBuilder aiPromptBuilder = new AiPromptBuilder();
 
     private void mockEmptySources() {
         when(ragContextService.build(any(), any())).thenReturn(new RagContext("", List.of()));
@@ -110,8 +121,7 @@ class StudyAssistantServiceTest {
 
         mockEmptySources();
 
-        when(generativeService.generate(anyString(), anyString()))
-                .thenReturn("Um anel é uma estrutura algébrica.");
+        when(generativeService.generate(anyString(), anyString())).thenReturn("Um anel é uma estrutura algébrica.");
 
         studyAssistantService.ask(1L, request);
 
@@ -224,9 +234,7 @@ class StudyAssistantServiceTest {
         );
 
         when(ragContextService.build(eq(1L), any()))
-                .thenThrow(new ResponseStatusException(
-                        HttpStatus.UNPROCESSABLE_CONTENT, "Insufficient sources for exclusive generation")
-                );
+                .thenThrow(new ResponseStatusException(HttpStatus.UNPROCESSABLE_CONTENT, INSUFFICIENT_SOURCES));
 
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class, () -> studyAssistantService.ask(1L, request)

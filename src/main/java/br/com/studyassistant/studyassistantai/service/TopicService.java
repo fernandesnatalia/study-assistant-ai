@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
+import static br.com.studyassistant.studyassistantai.constants.ErrorMessages.*;
 
 @Service
 public class TopicService {
@@ -38,10 +39,10 @@ public class TopicService {
 
     public Topic createTopic(Topic topic, Long userId, Long subjectId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
 
         Subject subject = subjectRepository.findByIdAndUserId(subjectId, userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Subject not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, SUBJECT_NOT_FOUND));
 
         topic.setUser(user);
         topic.setSubject(subject);
@@ -55,7 +56,7 @@ public class TopicService {
 
     public Topic getTopicById(Long id, Long userId) {
         return topicRepository.findByIdAndUserId(id, userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Topic not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, TOPIC_NOT_FOUND));
     }
 
     public Topic updateTopic(Long id, Long userId, Topic updatedTopic) {

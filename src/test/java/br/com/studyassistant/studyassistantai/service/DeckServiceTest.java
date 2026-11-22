@@ -23,6 +23,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import static br.com.studyassistant.studyassistantai.constants.ErrorMessages.INVALID_FLASHCARD_FORMAT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -67,12 +68,15 @@ class DeckServiceTest {
         deck.setMode(DeckMode.STUDY);
     }
 
+    private static final String QUESTION = "O que é um algoritmo?";
+    private static final String EXPECTED_ANSWER = "É uma sequência finita de instruções para resolver um problema.";
+
     @Test
     void shouldCreateDeckWithFirstFlashcard() {
         DeckCreateRequest request = new DeckCreateRequest();
         request.setTheme("Algoritmos");
-        request.setQuestion("O que é um algoritmo?");
-        request.setAnswer("É uma sequência finita de instruções para resolver um problema.");
+        request.setQuestion(QUESTION);
+        request.setAnswer(EXPECTED_ANSWER);
         request.setMode(DeckMode.STUDY);
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
@@ -82,7 +86,7 @@ class DeckServiceTest {
                     Deck savedDeck = invocation.getArgument(0);
                     savedDeck.setId(1L);
                     return savedDeck;
-        });
+                });
 
         when(flashcardRepository.save(any(Flashcard.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
@@ -100,11 +104,8 @@ class DeckServiceTest {
 
         Flashcard savedFlashcard = flashcardCaptor.getValue();
 
-        assertEquals("O que é um algoritmo?", savedFlashcard.getQuestion());
-        assertEquals(
-                "É uma sequência finita de instruções para resolver um problema.",
-                savedFlashcard.getAnswer()
-        );
+        assertEquals(QUESTION, savedFlashcard.getQuestion());
+        assertEquals(EXPECTED_ANSWER, savedFlashcard.getAnswer());
 
         assertSame(result, savedFlashcard.getDeck());
 
@@ -115,7 +116,7 @@ class DeckServiceTest {
     void shouldNotCreateTrainingDeckManually() {
         DeckCreateRequest request = new DeckCreateRequest();
         request.setTheme("Algoritmos");
-        request.setQuestion("O que é um algoritmo?");
+        request.setQuestion(QUESTION);
         request.setAnswer("Uma sequência de instruções.");
         request.setMode(DeckMode.TRAINING);
 
@@ -157,8 +158,10 @@ class DeckServiceTest {
 
         when(deckRepository.save(any(Deck.class)))
                 .thenAnswer(invocation -> {
-                    Deck savedDeck = invocation.getArgument(0);savedDeck.setId(1L);return savedDeck;}
-                );
+                    Deck savedDeck = invocation.getArgument(0);
+                    savedDeck.setId(1L);
+                    return savedDeck;
+                });
 
         Deck result = deckService.createWithAi(request, 1L);
 
@@ -213,7 +216,7 @@ class DeckServiceTest {
         );
 
         List<GeneratedFlashcard> generatedFlashcards = List.of(
-                new GeneratedFlashcard("O que é um algoritmo?", "Uma sequência finita de instruções.")
+                new GeneratedFlashcard(QUESTION, "Uma sequência finita de instruções.")
         );
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
@@ -239,7 +242,7 @@ class DeckServiceTest {
         when(userRepository.findById(1L))
                 .thenReturn(Optional.of(user));
         when(flashcardAiService.generateFlashcards("Sequências Numéricas", 2, ""))
-                .thenThrow(new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI returned an invalid flashcard format"));
+                .thenThrow(new ResponseStatusException(HttpStatus.BAD_GATEWAY, INVALID_FLASHCARD_FORMAT));
 
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class, () -> deckService.createWithAi(request, 1L)
@@ -255,8 +258,8 @@ class DeckServiceTest {
     void shouldNotCreateDeckForNonexistentUser() {
         DeckCreateRequest request = new DeckCreateRequest();
         request.setTheme("Algoritmos");
-        request.setQuestion("O que é um algoritmo?");
-        request.setAnswer("É uma sequência finita de instruções para resolver um problema.");
+        request.setQuestion(QUESTION);
+        request.setAnswer(EXPECTED_ANSWER);
         request.setMode(DeckMode.STUDY);
 
         when(userRepository.findById(99L)).thenReturn(Optional.empty());

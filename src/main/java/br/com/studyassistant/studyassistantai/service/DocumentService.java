@@ -17,6 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
+import static br.com.studyassistant.studyassistantai.constants.ErrorMessages.*;
 
 @Service
 public class DocumentService {
@@ -53,26 +54,26 @@ public class DocumentService {
             String body
     ) {
         if (userId == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID is required");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, USER_ID_REQUIRED);
         }
 
         if (topicId == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Topic ID is required");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, TOPIC_ID_REQUIRED);
         }
 
         if (title == null || title.isBlank() || body == null || body.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Title and body are required");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, TITLE_BODY_REQUIRED);
         }
 
         if (title.trim().length() > 255) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Title must not exceed 255 characters");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, TITLE_TOO_LONG);
         }
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
 
         Topic topic = topicRepository.findByIdAndUserId(topicId, userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Topic not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, TOPIC_NOT_FOUND));
 
         String extractedText = documentExtractionService.extractText(file);
 
@@ -105,7 +106,7 @@ public class DocumentService {
     @Transactional
     public void deleteDocument(Long documentId, Long userId) {
         Document document = documentRepository.findByIdAndUserId(documentId, userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Document not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, DOCUMENT_NOT_FOUND));
 
         List<Content> contents = contentRepository.findByDocumentIdAndUserId(documentId, userId);
 

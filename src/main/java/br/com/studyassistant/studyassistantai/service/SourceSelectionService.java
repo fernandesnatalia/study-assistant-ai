@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.Set;
+import static br.com.studyassistant.studyassistantai.constants.ErrorMessages.*;
 
 @Service
 public class SourceSelectionService {
@@ -34,12 +35,11 @@ public class SourceSelectionService {
             Set<Long> contentIds
     ){
         if(userId == null) {
-            throw new IllegalArgumentException("User ID is required");
+            throw new IllegalArgumentException(USER_ID_REQUIRED);
         }
 
         for(Long subjectId : safe(subjectIds)) {
-            if(subjectId == null || subjectRepository
-                    .findByIdAndUserId(subjectId, userId).isEmpty()) {
+            if(subjectId == null || subjectRepository.findByIdAndUserId(subjectId, userId).isEmpty()) {
                 throw invalidSource();
             }
         }
@@ -74,7 +74,6 @@ public class SourceSelectionService {
     }
 
     private ResponseStatusException invalidSource() {
-        return new ResponseStatusException(
-                HttpStatus.BAD_REQUEST, "Invalid or incompatible source selection");
+        return new ResponseStatusException(HttpStatus.BAD_REQUEST, INVALID_SOURCE);
     }
 }

@@ -10,9 +10,21 @@ import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.jdbc.core.JdbcTemplate;
 import java.util.List;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static br.com.studyassistant.studyassistantai.constants.SqlQueries.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 class ContentVectorServiceTest {
 
@@ -66,14 +78,14 @@ class ContentVectorServiceTest {
         Content content = createContent();
 
         when(chunkingService.split(anyString())).thenReturn(List.of("Trecho de estudo"));
-        when(jdbcTemplate.queryForList(contains("SELECT id::text"), eq(String.class), eq("10"), eq("20")))
+        when(jdbcTemplate.queryForList(eq(FIND_CONTENT_VECTORS), eq(String.class), eq("10"), eq("20")))
                 .thenReturn(List.of("previous-vector-id"));
 
         service.indexContent(content);
 
         InOrder inOrder = inOrder(jdbcTemplate, vectorStore);
 
-        inOrder.verify(jdbcTemplate).queryForList(contains("SELECT id::text"), eq(String.class), eq("10"), eq("20"));
+        inOrder.verify(jdbcTemplate).queryForList(eq(FIND_CONTENT_VECTORS), eq(String.class), eq("10"), eq("20"));
 
         inOrder.verify(vectorStore).add(anyList());
         inOrder.verify(vectorStore).delete(List.of("previous-vector-id"));
@@ -84,7 +96,7 @@ class ContentVectorServiceTest {
         Content content = createContent();
 
         when(chunkingService.split(anyString())).thenReturn(List.of("Trecho de estudo"));
-        when(jdbcTemplate.queryForList(contains("SELECT id::text"), eq(String.class), eq("10"), eq("20")))
+        when(jdbcTemplate.queryForList(eq(FIND_CONTENT_VECTORS), eq(String.class), eq("10"), eq("20")))
                 .thenReturn(List.of("previous-vector-id"));
 
         doThrow(new RuntimeException("Embedding generation failed")).when(vectorStore).add(anyList());
@@ -98,14 +110,14 @@ class ContentVectorServiceTest {
     void shouldDeleteVectorsByContentAndUser() {
         service.deleteContentVectors(10L, 20L);
 
-        verify(jdbcTemplate).update(contains("DELETE FROM vector_store"), eq("10"), eq("20"));
+        verify(jdbcTemplate).update(eq(DELETE_CONTENT_VECTORS), eq("10"), eq("20"));
     }
 
     @Test
     void shouldDeleteAllUserVectors() {
         service.deleteUserVectors(20L);
 
-        verify(jdbcTemplate).update(contains("DELETE FROM vector_store"), eq("20"));
+        verify(jdbcTemplate).update(eq(DELETE_USER_VECTORS), eq("20"));
     }
 
     @Test

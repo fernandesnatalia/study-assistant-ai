@@ -13,8 +13,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.Optional;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
@@ -31,19 +35,21 @@ class AuthServiceTest {
     @InjectMocks
     private AuthService authService;
 
+    private static final String EMAIL = "ada@example.com";
+
     @Test
     void shouldLogin() {
         User user = new User();
         user.setId(1L);
         user.setName("Augusta Ada Byron King");
-        user.setEmail("ada@example.com");
+        user.setEmail(EMAIL);
         user.setPassword("encoded-password");
 
-        LoginRequest request = new LoginRequest("ada@example.com", "ada123");
+        LoginRequest request = new LoginRequest(EMAIL, "ada123");
 
-        when(userRepository.findByEmail("ada@example.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("ada123", "encoded-password")).thenReturn(true);
-        when(jwtService.generateToken("ada@example.com")).thenReturn("jwt-token");
+        when(jwtService.generateToken(EMAIL)).thenReturn("jwt-token");
 
         LoginResponse response = authService.login(request);
 
@@ -52,9 +58,9 @@ class AuthServiceTest {
 
     @Test
     void shouldRejectNonexistentEmail() {
-        LoginRequest request = new LoginRequest("ada@example.com", "ada123");
+        LoginRequest request = new LoginRequest(EMAIL, "ada123");
 
-        when(userRepository.findByEmail("ada@example.com")).thenReturn(Optional.empty());
+        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.empty());
 
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class, () -> authService.login(request)
@@ -68,12 +74,12 @@ class AuthServiceTest {
     @Test
     void shouldRejectInvalidPassword() {
         User user = new User();
-        user.setEmail("ada@example.com");
+        user.setEmail(EMAIL);
         user.setPassword("encoded-password");
 
-        LoginRequest request = new LoginRequest("ada@example.com", "wrong-password");
+        LoginRequest request = new LoginRequest(EMAIL, "wrong-password");
 
-        when(userRepository.findByEmail("ada@example.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("wrong-password", "encoded-password")).thenReturn(false);
 
         ResponseStatusException exception = assertThrows(

@@ -10,6 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Locale;
+import static br.com.studyassistant.studyassistantai.constants.ErrorMessages.*;
 
 @Service
 public class DocumentExtractionService {
@@ -28,45 +29,45 @@ public class DocumentExtractionService {
             String text = tika.parseToString(inputStream, new Metadata(), MAX_EXTRACTED_CHARACTERS + 1);
 
             if (text == null || text.isBlank()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Document has no extractable text");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, NO_EXTRACTABLE_TEXT);
             }
 
             if (text.length() > MAX_EXTRACTED_CHARACTERS) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Document exceeds the extracted text limit");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, TEXT_LIMIT_EXCEEDED);
             }
 
             String normalizedText = normalizeText(text);
 
             if (normalizedText.isBlank()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Document has no extractable text");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, NO_EXTRACTABLE_TEXT);
             }
 
             return normalizedText;
 
         } catch (IOException | TikaException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Could not extract document text", e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, TEXT_EXTRACTION_FAILED, e);
         }
     }
 
     private void validateFile(MultipartFile file) {
         if (file == null || file.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File is required");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, FILE_REQUIRED);
         }
 
         if (file.getSize() > MAX_FILE_SIZE) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File exceeds the 10 MB limit");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, FILE_LIMIT_EXCEEDED);
         }
 
         String filename = file.getOriginalFilename();
 
         if (filename == null || filename.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Filename is required");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, FILE_REQUIRED);
         }
 
         String extension = filename.toLowerCase(Locale.ROOT);
 
         if (!extension.endsWith(".pdf") && !extension.endsWith(".txt")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only PDF and TXT files are supported");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, UNSUPPORTED_EXTENSION);
         }
 
         try (InputStream inputStream = file.getInputStream()) {
@@ -77,11 +78,11 @@ public class DocumentExtractionService {
             boolean validTxt = extension.endsWith(".txt") && detectedType.equals("text/plain");
 
             if (!validPdf && !validTxt) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File format does not match its extension");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, INVALID_FILE_FORMAT);
             }
 
         } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Could not read document", e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, DOCUMENT_READ_FAILED, e);
         }
     }
 

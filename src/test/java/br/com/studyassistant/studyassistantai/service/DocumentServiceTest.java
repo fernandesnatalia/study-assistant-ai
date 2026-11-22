@@ -22,9 +22,18 @@ import org.springframework.web.server.ResponseStatusException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.anyLong;
 
 @ExtendWith(MockitoExtension.class)
 class DocumentServiceTest {
@@ -81,9 +90,12 @@ class DocumentServiceTest {
 
         mockExistingUserAndTopic();
 
-        when(documentExtractionService.extractText(file)).thenReturn(extractedText);
-        when(documentRepository.save(any(Document.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(contentRepository.save(any(Content.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(documentExtractionService.extractText(file))
+                .thenReturn(extractedText);
+        when(documentRepository.save(any(Document.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(contentRepository.save(any(Content.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         Content result = documentService.confirmDocument(1L, file, 1L, "Título revisado", "Conteúdo revisado");
 
@@ -202,7 +214,8 @@ class DocumentServiceTest {
 
         mockExistingUserAndTopic();
 
-        when(documentExtractionService.extractText(file)).thenReturn("Conteúdo original");
+        when(documentExtractionService.extractText(file))
+                .thenReturn("Conteúdo original");
         when(documentRepository.save(any(Document.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
         when(contentRepository.save(any(Content.class)))
@@ -250,8 +263,7 @@ class DocumentServiceTest {
         when(documentRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.empty());
 
         ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
-                () -> documentService.deleteDocument(10L, 1L)
+                ResponseStatusException.class, () -> documentService.deleteDocument(10L, 1L)
         );
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
@@ -266,8 +278,7 @@ class DocumentServiceTest {
         when(documentRepository.findByIdAndUserId(10L, 2L)).thenReturn(Optional.empty());
 
         ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
-                () -> documentService.deleteDocument(10L, 2L)
+                ResponseStatusException.class, () -> documentService.deleteDocument(10L, 2L)
         );
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());

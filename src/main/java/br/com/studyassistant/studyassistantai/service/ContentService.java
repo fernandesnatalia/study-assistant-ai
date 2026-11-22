@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
+import static br.com.studyassistant.studyassistantai.constants.ErrorMessages.*;
 
 @Service
 public class ContentService {
@@ -50,14 +51,14 @@ public class ContentService {
 
     private Content saveContent(Long userId, Content content, ContentOrigin origin) {
         if (userId == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID is required");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, USER_ID_REQUIRED);
         }
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
 
         if (content.getTopic() == null || content.getTopic().getId() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Topic ID is required");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, TOPIC_ID_REQUIRED);
         }
 
         Topic topic = getExistingTopic(content.getTopic().getId(), userId);
@@ -78,14 +79,14 @@ public class ContentService {
 
     public List<Content> getAllContents(Long userId) {
         userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
 
         return contentRepository.findByUserId(userId);
     }
 
     public Content getContentById(Long id, Long userId) {
         return contentRepository.findByIdAndUserId(id, userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Content not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, CONTENT_NOT_FOUND));
     }
 
     @Transactional
@@ -96,7 +97,7 @@ public class ContentService {
                 updatedContent.getTitle().isBlank() ||
                 updatedContent.getBody() == null ||
                 updatedContent.getBody().isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Title and body are required");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, TITLE_BODY_REQUIRED);
         }
 
         boolean bodyChanged = !content.getBody().equals(updatedContent.getBody());
@@ -134,7 +135,7 @@ public class ContentService {
 
     private Topic getExistingTopic(Long topicId, Long userId) {
         return topicRepository.findByIdAndUserId(topicId, userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Topic not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, TOPIC_NOT_FOUND));
     }
 
     private Document validateDocumentOrigin(
@@ -144,19 +145,17 @@ public class ContentService {
     ) {
         if (origin != ContentOrigin.DOCUMENT) {
             if (document != null) {
-                throw new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST, "Only document content can reference a document"
-                );
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, INVALID_DOCUMENT_REFERENCE);
             }
 
             return null;
         }
 
         if (document == null || document.getId() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Document ID is required");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, DOCUMENT_ID_REQUIRED);
         }
 
         return documentRepository.findByIdAndUserId(document.getId(), userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Document not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, DOCUMENT_NOT_FOUND));
     }
 }

@@ -6,6 +6,7 @@ import br.com.studyassistant.studyassistantai.dto.StudyAssistantRequest;
 import br.com.studyassistant.studyassistantai.dto.StudyAssistantResponse;
 import br.com.studyassistant.studyassistantai.enums.PromptPurpose;
 import br.com.studyassistant.studyassistantai.enums.SourceSelectionMode;
+import br.com.studyassistant.studyassistantai.prompt.AiPromptBuilder;
 import br.com.studyassistant.studyassistantai.prompt.RagPromptBuilder;
 import org.springframework.stereotype.Service;
 
@@ -15,33 +16,22 @@ public class StudyAssistantService {
     private final GenerativeService generativeService;
     private final RagContextService ragContextService;
     private final RagPromptBuilder ragPromptBuilder;
+    private final AiPromptBuilder aiPromptBuilder;
 
     public StudyAssistantService(
             GenerativeService generativeService,
             RagContextService ragContextService,
-            RagPromptBuilder ragPromptBuilder
+            RagPromptBuilder ragPromptBuilder,
+            AiPromptBuilder aiPromptBuilder
     ) {
         this.generativeService = generativeService;
         this.ragContextService = ragContextService;
         this.ragPromptBuilder = ragPromptBuilder;
+        this.aiPromptBuilder = aiPromptBuilder;
     }
 
     public StudyAssistantResponse ask(Long userId, StudyAssistantRequest request) {
-        String systemPrompt = """
-                Você é um assistente de estudos multidisciplinar.
-                Regras:
-                1. Responda diretamente à solicitação do usuário.
-                2. Utilize o contexto fornecido pelo usuário quando estiver presente e for relevante.
-                3. Não invente informações para preencher lacunas do contexto fornecido.
-                4. Forneça explicações claras, conceitualmente precisas e adequadas ao estudo.
-                5. Quando solicitado, aprofunde conceitos ou apresente a informação de outra forma.
-                6. Não inclua comentários sobre o processo de geração.
-                7. Responda em português brasileiro.
-                """;
-
-        String context = request.context() == null || request.context().isBlank()
-                ? "Nenhum contexto adicional fornecido."
-                : request.context();
+        String systemPrompt = aiPromptBuilder.studyAssistantSystemPrompt();
 
         SourceSelectionMode mode = ragPromptBuilder.resolveMode(request.selectionMode());
 
@@ -57,13 +47,7 @@ public class StudyAssistantService {
 
         RagContext ragContext = ragContextService.build(userId, semanticSearch);
 
-        String userPrompt = """
-        Solicitação:
-        %s
-
-        Contexto fornecido pelo usuário:
-        %s
-        """.formatted(request.request(), context);
+        String userPrompt = aiPromptBuilder.studyAssistantUserPrompt(request.request(), request.context());
 
         userPrompt += ragPromptBuilder.build(ragContext, mode, PromptPurpose.STUDY_ASSISTANT);
 

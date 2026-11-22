@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import static br.com.studyassistant.studyassistantai.constants.ErrorMessages.AUTH_USER_NOT_FOUND;
 
 @Service
 public class AuthenticatedUserService {
@@ -18,8 +19,7 @@ public class AuthenticatedUserService {
 
     public User getAuthenticatedUser(Authentication authentication) {
         return userRepository.findByEmail(authentication.getName())
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.UNAUTHORIZED, "Authenticated user not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, AUTH_USER_NOT_FOUND));
     }
 
     public Long getAuthenticatedUserId(Authentication authentication) {

@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
+import static br.com.studyassistant.studyassistantai.constants.ErrorMessages.INSUFFICIENT_SOURCES;
 
 @Service
 public class RagContextService {
@@ -35,9 +36,7 @@ public class RagContextService {
 
         if (sources.isEmpty()) {
             if (mode == SourceSelectionMode.EXCLUSIVE) {
-                throw new ResponseStatusException(
-                        HttpStatus.UNPROCESSABLE_CONTENT, "Insufficiente sources for exclusive generation"
-                );
+                throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_CONTENT, INSUFFICIENT_SOURCES);
             }
 
             return new RagContext("", List.of());

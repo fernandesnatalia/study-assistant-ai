@@ -7,6 +7,7 @@ import br.com.studyassistant.studyassistantai.dto.RetrievedSource;
 import br.com.studyassistant.studyassistantai.dto.SemanticSearchRequest;
 import br.com.studyassistant.studyassistantai.enums.SourceSelectionMode;
 import br.com.studyassistant.studyassistantai.model.Topic;
+import br.com.studyassistant.studyassistantai.prompt.AiPromptBuilder;
 import br.com.studyassistant.studyassistantai.prompt.RagPromptBuilder;
 import br.com.studyassistant.studyassistantai.repository.TopicRepository;
 import org.junit.jupiter.api.Test;
@@ -20,9 +21,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Optional;
-import static org.junit.jupiter.api.Assertions.*;
+import static br.com.studyassistant.studyassistantai.constants.ErrorMessages.INSUFFICIENT_SOURCES;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 @ExtendWith(MockitoExtension.class)
 class ContentAiServiceTest {
@@ -39,11 +47,15 @@ class ContentAiServiceTest {
     @InjectMocks
     private ContentAiService contentAiService;
 
-    @InjectMocks
-    private StudyAssistantService studyAssistantService;
-
     @Spy
     private RagPromptBuilder ragPromptBuilder = new RagPromptBuilder();
+
+    @Spy
+    private AiPromptBuilder aiPromptBuilder = new AiPromptBuilder();
+
+    private static final String TEXT = "Trecho sobre anéis comutativos.";
+    public static final String TITLE = "Anéis Comutativos";
+    public static final String REQUEST = "Explique o conceito de anel.";
 
     @Test
     void shouldGenerateContentForOwnedTopic() {
@@ -60,7 +72,7 @@ class ContentAiServiceTest {
         GeneratedContentResponse result = contentAiService.generateContent(1L, request);
 
         assertEquals(1L, result.topicId());
-        assertEquals("Anéis Comutativos", result.title());
+        assertEquals(TITLE, result.title());
         assertEquals("Um anel comutativo possui multiplicação comutativa.", result.body());
         assertTrue(result.sources().isEmpty());
 
@@ -71,14 +83,14 @@ class ContentAiServiceTest {
 
     @Test
     void shouldGenerateContentWithoutAdditionalContext() {
-        ContentGenerationRequest request = new ContentGenerationRequest(1L, "Explique o conceito de anel.", null, null);
+        ContentGenerationRequest request = new ContentGenerationRequest(1L, REQUEST, null, null);
 
         when(topicRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(topic()));
         when(generativeService.generate(anyString(), anyString())).thenReturn(validGeneratedContent());
 
         GeneratedContentResponse result = contentAiService.generateContent(1L, request);
 
-        assertEquals("Anéis Comutativos", result.title());
+        assertEquals(TITLE, result.title());
         assertTrue(result.sources().isEmpty());
 
         ArgumentCaptor<String> promptCaptor = ArgumentCaptor.forClass(String.class);
@@ -91,7 +103,7 @@ class ContentAiServiceTest {
 
     @Test
     void shouldNotGenerateContentForAnotherUsersTopic() {
-        ContentGenerationRequest request = new ContentGenerationRequest(1L, "Explique o conceito de anel.", null, null);
+        ContentGenerationRequest request = new ContentGenerationRequest(1L, REQUEST, null, null);
 
         when(topicRepository.findByIdAndUserId(1L, 2L)).thenReturn(Optional.empty());
 
@@ -107,7 +119,7 @@ class ContentAiServiceTest {
 
     @Test
     void shouldRejectInvalidAiResponse() {
-        ContentGenerationRequest request = new ContentGenerationRequest(1L, "Explique o conceito de anel.", null, null);
+        ContentGenerationRequest request = new ContentGenerationRequest(1L, REQUEST, null, null);
 
         when(topicRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(topic()));
         when(generativeService.generate(anyString(), anyString())).thenReturn("Resposta fora do formato esperado.");
@@ -135,14 +147,14 @@ class ContentAiServiceTest {
 
         GeneratedContentResponse result = contentAiService.generateContent(1L, request);
 
-        assertEquals("Anéis Comutativos", result.title());
+        assertEquals(TITLE, result.title());
         assertEquals(List.of(source), result.sources());
 
         ArgumentCaptor<String> promptCaptor = ArgumentCaptor.forClass(String.class);
 
         verify(generativeService).generate(anyString(), promptCaptor.capture());
 
-        assertTrue(promptCaptor.getValue().contains("Trecho sobre anéis comutativos."));
+        assertTrue(promptCaptor.getValue().contains(TEXT));
 
         verify(ragContextService).build(1L, search);
     }
@@ -158,7 +170,7 @@ class ContentAiServiceTest {
 
         GeneratedContentResponse result = contentAiService.generateContent(1L, request);
 
-        assertEquals("Anéis Comutativos", result.title());
+        assertEquals(TITLE, result.title());
         assertTrue(result.sources().isEmpty());
 
         verify(generativeService).generate(anyString(), anyString());
@@ -193,7 +205,7 @@ class ContentAiServiceTest {
         when(topicRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(topic()));
 
         when(ragContextService.build(1L, search)).thenThrow(new ResponseStatusException(
-                HttpStatus.UNPROCESSABLE_CONTENT, "Insufficient sources for exclusive generation"));
+                HttpStatus.UNPROCESSABLE_CONTENT, INSUFFICIENT_SOURCES));
 
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class, () -> contentAiService.generateContent(1L, request));
@@ -217,14 +229,14 @@ class ContentAiServiceTest {
     }
 
     private SemanticSearchRequest search(SourceSelectionMode mode) {
-        return new SemanticSearchRequest("Anéis comutativos", null, null, null, mode, 5, 0.7);
+        return new SemanticSearchRequest(TITLE, null, null, null, mode, 5, 0.7);
     }
 
     private RetrievedSource source() {
         return new RetrievedSource(
                 "chunk-1",
                 0,
-                "Trecho sobre anéis comutativos.",
+                TEXT,
                 0.95,
                 10L,
                 "Anéis",

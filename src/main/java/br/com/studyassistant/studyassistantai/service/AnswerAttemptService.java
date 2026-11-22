@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
+import static br.com.studyassistant.studyassistantai.constants.ErrorMessages.*;
 
 @Service
 public class AnswerAttemptService {
@@ -47,7 +48,7 @@ public class AnswerAttemptService {
         validateDeckIsInTraining(flashcard);
 
         if (flashcard.getAnswer() == null || flashcard.getAnswer().isBlank()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Flashcard does not have an expected answer");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, MISSING_EXPECTED_ANSWER);
         }
 
         AnswerAttemptResult result = answerEvaluationAiService.evaluate(
@@ -56,13 +57,7 @@ public class AnswerAttemptService {
                 userAnswer
         );
 
-        AnswerAttempt attempt = new AnswerAttempt(
-                user,
-                flashcard,
-                userAnswer,
-                result
-        );
-
+        AnswerAttempt attempt = new AnswerAttempt(user, flashcard, userAnswer, result);
         AnswerAttempt saved = answerAttemptRepository.save(attempt);
 
         return toResponse(saved);
@@ -75,13 +70,7 @@ public class AnswerAttemptService {
 
         validateDeckIsInTraining(flashcard);
 
-        AnswerAttempt attempt = new AnswerAttempt(
-                user,
-                flashcard,
-                null,
-                AnswerAttemptResult.INCORRECT
-        );
-
+        AnswerAttempt attempt = new AnswerAttempt(user, flashcard, null, AnswerAttemptResult.INCORRECT);
         AnswerAttempt saved = answerAttemptRepository.save(attempt);
 
         return toResponse(saved);
@@ -116,23 +105,23 @@ public class AnswerAttemptService {
 
     private User getExistingUser(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
     }
 
     private Flashcard getExistingFlashcard(Long flashcardId, Long userId) {
         return flashcardRepository.findByIdAndDeckUserId(flashcardId, userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Flashcard not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, FLASHCARD_NOT_FOUND));
     }
 
     private void validateDeckIsInTraining(Flashcard flashcard) {
         if (flashcard.getDeck().getMode() != DeckMode.TRAINING) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Deck is not in TRAINING mode");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, DECK_NOT_TRAINING);
         }
     }
 
     private void validateUserExists(Long userId) {
         if (!userRepository.existsById(userId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND);
         }
     }
 

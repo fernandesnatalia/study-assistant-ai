@@ -1,4 +1,4 @@
-package br.com.studyassistant.studyassistantai.service;
+package br.com.studyassistant.studyassistantai.service.integration;
 
 import br.com.studyassistant.studyassistantai.model.User;
 import br.com.studyassistant.studyassistantai.model.Deck;
@@ -12,12 +12,14 @@ import br.com.studyassistant.studyassistantai.repository.DeckRepository;
 import br.com.studyassistant.studyassistantai.repository.FlashcardRepository;
 import br.com.studyassistant.studyassistantai.repository.AnswerAttemptRepository;
 import br.com.studyassistant.studyassistantai.repository.DeckPerformanceHistoryRepository;
+import br.com.studyassistant.studyassistantai.service.PerformanceService;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @Transactional

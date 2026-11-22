@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
+import static br.com.studyassistant.studyassistantai.constants.ErrorMessages.*;
 
 @Service
 public class PerformanceService {
@@ -50,7 +51,7 @@ public class PerformanceService {
                 .findByOriginalDeckIdAndUserId(deckId, userId)
                 .isPresent()
         ) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Deck performance has already been consolidated");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, PERFORMANCE_CONSOLIDATED);
         }
 
         List<AnswerAttempt> attempts = answerAttemptRepository.findByUserIdAndFlashcardDeckId(userId, deckId);
@@ -102,10 +103,10 @@ public class PerformanceService {
 
     private Deck getTrainingDeck(Long userId, Long deckId) {
         Deck deck = deckRepository.findByIdAndUserId(deckId, userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Deck not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, DECK_NOT_FOUND));
 
         if (deck.getMode() != DeckMode.TRAINING) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Deck is not in TRAINING mode");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, DECK_NOT_TRAINING);
         }
         return deck;
     }

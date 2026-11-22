@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
+import static br.com.studyassistant.studyassistantai.constants.ErrorMessages.*;
 
 @Service
 public class NoteService {
@@ -47,7 +48,7 @@ public class NoteService {
             Subject subject = getExistingSubject(note.getSubject().getId(), userId);
 
             if (noteRepository.existsByUserIdAndSubjectId(userId, subject.getId())) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "Note already exists for this subject");
+                throw new ResponseStatusException(HttpStatus.CONFLICT, NOTE_EXISTS_SUBJECT);
             }
 
             note.setSubject(subject);
@@ -57,7 +58,7 @@ public class NoteService {
             Topic topic = getExistingTopic(note.getTopic().getId(), userId);
 
             if (noteRepository.existsByUserIdAndTopicId(userId, topic.getId())) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "Note already exists for this topic");
+                throw new ResponseStatusException(HttpStatus.CONFLICT, NOTE_EXISTS_TOPIC);
             }
 
             note.setTopic(topic);
@@ -67,7 +68,7 @@ public class NoteService {
             Content content = getExistingContent(note.getContent().getId(), userId);
 
             if (noteRepository.existsByUserIdAndContentId(userId, content.getId())) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "Note already exists for this content");
+                throw new ResponseStatusException(HttpStatus.CONFLICT, NOTE_EXISTS_CONTENT);
             }
 
             note.setContent(content);
@@ -120,44 +121,44 @@ public class NoteService {
         }
 
         if (contexts != 1) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Note must have exactly one context");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, NOTE_SINGLE_CONTEXT);
         }
 
         if (note.getSubject() != null && note.getSubject().getId() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Subject ID is required");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, SUBJECT_ID_REQUIRED);
         }
 
         if (note.getTopic() != null && note.getTopic().getId() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Topic ID is required");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, TOPIC_ID_REQUIRED);
         }
 
         if (note.getContent() != null && note.getContent().getId() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Content ID is required");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, CONTENT_ID_REQUIRED);
         }
     }
 
     private User getExistingUser(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
     }
 
     private Subject getExistingSubject(Long subjectId, Long userId) {
         return subjectRepository.findByIdAndUserId(subjectId, userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Subject not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, SUBJECT_NOT_FOUND));
     }
 
     private Topic getExistingTopic(Long topicId, Long userId) {
         return topicRepository.findByIdAndUserId(topicId, userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Topic not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, TOPIC_NOT_FOUND));
     }
 
     private Content getExistingContent(Long contentId, Long userId) {
         return contentRepository.findByIdAndUserId(contentId, userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Content not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, CONTENT_NOT_FOUND));
     }
 
     private Note getExistingNote(Long id, Long userId) {
         return noteRepository.findByIdAndUserId(id, userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Note not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, NOTE_NOT_FOUND));
     }
 }

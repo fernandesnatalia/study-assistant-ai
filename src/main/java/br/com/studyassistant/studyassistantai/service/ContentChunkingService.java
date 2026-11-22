@@ -7,6 +7,7 @@ import com.knuddels.jtokkit.api.IntArrayList;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
+import static br.com.studyassistant.studyassistantai.constants.ErrorMessages.CONTENT_BLANK;
 
 @Service
 public class ContentChunkingService {
@@ -18,7 +19,7 @@ public class ContentChunkingService {
 
     public List<String> split(String text) {
         if(text == null || text.isBlank()) {
-            throw new IllegalArgumentException("Content text must not be blank");
+            throw new IllegalArgumentException(CONTENT_BLANK);
         }
 
         List<Integer> tokens = encoding.encode(text.trim()).boxed();

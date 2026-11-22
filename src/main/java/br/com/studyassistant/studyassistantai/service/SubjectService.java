@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import static br.com.studyassistant.studyassistantai.constants.ErrorMessages.*;
 
 @Service
 public class SubjectService {
@@ -37,7 +38,7 @@ public class SubjectService {
 
     public Subject createSubject(Subject subject, Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
 
         subject.setUser(user);
 
@@ -50,7 +51,7 @@ public class SubjectService {
 
     public Subject getSubjectById(Long id, Long userId) {
         return subjectRepository.findByIdAndUserId(id, userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Subject not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, SUBJECT_NOT_FOUND));
     }
 
     public Subject updateSubject(Long id, Long userId, Subject updatedSubject) {

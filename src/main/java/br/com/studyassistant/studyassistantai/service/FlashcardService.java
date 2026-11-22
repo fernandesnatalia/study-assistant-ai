@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
+import static br.com.studyassistant.studyassistantai.constants.ErrorMessages.*;
 
 @Service
 public class FlashcardService {
@@ -51,7 +52,7 @@ public class FlashcardService {
             Flashcard flashcard
     ) {
         Deck deck = deckRepository.findByIdAndUserId(deckId, userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Deck not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, DECK_NOT_FOUND));
 
         validateDeckIsNotInTraining(deck);
 
@@ -72,7 +73,7 @@ public class FlashcardService {
             SemanticSearchRequest semanticSearch
     ) {
         Deck deck = deckRepository.findByIdAndUserId(deckId, userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Deck not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, DECK_NOT_FOUND));
 
         String generationContext = buildGenerationContext(userId, contentId, topicId, context);
 
@@ -108,12 +109,12 @@ public class FlashcardService {
 
     public Flashcard getFlashcardById(Long id, Long userId) {
         return flashcardRepository.findByIdAndDeckUserId(id, userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Flashcard not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, FLASHCARD_NOT_FOUND));
     }
 
     public List<Flashcard> getFlashcardsByDeckId(Long deckId, Long userId) {
         if (deckRepository.findByIdAndUserId(deckId, userId).isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Deck not found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, DECK_NOT_FOUND);
         }
 
         return flashcardRepository.findByDeckIdAndDeckUserId(deckId, userId);
@@ -140,7 +141,7 @@ public class FlashcardService {
         validateDeckIsNotInTraining(flashcard.getDeck());
 
         if (flashcard.getAnswer() != null && !flashcard.getAnswer().isBlank()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Flashcard already has an answer");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, ANSWER_ALREADY_EXISTS);
         }
 
         String generatedAnswer = flashcardAiService.generateAnswer(
@@ -176,7 +177,7 @@ public class FlashcardService {
 
         if (contentId != null) {
             Content content = contentRepository.findByIdAndUserId(contentId, userId)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Content not found"));
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, CONTENT_NOT_FOUND));
 
             generationContext
                     .append("Conteúdo de estudo selecionado:\n")
@@ -190,7 +191,7 @@ public class FlashcardService {
 
         if (topicId != null) {
             Topic topic = topicRepository.findByIdAndUserId(topicId, userId)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Topic not found"));
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, TOPIC_NOT_FOUND));
 
             if (!generationContext.isEmpty()) {
                 generationContext.append("\n");
@@ -218,9 +219,7 @@ public class FlashcardService {
 
     private void validateDeckIsNotInTraining(Deck deck) {
         if (deck.getMode() == DeckMode.TRAINING) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT, "Flashcards cannot be manually modified in TRAINING mode"
-            );
+            throw new ResponseStatusException(HttpStatus.CONFLICT, FLASHCARD_MODIFICATION_FORBIDDEN);
         }
     }
 }

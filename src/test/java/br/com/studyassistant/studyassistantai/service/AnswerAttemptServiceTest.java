@@ -53,6 +53,10 @@ class AnswerAttemptServiceTest {
 
     private Flashcard flashcard;
 
+    private static final String EXPECTED_ANSWER = "É uma sequência finita de instruções.";
+    private static final String CORRECT_ANSWER = "É uma sequência de passos para resolver um problema.";
+    private static final String INCORRECT_ANSWER = "É um tipo de banco de dados.";
+
     @BeforeEach
     void setUp() {
         user = new User();
@@ -67,7 +71,7 @@ class AnswerAttemptServiceTest {
         flashcard = new Flashcard();
         flashcard.setId(10L);
         flashcard.setQuestion("O que é um algoritmo?");
-        flashcard.setAnswer("É uma sequência finita de instruções.");
+        flashcard.setAnswer(EXPECTED_ANSWER);
         flashcard.setDeck(deck);
     }
 
@@ -76,35 +80,21 @@ class AnswerAttemptServiceTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(flashcardRepository.findByIdAndDeckUserId(10L, 1L)).thenReturn(Optional.of(flashcard));
 
-        when(answerEvaluationAiService.evaluate(
-                flashcard.getQuestion(),
-                flashcard.getAnswer(),
-                "É uma sequência de passos para resolver um problema."
-        )).thenReturn(AnswerAttemptResult.CORRECT);
+        when(answerEvaluationAiService.evaluate(flashcard.getQuestion(), flashcard.getAnswer(), CORRECT_ANSWER))
+                .thenReturn(AnswerAttemptResult.CORRECT);
 
         when(answerAttemptRepository.save(any(AnswerAttempt.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
-        AnswerAttemptResponse response = service.answer(
-                1L,
-                10L,
-                "É uma sequência de passos para resolver um problema."
-        );
+        AnswerAttemptResponse response = service.answer(1L, 10L, CORRECT_ANSWER);
 
         assertEquals(1L, response.userId());
         assertEquals(10L, response.flashcardId());
-        assertEquals(
-                "É uma sequência de passos para resolver um problema.",
-                response.userAnswer()
-        );
+        assertEquals(CORRECT_ANSWER, response.userAnswer());
         assertEquals(AnswerAttemptResult.CORRECT, response.result());
-        assertEquals("É uma sequência finita de instruções.", response.expectedAnswer());
+        assertEquals(EXPECTED_ANSWER, response.expectedAnswer());
 
-        verify(answerEvaluationAiService).evaluate(
-                flashcard.getQuestion(),
-                flashcard.getAnswer(),
-                "É uma sequência de passos para resolver um problema."
-        );
+        verify(answerEvaluationAiService).evaluate(flashcard.getQuestion(), flashcard.getAnswer(), CORRECT_ANSWER);
         verify(answerAttemptRepository).save(any(AnswerAttempt.class));
     }
 
@@ -113,22 +103,15 @@ class AnswerAttemptServiceTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(flashcardRepository.findByIdAndDeckUserId(10L, 1L)).thenReturn(Optional.of(flashcard));
 
-        when(answerEvaluationAiService.evaluate(
-                flashcard.getQuestion(),
-                flashcard.getAnswer(),
-                "É um tipo de banco de dados."
-        )).thenReturn(AnswerAttemptResult.INCORRECT);
+        when(answerEvaluationAiService.evaluate(flashcard.getQuestion(), flashcard.getAnswer(), INCORRECT_ANSWER))
+                .thenReturn(AnswerAttemptResult.INCORRECT);
 
         when(answerAttemptRepository.save(any(AnswerAttempt.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
-        AnswerAttemptResponse response = service.answer(
-                1L,
-                10L,
-                "É um tipo de banco de dados."
-        );
+        AnswerAttemptResponse response = service.answer(1L, 10L, INCORRECT_ANSWER);
 
-        assertEquals("É um tipo de banco de dados.", response.userAnswer());
+        assertEquals(INCORRECT_ANSWER, response.userAnswer());
         assertEquals(AnswerAttemptResult.INCORRECT, response.result());
 
         verify(answerAttemptRepository).save(any(AnswerAttempt.class));
@@ -142,12 +125,7 @@ class AnswerAttemptServiceTest {
         when(flashcardRepository.findByIdAndDeckUserId(10L, 1L)).thenReturn(Optional.of(flashcard));
 
         ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
-                () -> service.answer(
-                        1L,
-                        10L,
-                        "É uma sequência de passos para resolver um problema."
-                )
+                ResponseStatusException.class, () -> service.answer(1L, 10L, CORRECT_ANSWER)
         );
 
         assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
@@ -187,7 +165,7 @@ class AnswerAttemptServiceTest {
         assertEquals(10L, response.flashcardId());
         assertNull(response.userAnswer());
         assertEquals(AnswerAttemptResult.INCORRECT, response.result());
-        assertEquals("É uma sequência finita de instruções.", response.expectedAnswer());
+        assertEquals(EXPECTED_ANSWER, response.expectedAnswer());
 
         verify(answerAttemptRepository).save(any(AnswerAttempt.class));
     }
