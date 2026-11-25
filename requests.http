@@ -986,6 +986,27 @@ Content-Type: application/json
 
 > {% client.global.set("adaFlashcardRag", response.body.flashcards[0].id); %}
 
+### RAG - Ada gera flashcard exclusivamente com fontes sobre algoritmos (201)
+POST http://localhost:8080/api/flashcards/generate?deckId={{adaBaralhoAlgoritmos}}
+Authorization: Bearer {{adaToken}}
+Content-Type: application/json
+
+{
+  "quantity": 1,
+  "context": "Elabore uma pergunta sobre a definição de algoritmo, utilizando exclusivamente o conteúdo selecionado.",
+  "semanticSearch": {
+    "query": "definição de algoritmo sequência finita de instruções",
+    "contentsIds": [
+      {{adaConteudoAlgoritmos}}
+    ],
+    "selectionMode": "EXCLUSIVE",
+    "topK": 3,
+    "similarityThreshold": 0.0
+  }
+}
+
+> {% client.global.set("adaFlashcardRagExclusive", response.body.flashcards[0].id); %}
+
 ### RAG - Ada consulta o assistente com recuperação automática de fontes (200)
 POST http://localhost:8080/api/study-assistant/ask
 Authorization: Bearer {{adaToken}}
@@ -1023,6 +1044,22 @@ Content-Type: application/json
   "selectionMode": "EXCLUSIVE"
 }
 
+### RAG - Rejeitar conteúdo de matéria diferente da selecionada (400)
+POST http://localhost:8080/api/study-assistant/ask
+Authorization: Bearer {{adaToken}}
+Content-Type: application/json
+
+{
+  "request": "Explique os fundamentos de algoritmos utilizando as fontes selecionadas.",
+  "subjectsIds": [
+    {{adaMatematica}}
+  ],
+  "contentsIds": [
+    {{adaConteudoAlgoritmos}}
+  ],
+  "selectionMode": "EXCLUSIVE"
+}
+
 ### RAG - Informar ausência de fontes na seleção exclusiva da matéria Teoria dos Números (422)
 POST http://localhost:8080/api/study-assistant/ask
 Authorization: Bearer {{emmyToken}}
@@ -1034,6 +1071,25 @@ Content-Type: application/json
     {{emmyNumeros}}
   ],
   "selectionMode": "EXCLUSIVE"
+}
+
+### RAG - Rejeitar geração de flashcards com fontes insuficientes no modo exclusivo (422)
+POST http://localhost:8080/api/flashcards/generate?deckId={{adaBaralhoAlgoritmos}}
+Authorization: Bearer {{adaToken}}
+Content-Type: application/json
+
+{
+  "quantity": 5,
+  "context": "Gere cinco flashcards distintos sobre demonstrações formais de correção de algoritmos por invariantes de laço, exclusivamente com base nas fontes selecionadas. Não utilize conhecimento externo nem repita perguntas.",
+  "semanticSearch": {
+    "query": "demonstração formal de invariantes de laço",
+    "contentsIds": [
+      {{adaConteudoAlgoritmos}}
+    ],
+    "selectionMode": "EXCLUSIVE",
+    "topK": 1,
+    "similarityThreshold": 0.0
+  }
 }
 
 ###
@@ -1087,6 +1143,10 @@ Authorization: Bearer {{adaToken}}
 
 ### Flashcard - Ada exclui flashcard gerado com RAG (204)
 DELETE http://localhost:8080/api/flashcards/{{adaFlashcardRag}}
+Authorization: Bearer {{adaToken}}
+
+### Flashcard - Ada exclui flashcard gerado com fontes exclusivas (204)
+DELETE http://localhost:8080/api/flashcards/{{adaFlashcardRagExclusive}}
 Authorization: Bearer {{adaToken}}
 
 ### Flashcard - Emmy exclui flashcard inicial de Teoria dos Anéis (204)

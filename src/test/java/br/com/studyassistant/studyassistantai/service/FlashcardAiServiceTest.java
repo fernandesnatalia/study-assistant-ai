@@ -119,8 +119,7 @@ class FlashcardAiServiceTest {
     void shouldGenerateFlashcardsWithRetrievedSources() {
         RagContext ragContext = new RagContext("Fonte 1\nTrecho sobre algoritmos.", List.of());
 
-        when(generativeService.generate(anyString(), anyString()))
-                .thenReturn(GENERATIVE_CONTENT);
+        when(generativeService.generate(anyString(), anyString())).thenReturn(GENERATIVE_CONTENT);
 
         List<GeneratedFlashcard> result = flashcardAiService
                 .generateFlashcards("Algoritmos", 1, "", ragContext, SourceSelectionMode.PREFERRED);
@@ -152,9 +151,24 @@ class FlashcardAiServiceTest {
     }
 
     @Test
+    void shouldRejectInsufficientSourcesForExclusiveFlashcardGeneration() {
+        RagContext ragContext = new RagContext("Fonte 1\nTrecho insuficiente sobre algoritmos.", List.of());
+
+        when(generativeService.generate(anyString(), anyString())).thenReturn("FONTES_INSUFICIENTES");
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class, () ->
+                flashcardAiService.generateFlashcards("Algoritmos", 5, "", ragContext, SourceSelectionMode.EXCLUSIVE)
+        );
+
+        assertEquals(HttpStatus.UNPROCESSABLE_CONTENT, exception.getStatusCode());
+
+        verify(generativeService).generate(anyString(), anyString());
+    }
+
+    @Test
     void shouldGenerateFlashcardsWithoutRagInstructions() {
-        when(generativeService.generate(anyString(), anyString()))
-                .thenReturn(GENERATIVE_CONTENT);
+        when(generativeService.generate(anyString(), anyString())).thenReturn(GENERATIVE_CONTENT);
 
         List<GeneratedFlashcard> result = flashcardAiService.generateFlashcards("Algoritmos", 1, "");
 

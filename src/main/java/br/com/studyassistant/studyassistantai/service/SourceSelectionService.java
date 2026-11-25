@@ -63,6 +63,10 @@ public class SourceSelectionService {
 
             Topic topic = content.getTopic();
 
+            if(!safe(subjectIds).isEmpty() && !subjectIds.contains(topic.getSubject().getId())) {
+                throw invalidSource();
+            }
+
             if(!safe(topicIds).isEmpty() && !topicIds.contains(topic.getId())) {
                 throw invalidSource();
             }

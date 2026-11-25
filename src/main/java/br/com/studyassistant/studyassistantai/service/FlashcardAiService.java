@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import static br.com.studyassistant.studyassistantai.constants.ErrorMessages.INVALID_FLASHCARD_FORMAT;
+import static br.com.studyassistant.studyassistantai.constants.ErrorMessages.*;
 
 @Service
 public class FlashcardAiService {
@@ -62,6 +62,13 @@ public class FlashcardAiService {
         }
 
         String generatedContent = generativeService.generate(systemPrompt, userPrompt);
+
+        if (ragContext != null
+                && ragPromptBuilder.resolveMode(selectionMode) == SourceSelectionMode.EXCLUSIVE
+                && generatedContent != null
+                && generatedContent.trim().equals("FONTES_INSUFICIENTES")) {
+
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_CONTENT, INSUFFICIENT_SOURCES);}
 
         return parseGeneratedFlashcards(generatedContent, quantity);
     }

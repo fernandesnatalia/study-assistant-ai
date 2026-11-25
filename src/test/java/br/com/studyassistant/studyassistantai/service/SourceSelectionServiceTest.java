@@ -99,6 +99,21 @@ class SourceSelectionServiceTest {
         assertThrows(IllegalArgumentException.class, () -> service.validate(null, null, null, null));
     }
 
+    @Test
+    void shouldRejectContentFromDifferentSubject() {
+        Subject selectedSubject = createSubject(10L);
+        Subject otherSubject = createSubject(11L);
+        Topic topic = createTopic(20L, otherSubject);
+        Content content = createContent(30L, topic);
+
+        when(subjectRepository.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(selectedSubject));
+        when(contentRepository.findByIdAndUserId(30L, 1L)).thenReturn(Optional.of(content));
+
+        assertThrows(
+                ResponseStatusException.class, () -> service.validate(1L, Set.of(10L), null, Set.of(30L))
+        );
+    }
+
     private Subject createSubject(Long id) {
         Subject subject = new Subject();
         subject.setId(id);

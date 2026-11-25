@@ -68,6 +68,8 @@ public class RagPromptBuilder {
                   para formular perguntas ou respostas.
                   Se as fontes não sustentarem a quantidade solicitada,
                   não invente informações nem gere perguntas redundantes.
+                  Nesse caso, retorne exclusivamente:
+                  FONTES_INSUFICIENTES
                   """
                 : """
                   Priorize as fontes recuperadas quando relevantes.
